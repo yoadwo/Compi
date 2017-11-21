@@ -17,9 +17,8 @@ void printtree (node *tree);
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID
 %token IF, ELSE, WHILE, FOR
 %token MAIN, PROCEDURE, RETURN
-%token LEFTPAREN,RIGHTPAREN
 %token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST
-%token LEFTPAREN,RIGHTPAREN,ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSUOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT
+%token ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSUOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT
 
 %right ASSIGNMENT ELSE 
 %left LEFTBRACE RIGHTBRACE LEFTPAREN RIGHTPAREN
@@ -37,7 +36,7 @@ expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
                | numbers                   
                | statements {;};
                
-Pexpr: |  leftParen expr rightParen {$$ = mknode ("", $1, $2, $3); };
+Pexpr:  leftParen expr rightParen {$$ = mknode ("", $1, $2, $3); };
 leftParen: LEFTPAREN {$$ = mknode ("(", NULL, NULL, NULL); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
 numbers: INTEGER_NEG {printf("yytext neg num=%s\n",yytext); $$ = mknode (yytext, NULL, NULL, NULL); } 
@@ -67,7 +66,8 @@ node *mknode    (char *token, node *left, node* middle, node *right){
 }
 
 void printtree (node *tree){
-    printf ("%s\n", tree -> token);
+    if (strlen(tree->token) > 0 )
+        printf ("%s\n", tree -> token);
     if (tree -> left)
         printtree (tree-> left);
     if (tree -> middle)
