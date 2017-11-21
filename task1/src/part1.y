@@ -27,26 +27,29 @@ void printtree (node *tree, int tab);
 %left MULTI DIVISION
 %start s
 %%
-s: expr     {printf ("ok\n");   printtree ($1,0); };
+s:  expr     {printf ("ok\n");   printtree ($1,0); }
+        | statements;
 expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
                | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
                | expr MULTI expr {$$ = mknode ("*", $1, NULL, $3); }
                | expr DIVISION expr {$$ = mknode ("/", $1, NULL, $3); }
                | Pexpr
-               | numbers                   
-               | statements {;};
-               
+               | id
+               | numbers                   ;
+id: ID                         {$$ = mknode (yytext, NULL, NULL, NULL); }            
 Pexpr:  leftParen expr rightParen {$$ = mknode ("PARENTHESES", $1, $2, $3); };
 leftParen: LEFTPAREN {$$ = mknode ("(", NULL, NULL, NULL); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
             |      INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
- statements: IF_statements {;}  
+statements: IF_statements {;}  
             |   LOOP_statements  {;}
-            |  IN.OUT_statements {;} ;
+            |  IN.OUT_statements {;}
+            |  ASSIGNMENT_statements;
 IF_statements: IF | ELSE;
 LOOP_statements: WHILE | FOR;
 IN.OUT_statements: ;
+ASSIGNMENT_statements: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
 %%
 
 #include "lex.yy.c"
