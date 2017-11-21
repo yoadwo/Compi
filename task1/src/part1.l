@@ -6,7 +6,6 @@
 %x comment
 %%
 [ ]+ ;
-"main" return MAIN;
 "boolean" return BOOL;
 "char" return CHAR;
 "integer" return INT;
@@ -16,7 +15,7 @@
 "if" return IF;
 "else" return ELSE;
 "while" return WHILE;
-"var" return VAR;
+"main" return MAIN;
 "procedure" return PROCEDURE;
 "return" return RETURN;
 "true" return BOOLTRUE;
