@@ -11,7 +11,7 @@ typedef struct node{
 } node;
 
 node *mknode (char *token, node *left, node* middle, node *right);
-void printtree (node *tree);
+void printtree (node *tree, int tab);
 #define YYSTYPE struct node *
 %}
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID
@@ -27,7 +27,7 @@ void printtree (node *tree);
 %left MULTI DIVISION
 %start s
 %%
-s: expr     {printf ("ok\n");   printtree ($1); };
+s: expr     {printf ("ok\n");   printtree ($1,0); };
 expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
                | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
                | expr MULTI expr {$$ = mknode ("*", $1, NULL, $3); }
@@ -36,11 +36,11 @@ expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
                | numbers                   
                | statements {;};
                
-Pexpr:  leftParen expr rightParen {$$ = mknode ("", $1, $2, $3); };
+Pexpr:  leftParen expr rightParen {$$ = mknode ("PARENTHESES", $1, $2, $3); };
 leftParen: LEFTPAREN {$$ = mknode ("(", NULL, NULL, NULL); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
-numbers: INTEGER_NEG {printf("yytext neg num=%s\n",yytext); $$ = mknode (yytext, NULL, NULL, NULL); } 
-            |      INTEGER_POS  {printf("yytext pos num=%s\n",yytext); $$ = mknode (yytext, NULL, NULL, NULL); };
+numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
+            |      INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
  statements: IF_statements {;}  
             |   LOOP_statements  {;}
             |  IN.OUT_statements {;} ;
@@ -65,17 +65,20 @@ node *mknode    (char *token, node *left, node* middle, node *right){
     return newnode;
 }
 
-void printtree (node *tree){
-    if (strlen(tree->token) > 0 )
-        printf ("%s\n", tree -> token);
+void printtree (node *tree, int tab){
+    int i; 
+    for (i = 0; i< tab; i++)
+        printf ("\t");
+    char* token = tree->token;
+    printf ("%s\n", token);
     if (tree -> left)
-        printtree (tree-> left);
+        printtree (tree-> left, tab + 1);
     if (tree -> middle)
-        printtree (tree-> middle);     
+        printtree (tree-> middle, tab + 1);     
     if (tree -> right)
-        printtree (tree-> right); 
+        printtree (tree-> right, tab + 1); 
 }
 int yyerror(char* s){
-    printf ("MY ERROR: %s at line %d with syntax %s\n",  s,counter, yytext);
+    printf ("%s: at line %d found token [%s]\n",  s,counter, yytext);
     return 0;
 }

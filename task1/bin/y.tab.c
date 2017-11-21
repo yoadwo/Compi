@@ -30,7 +30,7 @@ typedef struct node{
 } node;
 
 node *mknode (char *token, node *left, node* middle, node *right);
-void printtree (node *tree);
+void printtree (node *tree, int tab);
 #define YYSTYPE struct node *
 #line 36 "bin/y.tab.c"
 
@@ -327,21 +327,24 @@ node *mknode    (char *token, node *left, node* middle, node *right){
     return newnode;
 }
 
-void printtree (node *tree){
-    if (strlen(tree->token) > 0 )
-        printf ("%s\n", tree -> token);
+void printtree (node *tree, int tab){
+    int i; 
+    for (i = 0; i< tab; i++)
+        printf ("\t");
+    char* token = tree->token;
+    printf ("%s\n", token);
     if (tree -> left)
-        printtree (tree-> left);
+        printtree (tree-> left, tab + 1);
     if (tree -> middle)
-        printtree (tree-> middle);     
+        printtree (tree-> middle, tab + 1);     
     if (tree -> right)
-        printtree (tree-> right); 
+        printtree (tree-> right, tab + 1); 
 }
 int yyerror(char* s){
     printf ("MY ERROR: %s at line %d with syntax %s\n",  s,counter, yytext);
     return 0;
 }
-#line 345 "bin/y.tab.c"
+#line 348 "bin/y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -545,7 +548,7 @@ yyreduce:
     {
 case 1:
 #line 30 "src/part1.y"
-	{printf ("ok\n");   printtree (yystack.l_mark[0]); }
+	{printf ("ok\n");   printtree (yystack.l_mark[0],0); }
 break;
 case 2:
 #line 31 "src/part1.y"
@@ -569,7 +572,7 @@ case 8:
 break;
 case 9:
 #line 39 "src/part1.y"
-	{yyval = mknode ("", yystack.l_mark[-2], yystack.l_mark[-1], yystack.l_mark[0]); }
+	{yyval = mknode ("PARENTHESES", yystack.l_mark[-2], yystack.l_mark[-1], yystack.l_mark[0]); }
 break;
 case 10:
 #line 40 "src/part1.y"
@@ -581,11 +584,11 @@ case 11:
 break;
 case 12:
 #line 42 "src/part1.y"
-	{printf("yytext neg num=%s\n",yytext); yyval = mknode (yytext, NULL, NULL, NULL); }
+	{yyval = mknode (yytext, NULL, NULL, NULL); }
 break;
 case 13:
 #line 43 "src/part1.y"
-	{printf("yytext pos num=%s\n",yytext); yyval = mknode (yytext, NULL, NULL, NULL); }
+	{ yyval = mknode (yytext, NULL, NULL, NULL); }
 break;
 case 14:
 #line 44 "src/part1.y"
@@ -599,7 +602,7 @@ case 16:
 #line 46 "src/part1.y"
 	{;}
 break;
-#line 603 "bin/y.tab.c"
+#line 606 "bin/y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;
