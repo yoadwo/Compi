@@ -21,7 +21,7 @@
 "true" return BOOLTRUE;
 "false" return BOOLFALSE;
 "null" return NULLL;
-"=" return ASSIGN;
+"=" return ASSIGNMENT;
 "&&" return AND;
 \/ return DIVISION;
 "==" return EQUAL;
