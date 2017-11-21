@@ -15,12 +15,13 @@
 "if" return IF;
 "else" return ELSE;
 "while" return WHILE;
+"for"   return FOR;
 "main" return MAIN;
 "procedure" return PROCEDURE;
 "return" return RETURN;
 "true" return BOOLTRUE;
 "false" return BOOLFALSE;
-"null" return NULLL;
+"null" return CSNULL;
 "=" return ASSIGNMENT;
 "&&" return AND;
 \/ return DIVISION;
@@ -53,8 +54,8 @@
 <comment>\n     ;/*counter++;*/
 <comment>"*/" BEGIN 0;
 [a-zA-Z][a-zA-Z0-9_]* return ID;
-[1-9][0-9]*|-?0 return INTEGER_CONST;
-\-[1-9]+ return NEGATIVE_NUM;
+[1-9][0-9]*|-?0 return INTEGER_POS;
+\-[1-9]+ return INTEGER_NEG;
 [\'].[\'] return CHAR_CONST;
 [\"][^\"]*[\"] return STRING_CONST;
 0(x|X)[0-9A-Fa-f]+ return HEX_CONST;

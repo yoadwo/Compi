@@ -14,11 +14,11 @@ node *mknode (char *token, node *left, node* middle, node *right);
 void printtree (node *tree);
 #define YYSTYPE struct node *
 %}
-%token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR
-%token IF, ELSE, WHILE
+%token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID
+%token IF, ELSE, WHILE, FOR
 %token MAIN, PROCEDURE, RETURN
 %token LEFTPAREN,RIGHTPAREN
-%token BOOLTRUE, BOOLFALSE, NULL, INTEGER_CONST, NEGATIVE_NUM, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST
+%token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST
 %token LEFTPAREN,RIGHTPAREN,ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSUOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT
 
 %right ASSIGNMENT ELSE 
@@ -28,20 +28,20 @@ void printtree (node *tree);
 %left MULTI DIVISION
 %start s
 %%
-s: expr     {printf ("ok\n");   printtree ($1); }
+s: expr     {printf ("ok\n");   printtree ($1); };
 expr:       expr    PLUS    expr    {$$ = mknode ("+", $1, NULL, $3); }
-               | expr    MINUS    expr {$$ = mknode ("-", $1, NULL $3); }
-               | NUM                   {$$ = mknode (yytext, NULL, NULL, NULL); } ;
+               | expr    MINUS    expr {$$ = mknode ("-", $1, NULL, $3); }
+               | numbers                   {$$ = mknode (yytext, NULL, NULL, NULL); } 
+               | statements {;};
                
- 
- statements: IF_statements  {} |
-             LOOP_statements {} |
-             IN.OUT_statements {};
-               
-               
-               
-               
-               
+ numbers: INTEGER_NEG {;}
+            |      INTEGER_POS  {;};
+ statements: IF_statements {;}  
+            |   LOOP_statements  {;}
+            |  IN.OUT_statements {;} ;
+IF_statements: IF | ELSE;
+LOOP_statements: WHILE | FOR;
+IN.OUT_statements: ;
 %%
 
 #include "lex.yy.c"
