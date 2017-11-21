@@ -29,13 +29,19 @@ void printtree (node *tree);
 %start s
 %%
 s: expr     {printf ("ok\n");   printtree ($1); };
-expr:       expr    PLUS    expr    {$$ = mknode ("+", $1, NULL, $3); }
-               | expr    MINUS    expr {$$ = mknode ("-", $1, NULL, $3); }
-               | numbers                   {$$ = mknode (yytext, NULL, NULL, NULL); } 
+expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
+               | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
+               | expr MULTI expr {$$ = mknode ("*", $1, NULL, $3); }
+               | expr DIVISION expr {$$ = mknode ("/", $1, NULL, $3); }
+               | Pexpr
+               | numbers                   
                | statements {;};
                
- numbers: INTEGER_NEG {;}
-            |      INTEGER_POS  {;};
+Pexpr: |  leftParen expr rightParen {$$ = mknode ("", $1, $2, $3); };
+leftParen: LEFTPAREN {$$ = mknode ("(", NULL, NULL, NULL); };
+rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
+numbers: INTEGER_NEG {printf("yytext neg num=%s\n",yytext); $$ = mknode (yytext, NULL, NULL, NULL); } 
+            |      INTEGER_POS  {printf("yytext pos num=%s\n",yytext); $$ = mknode (yytext, NULL, NULL, NULL); };
  statements: IF_statements {;}  
             |   LOOP_statements  {;}
             |  IN.OUT_statements {;} ;
@@ -64,12 +70,12 @@ void printtree (node *tree){
     printf ("%s\n", tree -> token);
     if (tree -> left)
         printtree (tree-> left);
-    if (tree -> right)
-        printtree (tree-> right); 
     if (tree -> middle)
         printtree (tree-> middle);     
+    if (tree -> right)
+        printtree (tree-> right); 
 }
-int yyerror(){
-    printf ("MY ERROR\n");
+int yyerror(char* s){
+    printf ("MY ERROR: %s at line %d with syntax %s\n",  s,counter, yytext);
     return 0;
 }

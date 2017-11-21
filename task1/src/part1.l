@@ -1,8 +1,9 @@
-/*
+
 %{
 	int counter=1;
+	char *lastSyntax = "";
 %}
-*/
+
 %x comment
 %%
 [ ]+ ;
@@ -61,7 +62,7 @@
 0(x|X)[0-9A-Fa-f]+ return HEX_CONST;
 0[0-7]+ return OCTAL_CONST;
 (0|1)+b return BINARY_CONST;
-\n      ;/*counter++;*/
+\n      ;counter++;
 [ \t] ;
 . ;
 %%
