@@ -14,7 +14,7 @@ node *mknode (char *token, node *left, node* middle, node *right);
 void printtree (node *tree);
 #define YYSTYPE struct node *
 %}
-
+%token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR
 %token NUM, PLUS, MINUS
 %left PLUS MINUS
 %%
