@@ -16,12 +16,24 @@ void printtree (node *tree);
 %}
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR
 %token NUM, PLUS, MINUS
+%token LEFTPAREN,RIGHTPAREN
 %left PLUS MINUS
+%start s
 %%
 s: expr     {printf ("ok\n");   printtree ($1); }
 expr:       expr    PLUS    expr    {$$ = mknode ("+", $1, NULL, $3); }
                | expr    MINUS    expr {$$ = mknode ("-", $1, NULL $3); }
-               | NUM                        {$$ = mknode (yytext, NULL, NULL, NULL); } ;
+               | NUM                   {$$ = mknode (yytext, NULL, NULL, NULL); } ;
+               
+ 
+ statements: IF_statements  {} |
+             LOOP_statements {} |
+             IN.OUT_statements {};
+               
+               
+               
+               
+               
 %%
 
 #include "lex.yy.c"
