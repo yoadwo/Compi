@@ -43,6 +43,8 @@ leftParen: LEFTPAREN {$$ = mknode ("(", NULL, NULL, NULL); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
             |      INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
+bool_expr: comp_expr AND comp_expr {$$ = mknode ("AND", NULL, NULL, NULL); }
+            | comp_expr OR comp_expr {$$ = mknode ("OR", NULL, NULL, NULL); };
 
 comp_expr: expr EQUAL expr { $$ = mknode ("==", $1, NULL, $3); }
                 | expr GREATER expr { $$ = mknode (">", $1, NULL, $3); }
@@ -52,13 +54,13 @@ comp_expr: expr EQUAL expr { $$ = mknode ("==", $1, NULL, $3); }
                 | expr NOTEQUAL expr { $$ = mknode ("!=", $1, NULL, $3); };
                 
 statements: IF_statements 
-            |   LOOP_statements  
+            |  LOOP_statements  
             |  IN.OUT_statements 
             |  ASSIGNMENT_statements 
             | BOOLEAN_statements ;
 
 BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
-                                    | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); };
+                    | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); };
 IF_statements: IF | ELSE;
 LOOP_statements: WHILE | FOR;
 IN.OUT_statements: ;
