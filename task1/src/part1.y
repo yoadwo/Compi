@@ -29,7 +29,7 @@ void printtree (node *tree, int tab);
 %%
 s:  expr                 {printf ("ok\n");   printtree ($1,0); }
         | statements  {printf ("ok\n");   printtree ($1,0); }
-        | bool_expr {printf ("ok\n");   printtree ($1,0); };
+        | comp_expr {printf ("ok\n");   printtree ($1,0); };
 expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
                | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
                | expr MULTI expr {$$ = mknode ("*", $1, NULL, $3); }
@@ -44,7 +44,7 @@ rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
             |      INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
 
-bool_expr: expr EQUAL expr { $$ = mknode ("==", $1, NULL, $3); }
+comp_expr: expr EQUAL expr { $$ = mknode ("==", $1, NULL, $3); }
                 | expr GREATER expr { $$ = mknode (">", $1, NULL, $3); }
                 | expr GREATEREQUAL expr { $$ = mknode (">=", $1, NULL, $3); }
                 | expr LESS expr { $$ = mknode ("<", $1, NULL, $3); }
@@ -55,7 +55,7 @@ statements: IF_statements
             |   LOOP_statements  
             |  IN.OUT_statements 
             |  ASSIGNMENT_statements 
-            |BOOLEAN_statements ;
+            | BOOLEAN_statements ;
 
 BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
                                     | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); };
