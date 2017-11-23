@@ -34,29 +34,30 @@
   24            | expr LESS expr
   25            | expr LESSEQUAL expr
   26            | expr NOTEQUAL expr
+  27            | expr
 
-  27  statements : IF_statements
-  28             | LOOP_statements
-  29             | IN.OUT_statements
-  30             | ASSIGNMENT_statements
-  31             | BOOLEAN_statements
+  28  statements : IF_statements
+  29             | LOOP_statements
+  30             | IN.OUT_statements
+  31             | ASSIGNMENT_statements
+  32             | BOOLEAN_statements
 
-  32  BOOLEAN_statements : BOOLTRUE
-  33                     | BOOLFALSE
+  33  BOOLEAN_statements : BOOLTRUE
+  34                     | BOOLFALSE
 
-  34  IF_statements : IF
-  35                | ELSE
+  35  IF_statements : IF
+  36                | ELSE
 
-  36  LOOP_statements : WHILE
-  37                  | FOR
+  37  LOOP_statements : WHILE
+  38                  | FOR
 
-  38  IN.OUT_statements :
+  39  IN.OUT_statements :
 
-  39  ASSIGNMENT_statements : id ASSIGNMENT expr
+  40  ASSIGNMENT_statements : id ASSIGNMENT expr
 
 state 0
 	$accept : . s $end  (0)
-	IN.OUT_statements : .  (38)
+	IN.OUT_statements : .  (39)
 
 	ID  shift 1
 	IF  shift 2
@@ -69,7 +70,7 @@ state 0
 	INTEGER_NEG  shift 9
 	NOT  shift 10
 	LEFTPAREN  shift 11
-	$end  reduce 38
+	$end  reduce 39
 
 	s  goto 12
 	expr  goto 13
@@ -94,39 +95,39 @@ state 1
 
 
 state 2
-	IF_statements : IF .  (34)
-
-	.  reduce 34
-
-
-state 3
-	IF_statements : ELSE .  (35)
+	IF_statements : IF .  (35)
 
 	.  reduce 35
 
 
-state 4
-	LOOP_statements : WHILE .  (36)
+state 3
+	IF_statements : ELSE .  (36)
 
 	.  reduce 36
 
 
-state 5
-	LOOP_statements : FOR .  (37)
+state 4
+	LOOP_statements : WHILE .  (37)
 
 	.  reduce 37
 
 
-state 6
-	BOOLEAN_statements : BOOLTRUE .  (32)
+state 5
+	LOOP_statements : FOR .  (38)
 
-	.  reduce 32
+	.  reduce 38
+
+
+state 6
+	BOOLEAN_statements : BOOLTRUE .  (33)
+
+	.  reduce 33
 
 
 state 7
-	BOOLEAN_statements : BOOLFALSE .  (33)
+	BOOLEAN_statements : BOOLFALSE .  (34)
 
-	.  reduce 33
+	.  reduce 34
 
 
 state 8
@@ -172,6 +173,7 @@ state 12
 	$end  accept
 
 
+13: reduce/reduce conflict (reduce 1, reduce 27) on $end
 state 13
 	s : expr .  (1)
 	expr : expr . PLUS expr  (4)
@@ -184,6 +186,7 @@ state 13
 	comp_expr : expr . LESS expr  (24)
 	comp_expr : expr . LESSEQUAL expr  (25)
 	comp_expr : expr . NOTEQUAL expr  (26)
+	comp_expr : expr .  (27)
 
 	DIVISION  shift 29
 	EQUAL  shift 30
@@ -196,6 +199,8 @@ state 13
 	PLUS  shift 37
 	MULTI  shift 38
 	$end  reduce 1
+	AND  reduce 27
+	OR  reduce 27
 
 
 state 14
@@ -222,10 +227,11 @@ state 16
 
 state 17
 	expr : id .  (9)
-	ASSIGNMENT_statements : id . ASSIGNMENT expr  (39)
+	ASSIGNMENT_statements : id . ASSIGNMENT expr  (40)
 
 	ASSIGNMENT  shift 41
 	$end  reduce 9
+	AND  reduce 9
 	DIVISION  reduce 9
 	EQUAL  reduce 9
 	GREATER  reduce 9
@@ -234,6 +240,7 @@ state 17
 	LESSEQUAL  reduce 9
 	MINUS  reduce 9
 	NOTEQUAL  reduce 9
+	OR  reduce 9
 	PLUS  reduce 9
 	MULTI  reduce 9
 
@@ -267,33 +274,33 @@ state 20
 
 
 state 21
-	statements : IF_statements .  (27)
-
-	.  reduce 27
-
-
-state 22
-	statements : LOOP_statements .  (28)
+	statements : IF_statements .  (28)
 
 	.  reduce 28
 
 
-state 23
-	statements : IN.OUT_statements .  (29)
+state 22
+	statements : LOOP_statements .  (29)
 
 	.  reduce 29
 
 
-state 24
-	statements : ASSIGNMENT_statements .  (30)
+state 23
+	statements : IN.OUT_statements .  (30)
 
 	.  reduce 30
 
 
-state 25
-	statements : BOOLEAN_statements .  (31)
+state 24
+	statements : ASSIGNMENT_statements .  (31)
 
 	.  reduce 31
+
+
+state 25
+	statements : BOOLEAN_statements .  (32)
+
+	.  reduce 32
 
 
 state 26
@@ -307,6 +314,7 @@ state 26
 	comp_expr : expr . LESS expr  (24)
 	comp_expr : expr . LESSEQUAL expr  (25)
 	comp_expr : expr . NOTEQUAL expr  (26)
+	comp_expr : expr .  (27)
 
 	DIVISION  shift 29
 	EQUAL  shift 30
@@ -318,7 +326,9 @@ state 26
 	NOTEQUAL  shift 36
 	PLUS  shift 37
 	MULTI  shift 38
-	.  error
+	$end  reduce 27
+	AND  reduce 27
+	OR  reduce 27
 
 
 state 27
@@ -534,7 +544,7 @@ state 40
 
 
 state 41
-	ASSIGNMENT_statements : id ASSIGNMENT . expr  (39)
+	ASSIGNMENT_statements : id ASSIGNMENT . expr  (40)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -749,13 +759,13 @@ state 55
 	expr : expr . MINUS expr  (5)
 	expr : expr . MULTI expr  (6)
 	expr : expr . DIVISION expr  (7)
-	ASSIGNMENT_statements : id ASSIGNMENT expr .  (39)
+	ASSIGNMENT_statements : id ASSIGNMENT expr .  (40)
 
 	DIVISION  shift 29
 	MINUS  shift 35
 	PLUS  shift 37
 	MULTI  shift 38
-	$end  reduce 39
+	$end  reduce 40
 
 
 state 56
@@ -770,5 +780,8 @@ state 57
 	.  reduce 12
 
 
+State 13 contains 1 reduce/reduce conflict.
+
+
 53 terminals, 16 nonterminals
-40 grammar rules, 58 states
+41 grammar rules, 58 states
