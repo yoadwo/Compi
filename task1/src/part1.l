@@ -1,7 +1,6 @@
 
 %{
 	int counter=1;
-	char *lastSyntax = "";
 %}
 
 %x comment

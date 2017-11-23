@@ -550,7 +550,6 @@ char *yytext;
 #line 1 "src/part1.l"
 #line 3 "src/part1.l"
 	int counter=1;
-	char *lastSyntax = "";
 
 #line 556 "bin/lex.yy.c"
 
@@ -771,7 +770,7 @@ YY_DECL
 		}
 
 	{
-#line 8 "src/part1.l"
+#line 7 "src/part1.l"
 
 #line 777 "bin/lex.yy.c"
 
@@ -832,305 +831,305 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 9 "src/part1.l"
+#line 8 "src/part1.l"
 ;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 10 "src/part1.l"
+#line 9 "src/part1.l"
 return BOOL;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 11 "src/part1.l"
+#line 10 "src/part1.l"
 return CHAR;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 12 "src/part1.l"
+#line 11 "src/part1.l"
 return INT;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 13 "src/part1.l"
+#line 12 "src/part1.l"
 return STRING;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 14 "src/part1.l"
+#line 13 "src/part1.l"
 return INTPTR;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 15 "src/part1.l"
+#line 14 "src/part1.l"
 return CHARPTR;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 16 "src/part1.l"
+#line 15 "src/part1.l"
 return IF;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 17 "src/part1.l"
+#line 16 "src/part1.l"
 return ELSE;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 18 "src/part1.l"
+#line 17 "src/part1.l"
 return WHILE;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 19 "src/part1.l"
+#line 18 "src/part1.l"
 return FOR;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 20 "src/part1.l"
+#line 19 "src/part1.l"
 return MAIN;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 21 "src/part1.l"
+#line 20 "src/part1.l"
 return PROCEDURE;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 22 "src/part1.l"
+#line 21 "src/part1.l"
 return RETURN;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 23 "src/part1.l"
+#line 22 "src/part1.l"
 return BOOLTRUE;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 24 "src/part1.l"
+#line 23 "src/part1.l"
 return BOOLFALSE;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 25 "src/part1.l"
+#line 24 "src/part1.l"
 return CSNULL;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 26 "src/part1.l"
+#line 25 "src/part1.l"
 return ASSIGNMENT;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 27 "src/part1.l"
+#line 26 "src/part1.l"
 return AND;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 28 "src/part1.l"
+#line 27 "src/part1.l"
 return DIVISION;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 29 "src/part1.l"
+#line 28 "src/part1.l"
 return EQUAL;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 30 "src/part1.l"
+#line 29 "src/part1.l"
 return GREATER;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 31 "src/part1.l"
+#line 30 "src/part1.l"
 return GREATEREQUAL;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 32 "src/part1.l"
+#line 31 "src/part1.l"
 return LESS;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 33 "src/part1.l"
+#line 32 "src/part1.l"
 return LESSEQUAL;
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 34 "src/part1.l"
+#line 33 "src/part1.l"
 return MINUS;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 35 "src/part1.l"
+#line 34 "src/part1.l"
 return NOT;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 36 "src/part1.l"
+#line 35 "src/part1.l"
 return NOTEQUAL;
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 37 "src/part1.l"
+#line 36 "src/part1.l"
 return OR;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 38 "src/part1.l"
+#line 37 "src/part1.l"
 return PLUS;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 39 "src/part1.l"
+#line 38 "src/part1.l"
 return MULTI;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 40 "src/part1.l"
+#line 39 "src/part1.l"
 return ADDRESS;
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 41 "src/part1.l"
+#line 40 "src/part1.l"
 return DEREFERENCE;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 42 "src/part1.l"
+#line 41 "src/part1.l"
 return ABSUOLUTE;
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 43 "src/part1.l"
+#line 42 "src/part1.l"
 return SEMICOLON;
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 44 "src/part1.l"
+#line 43 "src/part1.l"
 return COLON;
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 45 "src/part1.l"
+#line 44 "src/part1.l"
 return COMMA;
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 46 "src/part1.l"
+#line 45 "src/part1.l"
 return LEFTBRACE;
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 47 "src/part1.l"
+#line 46 "src/part1.l"
 return RIGHTBRACE;
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 48 "src/part1.l"
+#line 47 "src/part1.l"
 return LEFTPAREN;
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 49 "src/part1.l"
+#line 48 "src/part1.l"
 return RIGHTPAREN;
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 50 "src/part1.l"
+#line 49 "src/part1.l"
 return LEFTBRACKET;
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 51 "src/part1.l"
+#line 50 "src/part1.l"
 return RIGHTBRACKET;
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 52 "src/part1.l"
+#line 51 "src/part1.l"
 return PERCENT;
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 53 "src/part1.l"
+#line 52 "src/part1.l"
 BEGIN comment;
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 54 "src/part1.l"
+#line 53 "src/part1.l"
 ;
 	YY_BREAK
 case 47:
 /* rule 47 can match eol */
 YY_RULE_SETUP
-#line 55 "src/part1.l"
+#line 54 "src/part1.l"
 ;/*counter++;*/
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 56 "src/part1.l"
+#line 55 "src/part1.l"
 BEGIN 0;
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 57 "src/part1.l"
+#line 56 "src/part1.l"
 return ID;
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 58 "src/part1.l"
+#line 57 "src/part1.l"
 return INTEGER_POS;
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 59 "src/part1.l"
+#line 58 "src/part1.l"
 return INTEGER_NEG;
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 60 "src/part1.l"
+#line 59 "src/part1.l"
 return CHAR_CONST;
 	YY_BREAK
 case 53:
 /* rule 53 can match eol */
 YY_RULE_SETUP
-#line 61 "src/part1.l"
+#line 60 "src/part1.l"
 return STRING_CONST;
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 62 "src/part1.l"
+#line 61 "src/part1.l"
 return HEX_CONST;
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 63 "src/part1.l"
+#line 62 "src/part1.l"
 return OCTAL_CONST;
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 64 "src/part1.l"
+#line 63 "src/part1.l"
 return BINARY_CONST;
 	YY_BREAK
 case 57:
 /* rule 57 can match eol */
 YY_RULE_SETUP
-#line 65 "src/part1.l"
+#line 64 "src/part1.l"
 ;counter++;
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 66 "src/part1.l"
+#line 65 "src/part1.l"
 ;
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 67 "src/part1.l"
+#line 66 "src/part1.l"
 ;
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 68 "src/part1.l"
+#line 67 "src/part1.l"
 ECHO;
 	YY_BREAK
 #line 1137 "bin/lex.yy.c"
@@ -2135,7 +2134,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 68 "src/part1.l"
+#line 67 "src/part1.l"
 
 
 

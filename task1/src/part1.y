@@ -45,7 +45,7 @@ numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); }
             |      INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
 bool_expr: bool_expr AND bool_expr {$$ = mknode ("&&", $1, NULL, $3); }
             | bool_expr OR bool_expr {$$ = mknode ("||", $1, NULL, $3); }
-            | NOT bool_expr {$$ = mknode ("!", NULL, NULL, $2); }
+            | NOT bool_expr {$$ = mknode ("NOT", NULL, NULL, $2); }
             | comp_expr;
 
 comp_expr: expr EQUAL expr { $$ = mknode ("==", $1, NULL, $3); }
