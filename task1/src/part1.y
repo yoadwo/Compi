@@ -29,7 +29,7 @@ void printtree (node *tree, int tab);
 %%
 s:  expr                 {printf ("ok\n");   printtree ($1,0); }
         | statements  {printf ("ok\n");   printtree ($1,0); }
-        | comp_expr {printf ("ok\n");   printtree ($1,0); };
+        | bool_expr {printf ("ok\n");   printtree ($1,0); };
 expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
                | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
                | expr MULTI expr {$$ = mknode ("*", $1, NULL, $3); }
