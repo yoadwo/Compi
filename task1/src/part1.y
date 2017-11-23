@@ -20,15 +20,15 @@ void printtree (node *tree, int tab);
 %token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST
 %token ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSUOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT
 
-%right ASSIGNMENT ELSE
+%right ASSIGNMENT ELSE NOT
 %left LEFTBRACE RIGHTBRACE LEFTPAREN RIGHTPAREN
 %left EQUAL GREATER GREATEREQUAL LESSEQUAL LESS NOTEQUAL
-%left PLUS MINUS AND OR NOT
+%left PLUS MINUS AND OR
 %left MULTI DIVISION
 %start s
 %%
-s:  expr                 {printf ("ok\n");   printtree ($1,0); }
-        | statements  {printf ("ok\n");   printtree ($1,0); }
+s:  /*expr                 {printf ("ok\n");   printtree ($1,0); }*/
+        statements  {printf ("ok\n");   printtree ($1,0); }
         | bool_expr {printf ("ok\n");   printtree ($1,0); };
 expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
                | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
@@ -57,7 +57,7 @@ comp_expr: expr EQUAL expr { $$ = mknode ("==", $1, NULL, $3); }
                 | expr;
 statements: IF_statements 
             |  LOOP_statements  
-            |  IN.OUT_statements 
+           /* |  IN.OUT_statements */
             |  ASSIGNMENT_statements 
             | BOOLEAN_statements ;
 
@@ -65,7 +65,7 @@ BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
                     | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); };
 IF_statements: IF | ELSE;
 LOOP_statements: WHILE | FOR;
-IN.OUT_statements: ;
+/*IN.OUT_statements: ;*/
 ASSIGNMENT_statements: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
 %%
 
