@@ -637,7 +637,7 @@ case 17:
 break;
 case 18:
 #line 48 "src/part1.y"
-	{yyval = mknode ("!", NULL, NULL, yystack.l_mark[0]); }
+	{yyval = mknode ("NOT", NULL, NULL, yystack.l_mark[0]); }
 break;
 case 20:
 #line 51 "src/part1.y"
