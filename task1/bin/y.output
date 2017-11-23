@@ -321,16 +321,12 @@ state 26
 	.  error
 
 
-27: shift/reduce conflict (shift 39, reduce 19) on AND
-27: shift/reduce conflict (shift 40, reduce 19) on OR
 state 27
 	bool_expr : bool_expr . AND bool_expr  (17)
 	bool_expr : bool_expr . OR bool_expr  (18)
 	bool_expr : NOT bool_expr .  (19)
 
-	AND  shift 39
-	OR  shift 40
-	$end  reduce 19
+	.  reduce 19
 
 
 state 28
@@ -772,9 +768,6 @@ state 57
 	Pexpr : leftParen expr rightParen .  (12)
 
 	.  reduce 12
-
-
-State 27 contains 2 shift/reduce conflicts.
 
 
 53 terminals, 16 nonterminals
