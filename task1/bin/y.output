@@ -7,25 +7,25 @@
    4       | expr MINUS expr
    5       | expr MULTI expr
    6       | expr DIVISION expr
-   7       | Pexpr
-   8       | id
-   9       | numbers
+   7       | id
+   8       | numbers
 
-  10  id : ID
+   9  id : ID
 
-  11  Pexpr : leftParen expr rightParen
+  10  Pbool : leftParen bool_expr rightParen
 
-  12  leftParen : LEFTPAREN
+  11  leftParen : LEFTPAREN
 
-  13  rightParen : RIGHTPAREN
+  12  rightParen : RIGHTPAREN
 
-  14  numbers : INTEGER_NEG
-  15          | INTEGER_POS
+  13  numbers : INTEGER_NEG
+  14          | INTEGER_POS
 
-  16  bool_expr : bool_expr AND bool_expr
-  17            | bool_expr OR bool_expr
-  18            | NOT bool_expr
-  19            | comp_expr
+  15  bool_expr : bool_expr AND bool_expr
+  16            | bool_expr OR bool_expr
+  17            | NOT bool_expr
+  18            | comp_expr
+  19            | Pbool
 
   20  comp_expr : expr EQUAL expr
   21            | expr GREATER expr
@@ -71,9 +71,9 @@ state 0
 	statements  goto 13
 	bool_expr  goto 14
 	expr  goto 15
-	Pexpr  goto 16
-	id  goto 17
-	numbers  goto 18
+	id  goto 16
+	numbers  goto 17
+	Pbool  goto 18
 	leftParen  goto 19
 	comp_expr  goto 20
 	IF_statements  goto 21
@@ -83,9 +83,9 @@ state 0
 
 
 state 1
-	id : ID .  (10)
+	id : ID .  (9)
 
-	.  reduce 10
+	.  reduce 9
 
 
 state 2
@@ -125,19 +125,19 @@ state 7
 
 
 state 8
-	numbers : INTEGER_POS .  (15)
-
-	.  reduce 15
-
-
-state 9
-	numbers : INTEGER_NEG .  (14)
+	numbers : INTEGER_POS .  (14)
 
 	.  reduce 14
 
 
+state 9
+	numbers : INTEGER_NEG .  (13)
+
+	.  reduce 13
+
+
 state 10
-	bool_expr : NOT . bool_expr  (18)
+	bool_expr : NOT . bool_expr  (17)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -148,17 +148,17 @@ state 10
 
 	bool_expr  goto 25
 	expr  goto 15
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
+	numbers  goto 17
+	Pbool  goto 18
 	leftParen  goto 19
 	comp_expr  goto 20
 
 
 state 11
-	leftParen : LEFTPAREN .  (12)
+	leftParen : LEFTPAREN .  (11)
 
-	.  reduce 12
+	.  reduce 11
 
 
 state 12
@@ -175,8 +175,8 @@ state 13
 
 state 14
 	s : bool_expr .  (2)
-	bool_expr : bool_expr . AND bool_expr  (16)
-	bool_expr : bool_expr . OR bool_expr  (17)
+	bool_expr : bool_expr . AND bool_expr  (15)
+	bool_expr : bool_expr . OR bool_expr  (16)
 
 	AND  shift 27
 	OR  shift 28
@@ -209,60 +209,64 @@ state 15
 	$end  reduce 26
 	AND  reduce 26
 	OR  reduce 26
+	RIGHTPAREN  reduce 26
 
 
 state 16
-	expr : Pexpr .  (7)
-
-	.  reduce 7
-
-
-state 17
-	expr : id .  (8)
+	expr : id .  (7)
 	ASSIGNMENT_statements : id . ASSIGNMENT expr  (37)
 
 	ASSIGNMENT  shift 39
-	$end  reduce 8
-	AND  reduce 8
-	DIVISION  reduce 8
-	EQUAL  reduce 8
-	GREATER  reduce 8
-	GREATEREQUAL  reduce 8
-	LESS  reduce 8
-	LESSEQUAL  reduce 8
-	MINUS  reduce 8
-	NOTEQUAL  reduce 8
-	OR  reduce 8
-	PLUS  reduce 8
-	MULTI  reduce 8
+	$end  reduce 7
+	AND  reduce 7
+	DIVISION  reduce 7
+	EQUAL  reduce 7
+	GREATER  reduce 7
+	GREATEREQUAL  reduce 7
+	LESS  reduce 7
+	LESSEQUAL  reduce 7
+	MINUS  reduce 7
+	NOTEQUAL  reduce 7
+	OR  reduce 7
+	PLUS  reduce 7
+	MULTI  reduce 7
+
+
+state 17
+	expr : numbers .  (8)
+
+	.  reduce 8
 
 
 state 18
-	expr : numbers .  (9)
+	bool_expr : Pbool .  (19)
 
-	.  reduce 9
+	.  reduce 19
 
 
 state 19
-	Pexpr : leftParen . expr rightParen  (11)
+	Pbool : leftParen . bool_expr rightParen  (10)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
 	INTEGER_NEG  shift 9
+	NOT  shift 10
 	LEFTPAREN  shift 11
 	.  error
 
-	expr  goto 40
-	Pexpr  goto 16
+	bool_expr  goto 40
+	expr  goto 15
 	id  goto 26
-	numbers  goto 18
+	numbers  goto 17
+	Pbool  goto 18
 	leftParen  goto 19
+	comp_expr  goto 20
 
 
 state 20
-	bool_expr : comp_expr .  (19)
+	bool_expr : comp_expr .  (18)
 
-	.  reduce 19
+	.  reduce 18
 
 
 state 21
@@ -290,23 +294,24 @@ state 24
 
 
 state 25
-	bool_expr : bool_expr . AND bool_expr  (16)
-	bool_expr : bool_expr . OR bool_expr  (17)
-	bool_expr : NOT bool_expr .  (18)
+	bool_expr : bool_expr . AND bool_expr  (15)
+	bool_expr : bool_expr . OR bool_expr  (16)
+	bool_expr : NOT bool_expr .  (17)
 
 	AND  shift 27
 	OR  shift 28
-	$end  reduce 18
+	$end  reduce 17
+	RIGHTPAREN  reduce 17
 
 
 state 26
-	expr : id .  (8)
+	expr : id .  (7)
 
-	.  reduce 8
+	.  reduce 7
 
 
 state 27
-	bool_expr : bool_expr AND . bool_expr  (16)
+	bool_expr : bool_expr AND . bool_expr  (15)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -317,15 +322,15 @@ state 27
 
 	bool_expr  goto 41
 	expr  goto 15
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
+	numbers  goto 17
+	Pbool  goto 18
 	leftParen  goto 19
 	comp_expr  goto 20
 
 
 state 28
-	bool_expr : bool_expr OR . bool_expr  (17)
+	bool_expr : bool_expr OR . bool_expr  (16)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -336,9 +341,9 @@ state 28
 
 	bool_expr  goto 42
 	expr  goto 15
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
+	numbers  goto 17
+	Pbool  goto 18
 	leftParen  goto 19
 	comp_expr  goto 20
 
@@ -349,14 +354,11 @@ state 29
 	ID  shift 1
 	INTEGER_POS  shift 8
 	INTEGER_NEG  shift 9
-	LEFTPAREN  shift 11
 	.  error
 
 	expr  goto 43
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
-	leftParen  goto 19
+	numbers  goto 17
 
 
 state 30
@@ -365,14 +367,11 @@ state 30
 	ID  shift 1
 	INTEGER_POS  shift 8
 	INTEGER_NEG  shift 9
-	LEFTPAREN  shift 11
 	.  error
 
 	expr  goto 44
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
-	leftParen  goto 19
+	numbers  goto 17
 
 
 state 31
@@ -381,14 +380,11 @@ state 31
 	ID  shift 1
 	INTEGER_POS  shift 8
 	INTEGER_NEG  shift 9
-	LEFTPAREN  shift 11
 	.  error
 
 	expr  goto 45
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
-	leftParen  goto 19
+	numbers  goto 17
 
 
 state 32
@@ -397,14 +393,11 @@ state 32
 	ID  shift 1
 	INTEGER_POS  shift 8
 	INTEGER_NEG  shift 9
-	LEFTPAREN  shift 11
 	.  error
 
 	expr  goto 46
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
-	leftParen  goto 19
+	numbers  goto 17
 
 
 state 33
@@ -413,14 +406,11 @@ state 33
 	ID  shift 1
 	INTEGER_POS  shift 8
 	INTEGER_NEG  shift 9
-	LEFTPAREN  shift 11
 	.  error
 
 	expr  goto 47
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
-	leftParen  goto 19
+	numbers  goto 17
 
 
 state 34
@@ -429,14 +419,11 @@ state 34
 	ID  shift 1
 	INTEGER_POS  shift 8
 	INTEGER_NEG  shift 9
-	LEFTPAREN  shift 11
 	.  error
 
 	expr  goto 48
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
-	leftParen  goto 19
+	numbers  goto 17
 
 
 state 35
@@ -445,14 +432,11 @@ state 35
 	ID  shift 1
 	INTEGER_POS  shift 8
 	INTEGER_NEG  shift 9
-	LEFTPAREN  shift 11
 	.  error
 
 	expr  goto 49
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
-	leftParen  goto 19
+	numbers  goto 17
 
 
 state 36
@@ -461,14 +445,11 @@ state 36
 	ID  shift 1
 	INTEGER_POS  shift 8
 	INTEGER_NEG  shift 9
-	LEFTPAREN  shift 11
 	.  error
 
 	expr  goto 50
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
-	leftParen  goto 19
+	numbers  goto 17
 
 
 state 37
@@ -477,14 +458,11 @@ state 37
 	ID  shift 1
 	INTEGER_POS  shift 8
 	INTEGER_NEG  shift 9
-	LEFTPAREN  shift 11
 	.  error
 
 	expr  goto 51
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
-	leftParen  goto 19
+	numbers  goto 17
 
 
 state 38
@@ -493,14 +471,11 @@ state 38
 	ID  shift 1
 	INTEGER_POS  shift 8
 	INTEGER_NEG  shift 9
-	LEFTPAREN  shift 11
 	.  error
 
 	expr  goto 52
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
-	leftParen  goto 19
+	numbers  goto 17
 
 
 state 39
@@ -509,27 +484,20 @@ state 39
 	ID  shift 1
 	INTEGER_POS  shift 8
 	INTEGER_NEG  shift 9
-	LEFTPAREN  shift 11
 	.  error
 
 	expr  goto 53
-	Pexpr  goto 16
 	id  goto 26
-	numbers  goto 18
-	leftParen  goto 19
+	numbers  goto 17
 
 
 state 40
-	expr : expr . PLUS expr  (3)
-	expr : expr . MINUS expr  (4)
-	expr : expr . MULTI expr  (5)
-	expr : expr . DIVISION expr  (6)
-	Pexpr : leftParen expr . rightParen  (11)
+	Pbool : leftParen bool_expr . rightParen  (10)
+	bool_expr : bool_expr . AND bool_expr  (15)
+	bool_expr : bool_expr . OR bool_expr  (16)
 
-	DIVISION  shift 29
-	MINUS  shift 35
-	PLUS  shift 37
-	MULTI  shift 38
+	AND  shift 27
+	OR  shift 28
 	RIGHTPAREN  shift 54
 	.  error
 
@@ -537,19 +505,19 @@ state 40
 
 
 state 41
-	bool_expr : bool_expr . AND bool_expr  (16)
-	bool_expr : bool_expr AND bool_expr .  (16)
-	bool_expr : bool_expr . OR bool_expr  (17)
+	bool_expr : bool_expr . AND bool_expr  (15)
+	bool_expr : bool_expr AND bool_expr .  (15)
+	bool_expr : bool_expr . OR bool_expr  (16)
 
-	.  reduce 16
+	.  reduce 15
 
 
 state 42
-	bool_expr : bool_expr . AND bool_expr  (16)
-	bool_expr : bool_expr . OR bool_expr  (17)
-	bool_expr : bool_expr OR bool_expr .  (17)
+	bool_expr : bool_expr . AND bool_expr  (15)
+	bool_expr : bool_expr . OR bool_expr  (16)
+	bool_expr : bool_expr OR bool_expr .  (16)
 
-	.  reduce 17
+	.  reduce 16
 
 
 state 43
@@ -576,6 +544,7 @@ state 44
 	$end  reduce 20
 	AND  reduce 20
 	OR  reduce 20
+	RIGHTPAREN  reduce 20
 
 
 state 45
@@ -592,6 +561,7 @@ state 45
 	$end  reduce 21
 	AND  reduce 21
 	OR  reduce 21
+	RIGHTPAREN  reduce 21
 
 
 state 46
@@ -608,6 +578,7 @@ state 46
 	$end  reduce 22
 	AND  reduce 22
 	OR  reduce 22
+	RIGHTPAREN  reduce 22
 
 
 state 47
@@ -624,6 +595,7 @@ state 47
 	$end  reduce 23
 	AND  reduce 23
 	OR  reduce 23
+	RIGHTPAREN  reduce 23
 
 
 state 48
@@ -640,6 +612,7 @@ state 48
 	$end  reduce 24
 	AND  reduce 24
 	OR  reduce 24
+	RIGHTPAREN  reduce 24
 
 
 state 49
@@ -679,6 +652,7 @@ state 50
 	$end  reduce 25
 	AND  reduce 25
 	OR  reduce 25
+	RIGHTPAREN  reduce 25
 
 
 state 51
@@ -729,15 +703,15 @@ state 53
 
 
 state 54
-	rightParen : RIGHTPAREN .  (13)
+	rightParen : RIGHTPAREN .  (12)
 
-	.  reduce 13
+	.  reduce 12
 
 
 state 55
-	Pexpr : leftParen expr rightParen .  (11)
+	Pbool : leftParen bool_expr rightParen .  (10)
 
-	.  reduce 11
+	.  reduce 10
 
 
 53 terminals, 15 nonterminals
