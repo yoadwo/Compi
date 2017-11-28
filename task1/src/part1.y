@@ -27,26 +27,32 @@ void printtree (node *tree, int tab);
 %left MULTI DIVISION
 %start s
 %%
-s:      expr                 {printf ("ok\n");   printtree ($1,0); }
-        | statements  {printf ("ok\n");   printtree ($1,0); }
+s:      
+        block                 {printf ("ok\n");   printtree ($1,0); }
+        | statements  {printf ("ok\n");   printtree ($1,0); } ;
+
+block: expr SEMICOLON block  {$$ = mknode ("newline:\n", $1, NULL, $3); }
+        |   expr SEMICOLON 
+        |   SEMICOLON;  
+        
 expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
-               | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
-               | expr MULTI expr {$$ = mknode ("*", $1, NULL, $3); }
-               | expr DIVISION expr {$$ = mknode ("/", $1, NULL, $3); }
-               | expr EQUAL expr { $$ = mknode ("==", $1, NULL, $3); }
-               | expr GREATER expr { $$ = mknode (">", $1, NULL, $3); }
-               | expr GREATEREQUAL expr { $$ = mknode (">=", $1, NULL, $3); }
-               | expr LESS expr { $$ = mknode ("<", $1, NULL, $3); }
-               | expr LESSEQUAL expr { $$ = mknode ("<=", $1, NULL, $3); }
-               | expr NOTEQUAL expr { $$ = mknode ("!=", $1, NULL, $3); }
-               | expr AND expr {$$ = mknode ("&&", $1, NULL, $3); }
-               | expr OR expr {$$ = mknode ("||", $1, NULL, $3); }
-               | NOT expr {$$ = mknode ("NOT", NULL, NULL, $2); }
-               | Pexpr
-               | consts ;
+        | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
+        | expr MULTI expr {$$ = mknode ("*", $1, NULL, $3); }
+        | expr DIVISION expr {$$ = mknode ("/", $1, NULL, $3); }
+        | expr EQUAL expr { $$ = mknode ("==", $1, NULL, $3); }
+        | expr GREATER expr { $$ = mknode (">", $1, NULL, $3); }
+        | expr GREATEREQUAL expr { $$ = mknode (">=", $1, NULL, $3); }
+        | expr LESS expr { $$ = mknode ("<", $1, NULL, $3); }
+        | expr LESSEQUAL expr { $$ = mknode ("<=", $1, NULL, $3); }
+        | expr NOTEQUAL expr { $$ = mknode ("!=", $1, NULL, $3); }
+        | expr AND expr {$$ = mknode ("&&", $1, NULL, $3); }
+        | expr OR expr {$$ = mknode ("||", $1, NULL, $3); }
+        | NOT expr {$$ = mknode ("NOT", NULL, NULL, $2); }
+        | Pexpr
+        | consts ;
                
 
-Pexpr:  leftParen expr rightParen {$$ = mknode ("PARENTHESES", $1, $2, $3); };
+Pexpr:  leftParen expr rightParen {$$ = mknode (" ", $1, $2, $3); };
 leftParen: LEFTPAREN {$$ = mknode ("(", NULL, NULL, NULL); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
                
