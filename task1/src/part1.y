@@ -43,32 +43,29 @@ expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
                | expr OR expr {$$ = mknode ("||", $1, NULL, $3); }
                | NOT expr {$$ = mknode ("NOT", NULL, NULL, $2); }
                | Pexpr
-               | id
-               | numbers                   ;
+               | consts ;
                
-id:   ID                         {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
-
 
 Pexpr:  leftParen expr rightParen {$$ = mknode ("PARENTHESES", $1, $2, $3); };
 leftParen: LEFTPAREN {$$ = mknode ("(", NULL, NULL, NULL); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
-
+               
+consts: id | numbers    ;
+id:   ID                         {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
-            |      INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
-
+            | INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
 
 statements: IF_statements 
-            |  LOOP_statements  
-           /* |  IN.OUT_statements */
-            |  ASSIGNMENT_statements 
+            | LOOP_statements  
+            | IN.OUT_statements 
+            | ASSIGNMENT_statements 
             | BOOLEAN_statements ;
 
 BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
                     | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); };
 IF_statements: IF | ELSE;
 LOOP_statements: WHILE | FOR;
-/*IN.OUT_statements: ;*/
-ASSIGNMENT_statements: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
+IN.OUT_statements: ASSIGNMENT_statements: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
 %%
 
 #include "lex.yy.c"

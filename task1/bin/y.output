@@ -17,38 +17,44 @@
   14       | expr OR expr
   15       | NOT expr
   16       | Pexpr
-  17       | id
-  18       | numbers
+  17       | consts
 
-  19  id : ID
+  18  consts : id
+  19         | numbers
 
-  20  Pexpr : leftParen expr rightParen
+  20  id : ID
 
-  21  leftParen : LEFTPAREN
+  21  Pexpr : leftParen expr rightParen
 
-  22  rightParen : RIGHTPAREN
+  22  leftParen : LEFTPAREN
 
-  23  numbers : INTEGER_NEG
-  24          | INTEGER_POS
+  23  rightParen : RIGHTPAREN
 
-  25  statements : IF_statements
-  26             | LOOP_statements
-  27             | ASSIGNMENT_statements
-  28             | BOOLEAN_statements
+  24  numbers : INTEGER_NEG
+  25          | INTEGER_POS
 
-  29  BOOLEAN_statements : BOOLTRUE
-  30                     | BOOLFALSE
+  26  statements : IF_statements
+  27             | LOOP_statements
+  28             | IN.OUT_statements
+  29             | ASSIGNMENT_statements
+  30             | BOOLEAN_statements
 
-  31  IF_statements : IF
-  32                | ELSE
+  31  BOOLEAN_statements : BOOLTRUE
+  32                     | BOOLFALSE
 
-  33  LOOP_statements : WHILE
-  34                  | FOR
+  33  IF_statements : IF
+  34                | ELSE
 
-  35  ASSIGNMENT_statements : id ASSIGNMENT expr
+  35  LOOP_statements : WHILE
+  36                  | FOR
+
+  37  IN.OUT_statements :
+
+  38  ASSIGNMENT_statements : id ASSIGNMENT expr
 
 state 0
 	$accept : . s $end  (0)
+	IN.OUT_statements : .  (37)
 
 	ID  shift 1
 	IF  shift 2
@@ -61,73 +67,75 @@ state 0
 	INTEGER_NEG  shift 9
 	NOT  shift 10
 	LEFTPAREN  shift 11
-	.  error
+	$end  reduce 37
 
 	s  goto 12
 	expr  goto 13
 	statements  goto 14
 	Pexpr  goto 15
-	id  goto 16
-	numbers  goto 17
-	leftParen  goto 18
-	IF_statements  goto 19
-	LOOP_statements  goto 20
-	ASSIGNMENT_statements  goto 21
-	BOOLEAN_statements  goto 22
+	consts  goto 16
+	id  goto 17
+	numbers  goto 18
+	leftParen  goto 19
+	IF_statements  goto 20
+	LOOP_statements  goto 21
+	IN.OUT_statements  goto 22
+	ASSIGNMENT_statements  goto 23
+	BOOLEAN_statements  goto 24
 
 
 state 1
-	id : ID .  (19)
+	id : ID .  (20)
 
-	.  reduce 19
+	.  reduce 20
 
 
 state 2
-	IF_statements : IF .  (31)
-
-	.  reduce 31
-
-
-state 3
-	IF_statements : ELSE .  (32)
-
-	.  reduce 32
-
-
-state 4
-	LOOP_statements : WHILE .  (33)
+	IF_statements : IF .  (33)
 
 	.  reduce 33
 
 
-state 5
-	LOOP_statements : FOR .  (34)
+state 3
+	IF_statements : ELSE .  (34)
 
 	.  reduce 34
 
 
-state 6
-	BOOLEAN_statements : BOOLTRUE .  (29)
+state 4
+	LOOP_statements : WHILE .  (35)
 
-	.  reduce 29
+	.  reduce 35
+
+
+state 5
+	LOOP_statements : FOR .  (36)
+
+	.  reduce 36
+
+
+state 6
+	BOOLEAN_statements : BOOLTRUE .  (31)
+
+	.  reduce 31
 
 
 state 7
-	BOOLEAN_statements : BOOLFALSE .  (30)
+	BOOLEAN_statements : BOOLFALSE .  (32)
 
-	.  reduce 30
+	.  reduce 32
 
 
 state 8
-	numbers : INTEGER_POS .  (24)
+	numbers : INTEGER_POS .  (25)
 
-	.  reduce 24
+	.  reduce 25
 
 
 state 9
-	numbers : INTEGER_NEG .  (23)
+	numbers : INTEGER_NEG .  (24)
 
-	.  reduce 23
+	.  reduce 24
 
 
 state 10
@@ -140,17 +148,18 @@ state 10
 	LEFTPAREN  shift 11
 	.  error
 
-	expr  goto 23
+	expr  goto 25
 	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
 
 
 state 11
-	leftParen : LEFTPAREN .  (21)
+	leftParen : LEFTPAREN .  (22)
 
-	.  reduce 21
+	.  reduce 22
 
 
 state 12
@@ -174,18 +183,18 @@ state 13
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
 
-	AND  shift 25
-	DIVISION  shift 26
-	EQUAL  shift 27
-	GREATER  shift 28
-	GREATEREQUAL  shift 29
-	LESS  shift 30
-	LESSEQUAL  shift 31
-	MINUS  shift 32
-	NOTEQUAL  shift 33
-	OR  shift 34
-	PLUS  shift 35
-	MULTI  shift 36
+	AND  shift 27
+	DIVISION  shift 28
+	EQUAL  shift 29
+	GREATER  shift 30
+	GREATEREQUAL  shift 31
+	LESS  shift 32
+	LESSEQUAL  shift 33
+	MINUS  shift 34
+	NOTEQUAL  shift 35
+	OR  shift 36
+	PLUS  shift 37
+	MULTI  shift 38
 	$end  reduce 1
 
 
@@ -202,33 +211,39 @@ state 15
 
 
 state 16
-	expr : id .  (17)
-	ASSIGNMENT_statements : id . ASSIGNMENT expr  (35)
+	expr : consts .  (17)
 
-	ASSIGNMENT  shift 37
-	$end  reduce 17
-	AND  reduce 17
-	DIVISION  reduce 17
-	EQUAL  reduce 17
-	GREATER  reduce 17
-	GREATEREQUAL  reduce 17
-	LESS  reduce 17
-	LESSEQUAL  reduce 17
-	MINUS  reduce 17
-	NOTEQUAL  reduce 17
-	OR  reduce 17
-	PLUS  reduce 17
-	MULTI  reduce 17
+	.  reduce 17
 
 
 state 17
-	expr : numbers .  (18)
+	consts : id .  (18)
+	ASSIGNMENT_statements : id . ASSIGNMENT expr  (38)
 
-	.  reduce 18
+	ASSIGNMENT  shift 39
+	$end  reduce 18
+	AND  reduce 18
+	DIVISION  reduce 18
+	EQUAL  reduce 18
+	GREATER  reduce 18
+	GREATEREQUAL  reduce 18
+	LESS  reduce 18
+	LESSEQUAL  reduce 18
+	MINUS  reduce 18
+	NOTEQUAL  reduce 18
+	OR  reduce 18
+	PLUS  reduce 18
+	MULTI  reduce 18
 
 
 state 18
-	Pexpr : leftParen . expr rightParen  (20)
+	consts : numbers .  (19)
+
+	.  reduce 19
+
+
+state 19
+	Pexpr : leftParen . expr rightParen  (21)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -237,38 +252,45 @@ state 18
 	LEFTPAREN  shift 11
 	.  error
 
-	expr  goto 38
+	expr  goto 40
 	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
-
-
-state 19
-	statements : IF_statements .  (25)
-
-	.  reduce 25
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
 
 
 state 20
-	statements : LOOP_statements .  (26)
+	statements : IF_statements .  (26)
 
 	.  reduce 26
 
 
 state 21
-	statements : ASSIGNMENT_statements .  (27)
+	statements : LOOP_statements .  (27)
 
 	.  reduce 27
 
 
 state 22
-	statements : BOOLEAN_statements .  (28)
+	statements : IN.OUT_statements .  (28)
 
 	.  reduce 28
 
 
 state 23
+	statements : ASSIGNMENT_statements .  (29)
+
+	.  reduce 29
+
+
+state 24
+	statements : BOOLEAN_statements .  (30)
+
+	.  reduce 30
+
+
+state 25
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -283,64 +305,30 @@ state 23
 	expr : expr . OR expr  (14)
 	expr : NOT expr .  (15)
 
-	AND  shift 25
-	DIVISION  shift 26
-	EQUAL  shift 27
-	GREATER  shift 28
-	GREATEREQUAL  shift 29
-	LESS  shift 30
-	LESSEQUAL  shift 31
-	MINUS  shift 32
-	NOTEQUAL  shift 33
-	OR  shift 34
-	PLUS  shift 35
-	MULTI  shift 36
+	AND  shift 27
+	DIVISION  shift 28
+	EQUAL  shift 29
+	GREATER  shift 30
+	GREATEREQUAL  shift 31
+	LESS  shift 32
+	LESSEQUAL  shift 33
+	MINUS  shift 34
+	NOTEQUAL  shift 35
+	OR  shift 36
+	PLUS  shift 37
+	MULTI  shift 38
 	$end  reduce 15
 	RIGHTPAREN  reduce 15
 
 
-state 24
-	expr : id .  (17)
-
-	.  reduce 17
-
-
-state 25
-	expr : expr AND . expr  (13)
-
-	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
-	.  error
-
-	expr  goto 39
-	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
-
-
 state 26
-	expr : expr DIVISION . expr  (6)
+	consts : id .  (18)
 
-	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
-	.  error
-
-	expr  goto 40
-	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
+	.  reduce 18
 
 
 state 27
-	expr : expr EQUAL . expr  (7)
+	expr : expr AND . expr  (13)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -351,13 +339,14 @@ state 27
 
 	expr  goto 41
 	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
 
 
 state 28
-	expr : expr GREATER . expr  (8)
+	expr : expr DIVISION . expr  (6)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -368,13 +357,14 @@ state 28
 
 	expr  goto 42
 	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
 
 
 state 29
-	expr : expr GREATEREQUAL . expr  (9)
+	expr : expr EQUAL . expr  (7)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -385,13 +375,14 @@ state 29
 
 	expr  goto 43
 	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
 
 
 state 30
-	expr : expr LESS . expr  (10)
+	expr : expr GREATER . expr  (8)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -402,13 +393,14 @@ state 30
 
 	expr  goto 44
 	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
 
 
 state 31
-	expr : expr LESSEQUAL . expr  (11)
+	expr : expr GREATEREQUAL . expr  (9)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -419,13 +411,14 @@ state 31
 
 	expr  goto 45
 	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
 
 
 state 32
-	expr : expr MINUS . expr  (4)
+	expr : expr LESS . expr  (10)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -436,13 +429,14 @@ state 32
 
 	expr  goto 46
 	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
 
 
 state 33
-	expr : expr NOTEQUAL . expr  (12)
+	expr : expr LESSEQUAL . expr  (11)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -453,13 +447,14 @@ state 33
 
 	expr  goto 47
 	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
 
 
 state 34
-	expr : expr OR . expr  (14)
+	expr : expr MINUS . expr  (4)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -470,13 +465,14 @@ state 34
 
 	expr  goto 48
 	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
 
 
 state 35
-	expr : expr PLUS . expr  (3)
+	expr : expr NOTEQUAL . expr  (12)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -487,13 +483,14 @@ state 35
 
 	expr  goto 49
 	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
 
 
 state 36
-	expr : expr MULTI . expr  (5)
+	expr : expr OR . expr  (14)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -504,13 +501,14 @@ state 36
 
 	expr  goto 50
 	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
 
 
 state 37
-	ASSIGNMENT_statements : id ASSIGNMENT . expr  (35)
+	expr : expr PLUS . expr  (3)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -521,12 +519,49 @@ state 37
 
 	expr  goto 51
 	Pexpr  goto 15
-	id  goto 24
-	numbers  goto 17
-	leftParen  goto 18
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
 
 
 state 38
+	expr : expr MULTI . expr  (5)
+
+	ID  shift 1
+	INTEGER_POS  shift 8
+	INTEGER_NEG  shift 9
+	NOT  shift 10
+	LEFTPAREN  shift 11
+	.  error
+
+	expr  goto 52
+	Pexpr  goto 15
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
+
+
+state 39
+	ASSIGNMENT_statements : id ASSIGNMENT . expr  (38)
+
+	ID  shift 1
+	INTEGER_POS  shift 8
+	INTEGER_NEG  shift 9
+	NOT  shift 10
+	LEFTPAREN  shift 11
+	.  error
+
+	expr  goto 53
+	Pexpr  goto 15
+	consts  goto 16
+	id  goto 26
+	numbers  goto 18
+	leftParen  goto 19
+
+
+state 40
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -539,27 +574,27 @@ state 38
 	expr : expr . NOTEQUAL expr  (12)
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
-	Pexpr : leftParen expr . rightParen  (20)
+	Pexpr : leftParen expr . rightParen  (21)
 
-	AND  shift 25
-	DIVISION  shift 26
-	EQUAL  shift 27
-	GREATER  shift 28
-	GREATEREQUAL  shift 29
-	LESS  shift 30
-	LESSEQUAL  shift 31
-	MINUS  shift 32
-	NOTEQUAL  shift 33
-	OR  shift 34
-	PLUS  shift 35
-	MULTI  shift 36
-	RIGHTPAREN  shift 52
+	AND  shift 27
+	DIVISION  shift 28
+	EQUAL  shift 29
+	GREATER  shift 30
+	GREATEREQUAL  shift 31
+	LESS  shift 32
+	LESSEQUAL  shift 33
+	MINUS  shift 34
+	NOTEQUAL  shift 35
+	OR  shift 36
+	PLUS  shift 37
+	MULTI  shift 38
+	RIGHTPAREN  shift 54
 	.  error
 
-	rightParen  goto 53
+	rightParen  goto 55
 
 
-state 39
+state 41
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -574,8 +609,8 @@ state 39
 	expr : expr AND expr .  (13)
 	expr : expr . OR expr  (14)
 
-	DIVISION  shift 26
-	MULTI  shift 36
+	DIVISION  shift 28
+	MULTI  shift 38
 	$end  reduce 13
 	AND  reduce 13
 	EQUAL  reduce 13
@@ -590,7 +625,7 @@ state 39
 	RIGHTPAREN  reduce 13
 
 
-state 40
+state 42
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -608,7 +643,7 @@ state 40
 	.  reduce 6
 
 
-state 41
+state 43
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -623,12 +658,12 @@ state 41
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
 
-	AND  shift 25
-	DIVISION  shift 26
-	MINUS  shift 32
-	OR  shift 34
-	PLUS  shift 35
-	MULTI  shift 36
+	AND  shift 27
+	DIVISION  shift 28
+	MINUS  shift 34
+	OR  shift 36
+	PLUS  shift 37
+	MULTI  shift 38
 	$end  reduce 7
 	EQUAL  reduce 7
 	GREATER  reduce 7
@@ -639,7 +674,7 @@ state 41
 	RIGHTPAREN  reduce 7
 
 
-state 42
+state 44
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -654,12 +689,12 @@ state 42
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
 
-	AND  shift 25
-	DIVISION  shift 26
-	MINUS  shift 32
-	OR  shift 34
-	PLUS  shift 35
-	MULTI  shift 36
+	AND  shift 27
+	DIVISION  shift 28
+	MINUS  shift 34
+	OR  shift 36
+	PLUS  shift 37
+	MULTI  shift 38
 	$end  reduce 8
 	EQUAL  reduce 8
 	GREATER  reduce 8
@@ -670,7 +705,7 @@ state 42
 	RIGHTPAREN  reduce 8
 
 
-state 43
+state 45
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -685,12 +720,12 @@ state 43
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
 
-	AND  shift 25
-	DIVISION  shift 26
-	MINUS  shift 32
-	OR  shift 34
-	PLUS  shift 35
-	MULTI  shift 36
+	AND  shift 27
+	DIVISION  shift 28
+	MINUS  shift 34
+	OR  shift 36
+	PLUS  shift 37
+	MULTI  shift 38
 	$end  reduce 9
 	EQUAL  reduce 9
 	GREATER  reduce 9
@@ -701,7 +736,7 @@ state 43
 	RIGHTPAREN  reduce 9
 
 
-state 44
+state 46
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -716,12 +751,12 @@ state 44
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
 
-	AND  shift 25
-	DIVISION  shift 26
-	MINUS  shift 32
-	OR  shift 34
-	PLUS  shift 35
-	MULTI  shift 36
+	AND  shift 27
+	DIVISION  shift 28
+	MINUS  shift 34
+	OR  shift 36
+	PLUS  shift 37
+	MULTI  shift 38
 	$end  reduce 10
 	EQUAL  reduce 10
 	GREATER  reduce 10
@@ -732,7 +767,7 @@ state 44
 	RIGHTPAREN  reduce 10
 
 
-state 45
+state 47
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -747,12 +782,12 @@ state 45
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
 
-	AND  shift 25
-	DIVISION  shift 26
-	MINUS  shift 32
-	OR  shift 34
-	PLUS  shift 35
-	MULTI  shift 36
+	AND  shift 27
+	DIVISION  shift 28
+	MINUS  shift 34
+	OR  shift 36
+	PLUS  shift 37
+	MULTI  shift 38
 	$end  reduce 11
 	EQUAL  reduce 11
 	GREATER  reduce 11
@@ -763,7 +798,7 @@ state 45
 	RIGHTPAREN  reduce 11
 
 
-state 46
+state 48
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr MINUS expr .  (4)
@@ -778,8 +813,8 @@ state 46
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
 
-	DIVISION  shift 26
-	MULTI  shift 36
+	DIVISION  shift 28
+	MULTI  shift 38
 	$end  reduce 4
 	AND  reduce 4
 	EQUAL  reduce 4
@@ -794,7 +829,7 @@ state 46
 	RIGHTPAREN  reduce 4
 
 
-state 47
+state 49
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -809,12 +844,12 @@ state 47
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
 
-	AND  shift 25
-	DIVISION  shift 26
-	MINUS  shift 32
-	OR  shift 34
-	PLUS  shift 35
-	MULTI  shift 36
+	AND  shift 27
+	DIVISION  shift 28
+	MINUS  shift 34
+	OR  shift 36
+	PLUS  shift 37
+	MULTI  shift 38
 	$end  reduce 12
 	EQUAL  reduce 12
 	GREATER  reduce 12
@@ -825,7 +860,7 @@ state 47
 	RIGHTPAREN  reduce 12
 
 
-state 48
+state 50
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -840,8 +875,8 @@ state 48
 	expr : expr . OR expr  (14)
 	expr : expr OR expr .  (14)
 
-	DIVISION  shift 26
-	MULTI  shift 36
+	DIVISION  shift 28
+	MULTI  shift 38
 	$end  reduce 14
 	AND  reduce 14
 	EQUAL  reduce 14
@@ -856,7 +891,7 @@ state 48
 	RIGHTPAREN  reduce 14
 
 
-state 49
+state 51
 	expr : expr . PLUS expr  (3)
 	expr : expr PLUS expr .  (3)
 	expr : expr . MINUS expr  (4)
@@ -871,8 +906,8 @@ state 49
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
 
-	DIVISION  shift 26
-	MULTI  shift 36
+	DIVISION  shift 28
+	MULTI  shift 38
 	$end  reduce 3
 	AND  reduce 3
 	EQUAL  reduce 3
@@ -887,7 +922,7 @@ state 49
 	RIGHTPAREN  reduce 3
 
 
-state 50
+state 52
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -905,7 +940,7 @@ state 50
 	.  reduce 5
 
 
-state 51
+state 53
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -918,34 +953,34 @@ state 51
 	expr : expr . NOTEQUAL expr  (12)
 	expr : expr . AND expr  (13)
 	expr : expr . OR expr  (14)
-	ASSIGNMENT_statements : id ASSIGNMENT expr .  (35)
+	ASSIGNMENT_statements : id ASSIGNMENT expr .  (38)
 
-	AND  shift 25
-	DIVISION  shift 26
-	EQUAL  shift 27
-	GREATER  shift 28
-	GREATEREQUAL  shift 29
-	LESS  shift 30
-	LESSEQUAL  shift 31
-	MINUS  shift 32
-	NOTEQUAL  shift 33
-	OR  shift 34
-	PLUS  shift 35
-	MULTI  shift 36
-	$end  reduce 35
-
-
-state 52
-	rightParen : RIGHTPAREN .  (22)
-
-	.  reduce 22
+	AND  shift 27
+	DIVISION  shift 28
+	EQUAL  shift 29
+	GREATER  shift 30
+	GREATEREQUAL  shift 31
+	LESS  shift 32
+	LESSEQUAL  shift 33
+	MINUS  shift 34
+	NOTEQUAL  shift 35
+	OR  shift 36
+	PLUS  shift 37
+	MULTI  shift 38
+	$end  reduce 38
 
 
-state 53
-	Pexpr : leftParen expr rightParen .  (20)
+state 54
+	rightParen : RIGHTPAREN .  (23)
 
-	.  reduce 20
+	.  reduce 23
 
 
-53 terminals, 13 nonterminals
-36 grammar rules, 54 states
+state 55
+	Pexpr : leftParen expr rightParen .  (21)
+
+	.  reduce 21
+
+
+53 terminals, 15 nonterminals
+39 grammar rules, 56 states
