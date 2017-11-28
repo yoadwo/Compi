@@ -25,9 +25,10 @@
 
   21  Pexpr : leftParen expr rightParen
 
-  22  leftParen : LEFTPAREN
+  22  consts : id
+  23         | numbers
 
-  23  rightParen : RIGHTPAREN
+  24  id : ID
 
   24  consts : id
   25         | numbers
@@ -101,11 +102,37 @@ state 2
 
 	.  reduce 36
 
+	expr  goto 24
+	ASSIGNMENT_statement  goto 13
+	Pexpr  goto 14
+	statements  goto 15
+	consts  goto 16
+	leftParen  goto 17
+	id  goto 18
+	numbers  goto 19
+	IF_statements  goto 20
+	LOOP_statements  goto 21
+	IN.OUT_statements  goto 22
+	BOOLEAN_statements  goto 23
+
 
 state 3
 	IF_statements : ELSE .  (37)
 
 	.  reduce 37
+
+	expr  goto 25
+	ASSIGNMENT_statement  goto 13
+	Pexpr  goto 14
+	statements  goto 15
+	consts  goto 16
+	leftParen  goto 17
+	id  goto 18
+	numbers  goto 19
+	IF_statements  goto 20
+	LOOP_statements  goto 21
+	IN.OUT_statements  goto 22
+	BOOLEAN_statements  goto 23
 
 
 state 4
@@ -142,6 +169,19 @@ state 9
 	numbers : INTEGER_NEG .  (27)
 
 	.  reduce 27
+
+	expr  goto 27
+	ASSIGNMENT_statement  goto 13
+	Pexpr  goto 14
+	statements  goto 15
+	consts  goto 16
+	leftParen  goto 17
+	id  goto 18
+	numbers  goto 19
+	IF_statements  goto 20
+	LOOP_statements  goto 21
+	IN.OUT_statements  goto 22
+	BOOLEAN_statements  goto 23
 
 
 state 10
@@ -229,6 +269,19 @@ state 17
 
 	.  reduce 19
 
+	expr  goto 40
+	ASSIGNMENT_statement  goto 13
+	Pexpr  goto 14
+	statements  goto 15
+	consts  goto 16
+	leftParen  goto 17
+	id  goto 18
+	numbers  goto 19
+	IF_statements  goto 20
+	LOOP_statements  goto 21
+	IN.OUT_statements  goto 22
+	BOOLEAN_statements  goto 23
+
 
 state 18
 	expr : consts .  (20)
@@ -237,7 +290,7 @@ state 18
 
 
 state 19
-	Pexpr : leftParen . expr rightParen  (21)
+	consts : numbers .  (23)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -252,7 +305,6 @@ state 19
 	leftParen  goto 19
 	id  goto 28
 	numbers  goto 21
-
 
 state 20
 	consts : id .  (24)
@@ -308,6 +360,19 @@ state 26
 	statements : BOOLEAN_statements .  (33)
 
 	.  reduce 33
+
+	expr  goto 44
+	ASSIGNMENT_statement  goto 13
+	Pexpr  goto 14
+	statements  goto 15
+	consts  goto 16
+	leftParen  goto 17
+	id  goto 18
+	numbers  goto 19
+	IF_statements  goto 20
+	LOOP_statements  goto 21
+	IN.OUT_statements  goto 22
+	BOOLEAN_statements  goto 23
 
 
 state 27
@@ -991,12 +1056,30 @@ state 55
 
 	.  reduce 8
 
+	while1  goto 66
 
 state 56
 	block : expr SEMICOLON block .  (3)
 
 	.  reduce 3
 
+	ELSE  shift 67
+	$end  reduce 34
+	AND  reduce 34
+	DIVISION  reduce 34
+	EQUAL  reduce 34
+	GREATER  reduce 34
+	GREATEREQUAL  reduce 34
+	LESS  reduce 34
+	LESSEQUAL  reduce 34
+	MINUS  reduce 34
+	NOTEQUAL  reduce 34
+	OR  reduce 34
+	PLUS  reduce 34
+	MULTI  reduce 34
+	LEFTBRACE  reduce 34
+	RIGHTBRACE  reduce 34
+	RIGHTPAREN  reduce 34
 
 state 57
 	rightParen : RIGHTPAREN .  (23)

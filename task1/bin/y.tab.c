@@ -82,46 +82,47 @@ extern int YYPARSE_DECL();
 #define ELSE 265
 #define WHILE 266
 #define FOR 267
-#define MAIN 268
-#define PROCEDURE 269
-#define RETURN 270
-#define BOOLTRUE 271
-#define BOOLFALSE 272
-#define CSNULL 273
-#define INTEGER_POS 274
-#define INTEGER_NEG 275
-#define CHAR_CONST 276
-#define STRING_CONST 277
-#define HEX_CONST 278
-#define OCTAL_CONST 279
-#define BINARY_CONST 280
-#define ASSIGNMENT 281
-#define AND 282
-#define DIVISION 283
-#define EQUAL 284
-#define GREATER 285
-#define GREATEREQUAL 286
-#define LESS 287
-#define LESSEQUAL 288
-#define MINUS 289
-#define NOT 290
-#define NOTEQUAL 291
-#define OR 292
-#define PLUS 293
-#define MULTI 294
-#define ADDRESS 295
-#define DEREFERENCE 296
-#define ABSUOLUTE 297
-#define SEMICOLON 298
-#define COLON 299
-#define COMMA 300
-#define LEFTBRACE 301
-#define RIGHTBRACE 302
-#define LEFTPAREN 303
-#define RIGHTPAREN 304
-#define LEFTBRACKET 305
-#define RIGHTBRACKET 306
-#define PERCENT 307
+#define DO 268
+#define MAIN 269
+#define PROCEDURE 270
+#define RETURN 271
+#define BOOLTRUE 272
+#define BOOLFALSE 273
+#define CSNULL 274
+#define INTEGER_POS 275
+#define INTEGER_NEG 276
+#define CHAR_CONST 277
+#define STRING_CONST 278
+#define HEX_CONST 279
+#define OCTAL_CONST 280
+#define BINARY_CONST 281
+#define ASSIGNMENT 282
+#define AND 283
+#define DIVISION 284
+#define EQUAL 285
+#define GREATER 286
+#define GREATEREQUAL 287
+#define LESS 288
+#define LESSEQUAL 289
+#define MINUS 290
+#define NOT 291
+#define NOTEQUAL 292
+#define OR 293
+#define PLUS 294
+#define MULTI 295
+#define ADDRESS 296
+#define DEREFERENCE 297
+#define ABSUOLUTE 298
+#define SEMICOLON 299
+#define COLON 300
+#define COMMA 301
+#define LEFTBRACE 302
+#define RIGHTBRACE 303
+#define LEFTPAREN 304
+#define RIGHTPAREN 305
+#define LEFTBRACKET 306
+#define RIGHTBRACKET 307
+#define PERCENT 308
 #define YYERRCODE 256
 typedef short YYINT;
 static const YYINT yylhs[] = {                           -1,
@@ -308,7 +309,9 @@ static const char *const yyrule[] = {
 "expr : expr AND expr",
 "expr : expr OR expr",
 "expr : NOT expr",
+"expr : ASSIGNMENT_statement",
 "expr : Pexpr",
+"expr : statements",
 "expr : consts",
 "Pexpr : leftParen expr rightParen",
 "leftParen : LEFTPAREN",
@@ -321,16 +324,17 @@ static const char *const yyrule[] = {
 "statements : IF_statements",
 "statements : LOOP_statements",
 "statements : IN.OUT_statements",
-"statements : ASSIGNMENT_statements",
 "statements : BOOLEAN_statements",
 "BOOLEAN_statements : BOOLTRUE",
 "BOOLEAN_statements : BOOLFALSE",
-"IF_statements : IF",
-"IF_statements : ELSE",
-"LOOP_statements : WHILE",
-"LOOP_statements : FOR",
+"IF_statements : IF expr LEFTBRACE expr RIGHTBRACE else",
+"IF_statements : IF expr LEFTBRACE expr RIGHTBRACE",
+"else : ELSE LEFTBRACE expr RIGHTBRACE",
+"LOOP_statements : FOR expr LEFTBRACE expr RIGHTBRACE",
+"LOOP_statements : DO LEFTBRACE expr RIGHTBRACE while1 expr",
+"while1 : WHILE",
 "IN.OUT_statements :",
-"ASSIGNMENT_statements : id ASSIGNMENT expr",
+"ASSIGNMENT_statement : id ASSIGNMENT expr",
 
 };
 #endif

@@ -15,7 +15,7 @@ void printtree (node *tree, int tab);
 #define YYSTYPE struct node *
 %}
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID
-%token IF, ELSE, WHILE, FOR
+%token IF, ELSE, WHILE, FOR ,DO
 %token MAIN, PROCEDURE, RETURN
 %token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST
 %token ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSUOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT
@@ -57,21 +57,28 @@ leftParen: LEFTPAREN {$$ = mknode ("(", NULL, NULL, NULL); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
                
 consts: id | numbers    ;
-id:   ID                         {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
+id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
             | INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
 
 statements: IF_statements 
             | LOOP_statements  
-            | IN.OUT_statements 
-            | ASSIGNMENT_statements 
+            | IN.OUT_statements
             | BOOLEAN_statements ;
 
 BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
                     | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); };
-IF_statements: IF | ELSE;
-LOOP_statements: WHILE | FOR;
-IN.OUT_statements: ASSIGNMENT_statements: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
+IF_statements: IF expr LEFTBRACE expr RIGHTBRACE else {$$ = mknode ("IF", $2,$4, $6); }
+               |IF expr LEFTBRACE expr RIGHTBRACE {$$ = mknode ("IF", $2,$4,NULL); };
+               
+else: ELSE LEFTBRACE expr RIGHTBRACE {$$=mknode("else", $3,NULL, NULL);} ;
+
+LOOP_statements: while1 expr LEFTBRACE expr RIGHTBRACE {$$=mknode("while", $2,$4, NULL);} 
+                 |FOR expr LEFTBRACE expr RIGHTBRACE {$$=mknode("for", $2,$4, NULL);}
+                 |DO LEFTBRACE expr RIGHTBRACE while1 expr  {$$=mknode("do-while", $3,$6, NULL);};
+ while1: WHILE;                
+IN.OUT_statements:;
+ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
 %%
 
 #include "lex.yy.c"
