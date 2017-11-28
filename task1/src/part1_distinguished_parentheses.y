@@ -27,36 +27,41 @@ void printtree (node *tree, int tab);
 %left MULTI DIVISION
 %start s
 %%
-s:      expr                 {printf ("ok\n");   printtree ($1,0); }
-        | statements  {printf ("ok\n");   printtree ($1,0); }
+s:  /*expr                 {printf ("ok\n");   printtree ($1,0); }*/
+        statements  {printf ("ok\n");   printtree ($1,0); }
+        | bool_expr {printf ("ok\n");   printtree ($1,0); };
 expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
                | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
                | expr MULTI expr {$$ = mknode ("*", $1, NULL, $3); }
                | expr DIVISION expr {$$ = mknode ("/", $1, NULL, $3); }
-               | expr EQUAL expr { $$ = mknode ("==", $1, NULL, $3); }
-               | expr GREATER expr { $$ = mknode (">", $1, NULL, $3); }
-               | expr GREATEREQUAL expr { $$ = mknode (">=", $1, NULL, $3); }
-               | expr LESS expr { $$ = mknode ("<", $1, NULL, $3); }
-               | expr LESSEQUAL expr { $$ = mknode ("<=", $1, NULL, $3); }
-               | expr NOTEQUAL expr { $$ = mknode ("!=", $1, NULL, $3); }
-               | expr AND expr {$$ = mknode ("&&", $1, NULL, $3); }
-               | expr OR expr {$$ = mknode ("||", $1, NULL, $3); }
-               | NOT expr {$$ = mknode ("NOT", NULL, NULL, $2); }
-               | Pexpr
+               /*| Pexpr*/
                | id
                | numbers                   ;
-               
 id:   ID                         {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
+/*Pexpr:  leftParen expr rightParen {$$ = mknode ("EXPR PARENTHESES", $1, $2, $3); };*/
+/*Pcomp:  leftParen comp_expr rightParen {$$ = mknode ("PARENTHESES", $1, $2, $3); };*/
 
-
-Pexpr:  leftParen expr rightParen {$$ = mknode ("PARENTHESES", $1, $2, $3); };
+Pbool:  leftParen bool_expr rightParen {$$ = mknode ("BOOL PARENTHESES", $1, $2, $3); };
 leftParen: LEFTPAREN {$$ = mknode ("(", NULL, NULL, NULL); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
 
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
             |      INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
+bool_expr: bool_expr AND bool_expr {$$ = mknode ("&&", $1, NULL, $3); }
+            | bool_expr OR bool_expr {$$ = mknode ("||", $1, NULL, $3); }
+            | NOT bool_expr {$$ = mknode ("NOT", NULL, NULL, $2); }
+            | comp_expr
+            | Pbool;
 
-
+comp_expr: expr EQUAL expr { $$ = mknode ("==", $1, NULL, $3); }
+                | expr GREATER expr { $$ = mknode (">", $1, NULL, $3); }
+                | expr GREATEREQUAL expr { $$ = mknode (">=", $1, NULL, $3); }
+                | expr LESS expr { $$ = mknode ("<", $1, NULL, $3); }
+                | expr LESSEQUAL expr { $$ = mknode ("<=", $1, NULL, $3); }
+                | expr NOTEQUAL expr { $$ = mknode ("!=", $1, NULL, $3); }
+                | expr
+                /*| Pcomp*/;
+              
 statements: IF_statements 
             |  LOOP_statements  
            /* |  IN.OUT_statements */
