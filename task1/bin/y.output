@@ -3,6 +3,8 @@
    1  s : expr
    2    | statements
 
+   2  s : expr $$1 statements
+
    3  expr : expr PLUS expr
    4       | expr MINUS expr
    5       | expr MULTI expr
@@ -91,45 +93,67 @@ state 1
 
 
 state 2
-	IF_statements : IF .  (33)
+	numbers : INTEGER_POS .  (22)
 
-	.  reduce 33
+	.  reduce 22
 
 
 state 3
-	IF_statements : ELSE .  (34)
+	numbers : INTEGER_NEG .  (21)
 
-	.  reduce 34
+	.  reduce 21
 
 
 state 4
-	LOOP_statements : WHILE .  (35)
+	expr : NOT . expr  (13)
 
-	.  reduce 35
+	ID  shift 1
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 5
+	RIGHTPAREN  shift 6
+	.  error
+
+	expr  goto 11
+	id  goto 9
+	numbers  goto 10
 
 
 state 5
-	LOOP_statements : FOR .  (36)
+	expr : LEFTPAREN . expr  (7)
 
-	.  reduce 36
+	ID  shift 1
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 5
+	RIGHTPAREN  shift 6
+	.  error
+
+	expr  goto 12
+	id  goto 9
+	numbers  goto 10
 
 
 state 6
-	BOOLEAN_statements : BOOLTRUE .  (31)
+	expr : RIGHTPAREN .  (8)
 
-	.  reduce 31
+	.  reduce 8
 
 
 state 7
-	BOOLEAN_statements : BOOLFALSE .  (32)
+	$accept : s . $end  (0)
 
-	.  reduce 32
+	$end  accept
 
 
 state 8
 	numbers : INTEGER_POS .  (25)
 
 	.  reduce 25
+
+	$$1  goto 25
 
 
 state 9
@@ -141,12 +165,7 @@ state 9
 state 10
 	expr : NOT . expr  (15)
 
-	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
-	.  error
+	.  reduce 10
 
 	expr  goto 25
 	Pexpr  goto 15
@@ -154,7 +173,6 @@ state 10
 	id  goto 26
 	numbers  goto 18
 	leftParen  goto 19
-
 
 state 11
 	leftParen : LEFTPAREN .  (22)
@@ -246,10 +264,11 @@ state 19
 	Pexpr : leftParen . expr rightParen  (21)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 5
+	RIGHTPAREN  shift 6
 	.  error
 
 	expr  goto 40
@@ -331,10 +350,11 @@ state 27
 	expr : expr AND . expr  (13)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 5
+	RIGHTPAREN  shift 6
 	.  error
 
 	expr  goto 41
@@ -349,10 +369,11 @@ state 28
 	expr : expr DIVISION . expr  (6)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 5
+	RIGHTPAREN  shift 6
 	.  error
 
 	expr  goto 42
@@ -525,7 +546,7 @@ state 37
 	leftParen  goto 19
 
 
-state 38
+state 24
 	expr : expr MULTI . expr  (5)
 
 	ID  shift 1
@@ -591,7 +612,6 @@ state 40
 	RIGHTPAREN  shift 54
 	.  error
 
-	rightParen  goto 55
 
 
 state 41
@@ -816,6 +836,13 @@ state 48
 	DIVISION  shift 28
 	MULTI  shift 38
 	$end  reduce 4
+	ID  reduce 4
+	IF  reduce 4
+	ELSE  reduce 4
+	WHILE  reduce 4
+	FOR  reduce 4
+	BOOLTRUE  reduce 4
+	BOOLFALSE  reduce 4
 	AND  reduce 4
 	EQUAL  reduce 4
 	GREATER  reduce 4
@@ -826,7 +853,6 @@ state 48
 	NOTEQUAL  reduce 4
 	OR  reduce 4
 	PLUS  reduce 4
-	RIGHTPAREN  reduce 4
 
 
 state 49
@@ -893,6 +919,43 @@ state 50
 
 state 51
 	expr : expr . PLUS expr  (3)
+	expr : expr . MINUS expr  (4)
+	expr : expr . MULTI expr  (5)
+	expr : expr . DIVISION expr  (6)
+	expr : expr . AND expr  (11)
+	expr : expr . OR expr  (12)
+	expr : expr OR expr .  (12)
+	expr : expr . EQUAL expr  (14)
+	expr : expr . GREATER expr  (15)
+	expr : expr . GREATEREQUAL expr  (16)
+	expr : expr . LESS expr  (17)
+	expr : expr . LESSEQUAL expr  (18)
+	expr : expr . NOTEQUAL expr  (19)
+
+	DIVISION  shift 14
+	MULTI  shift 24
+	$end  reduce 12
+	ID  reduce 12
+	IF  reduce 12
+	ELSE  reduce 12
+	WHILE  reduce 12
+	FOR  reduce 12
+	BOOLTRUE  reduce 12
+	BOOLFALSE  reduce 12
+	AND  reduce 12
+	EQUAL  reduce 12
+	GREATER  reduce 12
+	GREATEREQUAL  reduce 12
+	LESS  reduce 12
+	LESSEQUAL  reduce 12
+	MINUS  reduce 12
+	NOTEQUAL  reduce 12
+	OR  reduce 12
+	PLUS  reduce 12
+
+
+state 36
+	expr : expr . PLUS expr  (3)
 	expr : expr PLUS expr .  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -909,6 +972,13 @@ state 51
 	DIVISION  shift 28
 	MULTI  shift 38
 	$end  reduce 3
+	ID  reduce 3
+	IF  reduce 3
+	ELSE  reduce 3
+	WHILE  reduce 3
+	FOR  reduce 3
+	BOOLTRUE  reduce 3
+	BOOLFALSE  reduce 3
 	AND  reduce 3
 	EQUAL  reduce 3
 	GREATER  reduce 3
@@ -919,10 +989,9 @@ state 51
 	NOTEQUAL  reduce 3
 	OR  reduce 3
 	PLUS  reduce 3
-	RIGHTPAREN  reduce 3
 
 
-state 52
+state 37
 	expr : expr . PLUS expr  (3)
 	expr : expr . MINUS expr  (4)
 	expr : expr . MULTI expr  (5)
@@ -984,3 +1053,104 @@ state 55
 
 53 terminals, 15 nonterminals
 39 grammar rules, 56 states
+
+	.  reduce 32
+
+
+state 42
+	BOOLEAN_statements : BOOLTRUE .  (27)
+
+	.  reduce 27
+
+
+state 43
+	BOOLEAN_statements : BOOLFALSE .  (28)
+
+	.  reduce 28
+
+
+state 44
+	s : expr $$1 statements .  (2)
+
+	.  reduce 2
+
+
+state 45
+	ASSIGNMENT_statements : id . ASSIGNMENT expr  (33)
+
+	ASSIGNMENT  shift 50
+	.  error
+
+
+state 46
+	statements : IF_statements .  (23)
+
+	.  reduce 23
+
+
+state 47
+	statements : LOOP_statements .  (24)
+
+	.  reduce 24
+
+
+state 48
+	statements : ASSIGNMENT_statements .  (25)
+
+	.  reduce 25
+
+
+state 49
+	statements : BOOLEAN_statements .  (26)
+
+	.  reduce 26
+
+
+state 50
+	ASSIGNMENT_statements : id ASSIGNMENT . expr  (33)
+
+	ID  shift 1
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 5
+	RIGHTPAREN  shift 6
+	.  error
+
+	expr  goto 51
+	id  goto 9
+	numbers  goto 10
+
+
+state 51
+	expr : expr . PLUS expr  (3)
+	expr : expr . MINUS expr  (4)
+	expr : expr . MULTI expr  (5)
+	expr : expr . DIVISION expr  (6)
+	expr : expr . AND expr  (11)
+	expr : expr . OR expr  (12)
+	expr : expr . EQUAL expr  (14)
+	expr : expr . GREATER expr  (15)
+	expr : expr . GREATEREQUAL expr  (16)
+	expr : expr . LESS expr  (17)
+	expr : expr . LESSEQUAL expr  (18)
+	expr : expr . NOTEQUAL expr  (19)
+	ASSIGNMENT_statements : id ASSIGNMENT expr .  (33)
+
+	AND  shift 13
+	DIVISION  shift 14
+	EQUAL  shift 15
+	GREATER  shift 16
+	GREATEREQUAL  shift 17
+	LESS  shift 18
+	LESSEQUAL  shift 19
+	MINUS  shift 20
+	NOTEQUAL  shift 21
+	OR  shift 22
+	PLUS  shift 23
+	MULTI  shift 24
+	$end  reduce 33
+
+
+53 terminals, 11 nonterminals
+34 grammar rules, 52 states

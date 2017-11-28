@@ -63,5 +63,5 @@
 (0|1)+b return BINARY_CONST;
 \n      ;counter++;
 [ \t] ;
-. ;
+. return yytext[0]; ;
 %%
