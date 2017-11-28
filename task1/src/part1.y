@@ -20,7 +20,7 @@ void printtree (node *tree, int tab);
 %token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST
 %token ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSUOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT
 
-%right ASSIGNMENT ELSE NOT 
+%right ASSIGNMENT ELSE NOT SEMICOLON
 %left LEFTBRACE RIGHTBRACE LEFTPAREN RIGHTPAREN
 %left EQUAL GREATER GREATEREQUAL LESSEQUAL LESS NOTEQUAL
 %left PLUS MINUS AND OR
@@ -28,12 +28,12 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      
-        block                 {printf ("ok\n");   printtree ($1,0); }
-        | statements  {printf ("ok\n");   printtree ($1,0); } ;
+        statements    {printf ("ok\n");   printtree ($1,0); };
+        
 
-block: expr SEMICOLON block  {$$ = mknode ("newline:\n", $1, NULL, $3); }
-        |   expr SEMICOLON 
-        |   SEMICOLON;  
+/*block:    block expr   {$$ = mknode ("newline:\n", $1, NULL, NULL); }
+        |   expr  ;*/
+          
         
 expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
@@ -49,8 +49,8 @@ expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | expr OR expr {$$ = mknode ("||", $1, NULL, $3); }
         | NOT expr {$$ = mknode ("NOT", NULL, NULL, $2); }
         | Pexpr
-        | consts ;
-               
+        | consts 
+         |ASSIGNMENT_statement;   
 
 Pexpr:  leftParen expr rightParen {$$ = mknode (" ", $1, $2, $3); };
 leftParen: LEFTPAREN {$$ = mknode ("(", NULL, NULL, NULL); };
@@ -64,7 +64,8 @@ numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); }
 statements: IF_statements 
             | LOOP_statements  
             | IN.OUT_statements
-            | BOOLEAN_statements ;
+            | BOOLEAN_statements
+            |expr;
 
 BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
                     | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); };
@@ -73,10 +74,10 @@ IF_statements: IF expr LEFTBRACE expr RIGHTBRACE else {$$ = mknode ("IF", $2,$4,
                
 else: ELSE LEFTBRACE expr RIGHTBRACE {$$=mknode("else", $3,NULL, NULL);} ;
 
-LOOP_statements: while1 expr LEFTBRACE expr RIGHTBRACE {$$=mknode("while", $2,$4, NULL);} 
+LOOP_statements: WHILE expr LEFTBRACE expr RIGHTBRACE {$$=mknode("while", $2,$4, NULL);} 
                  |FOR expr LEFTBRACE expr RIGHTBRACE {$$=mknode("for", $2,$4, NULL);}
-                 |DO LEFTBRACE expr RIGHTBRACE while1 expr  {$$=mknode("do-while", $3,$6, NULL);};
- while1: WHILE;                
+                 |DO LEFTBRACE expr RIGHTBRACE WHILE expr  {$$=mknode("do-while", $3,$6, NULL);};
+                 
 IN.OUT_statements:;
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
 %%
