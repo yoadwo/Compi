@@ -1,1 +1,1 @@
-do {x=3} while(x>4)
+t = x+4; a = b + c;
