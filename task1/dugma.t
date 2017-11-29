@@ -1,1 +1,1 @@
-DO{x=x+1}while(x>4)
+do while(x>4)

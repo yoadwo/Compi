@@ -14,10 +14,11 @@
 "charptr" return CHARPTR;
 "if" return IF;
 "else" return ELSE;
+"do" return DO;
 "while" return WHILE;
 "for"   return FOR;
 "main" return MAIN;
-"procedure" return PROCEDURE;
+ "procedure" return PROCEDURE; 
 "return" return RETURN;
 "true" return BOOLTRUE;
 "false" return BOOLFALSE;
