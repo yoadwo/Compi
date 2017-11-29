@@ -1,54 +1,53 @@
    0  $accept : s $end
 
    1  s : statements
-   2    | DO block_statements WHILE expr
 
-   3  expr : expr PLUS expr
-   4       | expr MINUS expr
-   5       | expr MULTI expr
-   6       | expr DIVISION expr
-   7       | expr EQUAL expr
-   8       | expr GREATER expr
-   9       | expr GREATEREQUAL expr
-  10       | expr LESS expr
-  11       | expr LESSEQUAL expr
-  12       | expr NOTEQUAL expr
-  13       | expr AND expr
-  14       | expr OR expr
-  15       | NOT expr
-  16       | Pexpr
-  17       | consts
-  18       | ASSIGNMENT_statement
+   2  expr : expr PLUS expr
+   3       | expr MINUS expr
+   4       | expr MULTI expr
+   5       | expr DIVISION expr
+   6       | expr EQUAL expr
+   7       | expr GREATER expr
+   8       | expr GREATEREQUAL expr
+   9       | expr LESS expr
+  10       | expr LESSEQUAL expr
+  11       | expr NOTEQUAL expr
+  12       | expr AND expr
+  13       | expr OR expr
+  14       | NOT expr
+  15       | Pexpr
+  16       | consts
+  17       | ASSIGNMENT_statement
 
-  19  Pexpr : LEFTPAREN expr rightParen
+  18  Pexpr : LEFTPAREN expr rightParen
 
-  20  rightParen : RIGHTPAREN
+  19  rightParen : RIGHTPAREN
 
-  21  block_statements : LEFTBRACE statements rightbrace
+  20  block_statements : LEFTBRACE statements rightbrace
 
-  22  rightbrace : RIGHTBRACE
+  21  rightbrace : RIGHTBRACE
 
-  23  consts : id
-  24         | numbers
+  22  consts : id
+  23         | numbers
 
-  25  id : ID
+  24  id : ID
 
-  26  numbers : INTEGER_NEG
-  27          | INTEGER_POS
+  25  numbers : INTEGER_NEG
+  26          | INTEGER_POS
 
-  28  statements : IF_statements
-  29             | LOOP_statements
-  30             | IN.OUT_statements
-  31             | BOOLEAN_statements
-  32             | expr
+  27  statements : IF_statements
+  28             | LOOP_statements
+  29             | IN.OUT_statements
+  30             | BOOLEAN_statements
+  31             | expr
 
-  33  BOOLEAN_statements : BOOLTRUE
-  34                     | BOOLFALSE
+  32  BOOLEAN_statements : BOOLTRUE
+  33                     | BOOLFALSE
 
-  35  IF_statements : IF expr block_statements else
-  36                | IF expr block_statements
+  34  IF_statements : IF expr block_statements else
+  35                | IF expr block_statements
 
-  37  else : ELSE block_statements
+  36  else : ELSE block_statements
 
   37  LOOP_statements : WHILE expr block_statements
   38                  | FOR expr block_statements
@@ -90,14 +89,14 @@ state 0
 
 
 state 1
-	id : ID .  (25)
+	id : ID .  (24)
 
-	.  reduce 25
+	.  reduce 24
 
 
 state 2
-	IF_statements : IF . expr block_statements else  (35)
-	IF_statements : IF . expr block_statements  (36)
+	IF_statements : IF . expr block_statements else  (34)
+	IF_statements : IF . expr block_statements  (35)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -115,7 +114,7 @@ state 2
 
 
 state 3
-	LOOP_statements : WHILE . expr block_statements  (38)
+	LOOP_statements : WHILE . expr block_statements  (37)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -133,7 +132,7 @@ state 3
 
 
 state 4
-	LOOP_statements : FOR . expr block_statements  (39)
+	LOOP_statements : FOR . expr block_statements  (38)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -160,31 +159,31 @@ state 5
 
 
 state 6
-	BOOLEAN_statements : BOOLTRUE .  (33)
+	BOOLEAN_statements : BOOLTRUE .  (32)
+
+	.  reduce 32
+
+
+state 7
+	BOOLEAN_statements : BOOLFALSE .  (33)
 
 	.  reduce 33
 
 
-state 7
-	BOOLEAN_statements : BOOLFALSE .  (34)
-
-	.  reduce 34
-
-
 state 8
-	numbers : INTEGER_POS .  (27)
-
-	.  reduce 27
-
-
-state 9
-	numbers : INTEGER_NEG .  (26)
+	numbers : INTEGER_POS .  (26)
 
 	.  reduce 26
 
 
+state 9
+	numbers : INTEGER_NEG .  (25)
+
+	.  reduce 25
+
+
 state 10
-	expr : NOT . expr  (15)
+	expr : NOT . expr  (14)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -202,7 +201,7 @@ state 10
 
 
 state 11
-	Pexpr : LEFTPAREN . expr rightParen  (19)
+	Pexpr : LEFTPAREN . expr rightParen  (18)
 
 	ID  shift 1
 	INTEGER_POS  shift 8
@@ -232,19 +231,19 @@ state 13
 
 
 state 14
-	expr : expr . PLUS expr  (3)
-	expr : expr . MINUS expr  (4)
-	expr : expr . MULTI expr  (5)
-	expr : expr . DIVISION expr  (6)
-	expr : expr . EQUAL expr  (7)
-	expr : expr . GREATER expr  (8)
-	expr : expr . GREATEREQUAL expr  (9)
-	expr : expr . LESS expr  (10)
-	expr : expr . LESSEQUAL expr  (11)
-	expr : expr . NOTEQUAL expr  (12)
-	expr : expr . AND expr  (13)
-	expr : expr . OR expr  (14)
-	statements : expr .  (32)
+	expr : expr . PLUS expr  (2)
+	expr : expr . MINUS expr  (3)
+	expr : expr . MULTI expr  (4)
+	expr : expr . DIVISION expr  (5)
+	expr : expr . EQUAL expr  (6)
+	expr : expr . GREATER expr  (7)
+	expr : expr . GREATEREQUAL expr  (8)
+	expr : expr . LESS expr  (9)
+	expr : expr . LESSEQUAL expr  (10)
+	expr : expr . NOTEQUAL expr  (11)
+	expr : expr . AND expr  (12)
+	expr : expr . OR expr  (13)
+	statements : expr .  (31)
 
 	AND  shift 31
 	DIVISION  shift 32
@@ -263,25 +262,25 @@ state 14
 
 
 state 15
-	expr : Pexpr .  (16)
+	expr : Pexpr .  (15)
+
+	.  reduce 15
+
+
+state 16
+	expr : consts .  (16)
 
 	.  reduce 16
 
 
-state 16
-	expr : consts .  (17)
+state 17
+	expr : ASSIGNMENT_statement .  (17)
 
 	.  reduce 17
 
 
-state 17
-	expr : ASSIGNMENT_statement .  (18)
-
-	.  reduce 18
-
-
 state 18
-	consts : id .  (23)
+	consts : id .  (22)
 	ASSIGNMENT_statement : id . ASSIGNMENT expr  (41)
 
 	ASSIGNMENT  shift 43
@@ -304,50 +303,50 @@ state 18
 
 
 state 19
-	consts : numbers .  (24)
+	consts : numbers .  (23)
 
-	.  reduce 24
+	.  reduce 23
 
 
 state 20
-	statements : IF_statements .  (28)
+	statements : IF_statements .  (27)
+
+	.  reduce 27
+
+
+state 21
+	statements : LOOP_statements .  (28)
 
 	.  reduce 28
 
 
-state 21
-	statements : LOOP_statements .  (29)
+state 22
+	statements : IN.OUT_statements .  (29)
 
 	.  reduce 29
 
 
-state 22
-	statements : IN.OUT_statements .  (30)
+state 23
+	statements : BOOLEAN_statements .  (30)
 
 	.  reduce 30
 
 
-state 23
-	statements : BOOLEAN_statements .  (31)
-
-	.  reduce 31
-
-
 state 24
-	expr : expr . PLUS expr  (3)
-	expr : expr . MINUS expr  (4)
-	expr : expr . MULTI expr  (5)
-	expr : expr . DIVISION expr  (6)
-	expr : expr . EQUAL expr  (7)
-	expr : expr . GREATER expr  (8)
-	expr : expr . GREATEREQUAL expr  (9)
-	expr : expr . LESS expr  (10)
-	expr : expr . LESSEQUAL expr  (11)
-	expr : expr . NOTEQUAL expr  (12)
-	expr : expr . AND expr  (13)
-	expr : expr . OR expr  (14)
-	IF_statements : IF expr . block_statements else  (35)
-	IF_statements : IF expr . block_statements  (36)
+	expr : expr . PLUS expr  (2)
+	expr : expr . MINUS expr  (3)
+	expr : expr . MULTI expr  (4)
+	expr : expr . DIVISION expr  (5)
+	expr : expr . EQUAL expr  (6)
+	expr : expr . GREATER expr  (7)
+	expr : expr . GREATEREQUAL expr  (8)
+	expr : expr . LESS expr  (9)
+	expr : expr . LESSEQUAL expr  (10)
+	expr : expr . NOTEQUAL expr  (11)
+	expr : expr . AND expr  (12)
+	expr : expr . OR expr  (13)
+	IF_statements : IF expr . block_statements else  (34)
+	IF_statements : IF expr . block_statements  (35)
 
 	AND  shift 31
 	DIVISION  shift 32
@@ -368,19 +367,19 @@ state 24
 
 
 state 25
-	expr : expr . PLUS expr  (3)
-	expr : expr . MINUS expr  (4)
-	expr : expr . MULTI expr  (5)
-	expr : expr . DIVISION expr  (6)
-	expr : expr . EQUAL expr  (7)
-	expr : expr . GREATER expr  (8)
-	expr : expr . GREATEREQUAL expr  (9)
-	expr : expr . LESS expr  (10)
-	expr : expr . LESSEQUAL expr  (11)
-	expr : expr . NOTEQUAL expr  (12)
-	expr : expr . AND expr  (13)
-	expr : expr . OR expr  (14)
-	LOOP_statements : WHILE expr . block_statements  (38)
+	expr : expr . PLUS expr  (2)
+	expr : expr . MINUS expr  (3)
+	expr : expr . MULTI expr  (4)
+	expr : expr . DIVISION expr  (5)
+	expr : expr . EQUAL expr  (6)
+	expr : expr . GREATER expr  (7)
+	expr : expr . GREATEREQUAL expr  (8)
+	expr : expr . LESS expr  (9)
+	expr : expr . LESSEQUAL expr  (10)
+	expr : expr . NOTEQUAL expr  (11)
+	expr : expr . AND expr  (12)
+	expr : expr . OR expr  (13)
+	LOOP_statements : WHILE expr . block_statements  (37)
 
 	AND  shift 31
 	DIVISION  shift 32
@@ -401,19 +400,19 @@ state 25
 
 
 state 26
-	expr : expr . PLUS expr  (3)
-	expr : expr . MINUS expr  (4)
-	expr : expr . MULTI expr  (5)
-	expr : expr . DIVISION expr  (6)
-	expr : expr . EQUAL expr  (7)
-	expr : expr . GREATER expr  (8)
-	expr : expr . GREATEREQUAL expr  (9)
-	expr : expr . LESS expr  (10)
-	expr : expr . LESSEQUAL expr  (11)
-	expr : expr . NOTEQUAL expr  (12)
-	expr : expr . AND expr  (13)
-	expr : expr . OR expr  (14)
-	LOOP_statements : FOR expr . block_statements  (39)
+	expr : expr . PLUS expr  (2)
+	expr : expr . MINUS expr  (3)
+	expr : expr . MULTI expr  (4)
+	expr : expr . DIVISION expr  (5)
+	expr : expr . EQUAL expr  (6)
+	expr : expr . GREATER expr  (7)
+	expr : expr . GREATEREQUAL expr  (8)
+	expr : expr . LESS expr  (9)
+	expr : expr . LESSEQUAL expr  (10)
+	expr : expr . NOTEQUAL expr  (11)
+	expr : expr . AND expr  (12)
+	expr : expr . OR expr  (13)
+	LOOP_statements : FOR expr . block_statements  (38)
 
 	AND  shift 31
 	DIVISION  shift 32
@@ -771,26 +770,26 @@ state 43
 
 
 state 44
-	IF_statements : IF expr block_statements . else  (35)
-	IF_statements : IF expr block_statements .  (36)
+	IF_statements : IF expr block_statements . else  (34)
+	IF_statements : IF expr block_statements .  (35)
 
 	ELSE  shift 64
-	$end  reduce 36
-	RIGHTBRACE  reduce 36
+	$end  reduce 35
+	RIGHTBRACE  reduce 35
 
 	else  goto 65
 
 
 state 45
-	LOOP_statements : WHILE expr block_statements .  (38)
+	LOOP_statements : WHILE expr block_statements .  (37)
 
-	.  reduce 38
+	.  reduce 37
 
 
 state 46
-	LOOP_statements : FOR expr block_statements .  (39)
+	LOOP_statements : FOR expr block_statements .  (38)
 
-	.  reduce 39
+	.  reduce 38
 
 
 state 47
@@ -823,13 +822,13 @@ state 48
 state 49
 	rightParen : RIGHTPAREN .  (19)
 
-	.  reduce 20
+	.  reduce 19
 
 
 state 50
 	Pexpr : LEFTPAREN expr rightParen .  (18)
 
-	.  reduce 19
+	.  reduce 18
 
 
 state 51
@@ -880,7 +879,7 @@ state 52
 	expr : expr . AND expr  (12)
 	expr : expr . OR expr  (13)
 
-	.  reduce 6
+	.  reduce 5
 
 
 state 53
@@ -1195,7 +1194,7 @@ state 62
 	expr : expr . AND expr  (12)
 	expr : expr . OR expr  (13)
 
-	.  reduce 5
+	.  reduce 4
 
 
 state 63
@@ -1232,7 +1231,7 @@ state 63
 
 
 state 64
-	else : ELSE . block_statements  (37)
+	else : ELSE . block_statements  (36)
 
 	LEFTBRACE  shift 27
 	.  error
@@ -1241,21 +1240,21 @@ state 64
 
 
 state 65
-	IF_statements : IF expr block_statements else .  (35)
+	IF_statements : IF expr block_statements else .  (34)
 
-	.  reduce 35
+	.  reduce 34
 
 
 state 66
-	rightbrace : RIGHTBRACE .  (22)
+	rightbrace : RIGHTBRACE .  (21)
 
-	.  reduce 22
+	.  reduce 21
 
 
 state 67
-	block_statements : LEFTBRACE statements rightbrace .  (21)
+	block_statements : LEFTBRACE statements rightbrace .  (20)
 
-	.  reduce 21
+	.  reduce 20
 
 
 state 68
@@ -1292,7 +1291,7 @@ state 68
 state 69
 	else : ELSE block_statements .  (36)
 
-	.  reduce 37
+	.  reduce 36
 
 
 54 terminals, 17 nonterminals

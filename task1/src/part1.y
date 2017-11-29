@@ -28,14 +28,11 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      
-        statements    {printf ("ok\n");   printtree ($1,0); }
-         |DO block_statements WHILE expr    {$$=mknode("do-while", $2,NULL, $4);};
-        
-
+        statements    {printf ("ok\n");   printtree ($1,0); };
+    
 /*block:    block expr   {$$ = mknode ("newline:\n", $1, NULL, NULL); }
         |   expr  ;*/
-          
-        
+
 expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
         | expr MULTI expr {$$ = mknode ("*", $1, NULL, $3); }
@@ -76,7 +73,6 @@ IF_statements: IF expr block_statements else {$$ = mknode ("IF", $2,$3, $4); }
 else: ELSE block_statements {$$=mknode("else", $2,NULL, NULL);} ;
 
 LOOP_statements: WHILE expr block_statements {$$=mknode("while", $2,$3, NULL);} 
-<<<<<<< Updated upstream
                  |FOR expr block_statements {$$=mknode("for", $2,$3, NULL);}
                  |DO block_statements WHILE expr  {$$=mknode("do-while", $2,NULL, $4);};
                  

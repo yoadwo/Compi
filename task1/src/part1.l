@@ -16,7 +16,6 @@
 "else" return ELSE;
 "do" return DO;
 "while" return WHILE;
-"do" return DO;
 "for"   return FOR;
 "main" return MAIN;
  "procedure" return PROCEDURE; 
