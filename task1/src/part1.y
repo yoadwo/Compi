@@ -20,7 +20,7 @@ void printtree (node *tree, int tab);
 %token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST
 %token ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSUOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT
 
-%right ASSIGNMENT ELSE NOT SEMICOLON
+%right ASSIGNMENT ELSE NOT SEMICOLON 
 %left LEFTBRACE RIGHTBRACE LEFTPAREN RIGHTPAREN
 %left EQUAL GREATER GREATEREQUAL LESSEQUAL LESS NOTEQUAL
 %left PLUS MINUS AND OR
@@ -52,10 +52,10 @@ expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | consts 
          |ASSIGNMENT_statement;   
 
-Pexpr:  leftParen expr rightParen {$$ = mknode (" ", $1, $2, $3); };
-leftParen: LEFTPAREN {$$ = mknode ("(", NULL, NULL, NULL); };
+Pexpr:  LEFTPAREN expr rightParen {$$ = mknode ("(", $2, NULL, $3); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
-               
+block_statements:LEFTBRACE statements rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };   
+rightbrace:RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
 consts: id | numbers    ;
 id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
@@ -69,14 +69,14 @@ statements: IF_statements
 
 BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
                     | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); };
-IF_statements: IF expr LEFTBRACE expr RIGHTBRACE else {$$ = mknode ("IF", $2,$4, $6); }
-               |IF expr LEFTBRACE expr RIGHTBRACE {$$ = mknode ("IF", $2,$4,NULL); };
+IF_statements: IF expr block_statements else {$$ = mknode ("IF", $2,$3, $4); }
+               |IF expr block_statements {$$ = mknode ("IF", $2,$3,NULL); };
                
-else: ELSE LEFTBRACE expr RIGHTBRACE {$$=mknode("else", $3,NULL, NULL);} ;
+else: ELSE block_statements {$$=mknode("else", $2,NULL, NULL);} ;
 
-LOOP_statements: WHILE expr LEFTBRACE expr RIGHTBRACE {$$=mknode("while", $2,$4, NULL);} 
-                 |FOR expr LEFTBRACE expr RIGHTBRACE {$$=mknode("for", $2,$4, NULL);}
-                 |DO LEFTBRACE expr RIGHTBRACE WHILE expr  {$$=mknode("do-while", $3,$6, NULL);};
+LOOP_statements: WHILE expr block_statements {$$=mknode("while", $2,$3, NULL);} 
+                 |FOR expr block_statements {$$=mknode("for", $2,$3, NULL);}
+                 |DO block_statements WHILE expr  {$$=mknode("do-while", $2,$4, NULL);};
                  
 IN.OUT_statements:;
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
