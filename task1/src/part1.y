@@ -32,12 +32,11 @@ void printtree (node *tree, int tab);
 s:      
         statements    {printf ("ok\n");   printtree ($1,0); };
        
-/*    
-newline: newline expr SEMICOLON   {$$ = mknode ("", $1, NULL, $3); } 
-        |   expr SEMICOLON  
-        |   SEMICOLON
-        | statements;           
-        */
+    
+newline: newline expr SEMICOLON  {$$ = mknode ("newline", $1, NULL, $2); } 
+        |   expr SEMICOLON;
+        
+        
 expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
         | expr MULTI expr {$$ = mknode ("*", $1, NULL, $3); }
@@ -54,6 +53,7 @@ expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | Pexpr
         | consts 
         |ASSIGNMENT_statement;
+        /*| SEMICOLON;*/
 
 Pexpr:  LEFTPAREN expr rightParen {$$ = mknode ("(", $2, NULL, $3); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
@@ -63,8 +63,7 @@ id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
             | INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
 
- 
-            
+             
 statements_type: statements
                  |block_statements;
             
@@ -72,7 +71,7 @@ statements: IF_statements
             | LOOP_statements  
             | BOOLEAN_statements
             | IN.OUT_statements
-            | expr;
+            | newline;
 
 block_statements:LEFTBRACE statements rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };   
 rightbrace:RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
@@ -81,7 +80,7 @@ rightbrace:RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
 IF_statements: IF cond statements_type {$$ = mknode ("IF", $2,$3,NULL); } %prec LOWER_THAN_ELSE
              | IF cond statements_type else{$$ = mknode ("IF", $2,$3, $4); };
                
-else:ELSE statements_type{$$ = mknode ("ELSE", $2,NULL, NULL); };
+else:    ELSE statements_type{$$ = mknode ("ELSE", $2,NULL, NULL); };
 
 LOOP_statements: WHILE cond block_statements {$$=mknode("while", $2,$3, NULL);} 
              | FOR cond block_statements {$$=mknode("for", $2,$3, NULL);}
