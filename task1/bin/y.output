@@ -1,5 +1,6 @@
    0  $accept : s $end
 
+<<<<<<< HEAD
    1  s : statements
 
    2  expr : expr PLUS expr
@@ -56,6 +57,64 @@
   40                  | FOR expr block_statements
   41                  | DO block_statements WHILE expr
   42                  | WHILE expr statements
+=======
+   1  s : newline
+
+   2  newline : expr SEMICOLON newline
+   3          | expr SEMICOLON
+   4          | SEMICOLON
+
+   5  expr : expr PLUS expr
+   6       | expr MINUS expr
+   7       | expr MULTI expr
+   8       | expr DIVISION expr
+   9       | expr EQUAL expr
+  10       | expr GREATER expr
+  11       | expr GREATEREQUAL expr
+  12       | expr LESS expr
+  13       | expr LESSEQUAL expr
+  14       | expr NOTEQUAL expr
+  15       | expr AND expr
+  16       | expr OR expr
+  17       | NOT expr
+  18       | Pexpr
+  19       | consts
+  20       | ASSIGNMENT_statement
+
+  21  Pexpr : LEFTPAREN expr rightParen
+
+  22  rightParen : RIGHTPAREN
+
+  23  block_statements : LEFTBRACE statements rightbrace
+
+  24  rightbrace : RIGHTBRACE
+
+  25  consts : id
+  26         | numbers
+
+  27  id : ID
+
+  28  numbers : INTEGER_NEG
+  29          | INTEGER_POS
+
+  30  statements : IF_statements
+  31             | LOOP_statements
+  32             | IN.OUT_statements
+  33             | BOOLEAN_statements
+  34             | expr
+
+  35  BOOLEAN_statements : BOOLTRUE
+  36                     | BOOLFALSE
+
+  37  IF_statements : IF expr block_statements else
+  38                | IF expr block_statements
+
+  39  else : ELSE block_statements
+
+  40  LOOP_statements : WHILE expr block_statements
+  41                  | FOR expr block_statements
+  42                  | DO block_statements WHILE expr
+>>>>>>> master
 
   43  IN.OUT_statements :
 
@@ -63,6 +122,7 @@
 
 state 0
 	$accept : . s $end  (0)
+<<<<<<< HEAD
 	IN.OUT_statements : .  (43)
 
 	ID  shift 1
@@ -108,16 +168,41 @@ state 2
 	NOT  shift 10
 	LEFTPAREN  shift 11
 	.  error
+=======
 
-	expr  goto 24
-	Pexpr  goto 15
-	consts  goto 16
-	ASSIGNMENT_statement  goto 17
-	id  goto 18
-	numbers  goto 19
+	ID  shift 1
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	SEMICOLON  shift 5
+	LEFTPAREN  shift 6
+	.  error
+
+	s  goto 7
+	newline  goto 8
+	expr  goto 9
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+
+
+state 1
+	id : ID .  (27)
+
+	.  reduce 27
+
+
+state 2
+	numbers : INTEGER_POS .  (29)
+>>>>>>> master
+
+	.  reduce 29
 
 
 state 3
+<<<<<<< HEAD
 	LOOP_statements : WHILE . expr block_statements  (39)
 	LOOP_statements : WHILE . expr statements  (42)
 
@@ -127,43 +212,50 @@ state 3
 	NOT  shift 10
 	LEFTPAREN  shift 11
 	.  error
+=======
+	numbers : INTEGER_NEG .  (28)
+>>>>>>> master
 
-	expr  goto 25
-	Pexpr  goto 15
-	consts  goto 16
-	ASSIGNMENT_statement  goto 17
-	id  goto 18
-	numbers  goto 19
+	.  reduce 28
 
 
 state 4
+<<<<<<< HEAD
 	LOOP_statements : FOR . expr block_statements  (40)
+=======
+	expr : NOT . expr  (17)
+>>>>>>> master
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
-	expr  goto 26
-	Pexpr  goto 15
-	consts  goto 16
-	ASSIGNMENT_statement  goto 17
-	id  goto 18
-	numbers  goto 19
+	expr  goto 15
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
 
 
 state 5
+<<<<<<< HEAD
 	LOOP_statements : DO . block_statements WHILE expr  (41)
 
 	LEFTBRACE  shift 27
 	.  error
+=======
+	newline : SEMICOLON .  (4)
+>>>>>>> master
 
-	block_statements  goto 28
+	.  reduce 4
 
 
 state 6
+<<<<<<< HEAD
 	BOOLEAN_statements : BOOLTRUE .  (34)
 
 	.  reduce 34
@@ -196,46 +288,114 @@ state 10
 	NOT  shift 10
 	LEFTPAREN  shift 11
 	.  error
-
-	expr  goto 29
-	Pexpr  goto 15
-	consts  goto 16
-	ASSIGNMENT_statement  goto 17
-	id  goto 18
-	numbers  goto 19
-
-
-state 11
-	Pexpr : LEFTPAREN . expr rightParen  (18)
+=======
+	Pexpr : LEFTPAREN . expr rightParen  (21)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
-	expr  goto 30
-	Pexpr  goto 15
-	consts  goto 16
-	ASSIGNMENT_statement  goto 17
-	id  goto 18
-	numbers  goto 19
+	expr  goto 16
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
 
 
-state 12
+state 7
 	$accept : s . $end  (0)
 
 	$end  accept
 
 
-state 13
-	s : statements .  (1)
+state 8
+	s : newline .  (1)
 
 	.  reduce 1
 
 
+state 9
+	newline : expr . SEMICOLON newline  (2)
+	newline : expr . SEMICOLON  (3)
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+
+	AND  shift 17
+	DIVISION  shift 18
+	EQUAL  shift 19
+	GREATER  shift 20
+	GREATEREQUAL  shift 21
+	LESS  shift 22
+	LESSEQUAL  shift 23
+	MINUS  shift 24
+	NOTEQUAL  shift 25
+	OR  shift 26
+	PLUS  shift 27
+	MULTI  shift 28
+	SEMICOLON  shift 29
+	.  error
+
+
+state 10
+	expr : Pexpr .  (18)
+>>>>>>> master
+
+	.  reduce 18
+
+
+state 11
+<<<<<<< HEAD
+	Pexpr : LEFTPAREN . expr rightParen  (18)
+=======
+	expr : consts .  (19)
+>>>>>>> master
+
+	.  reduce 19
+
+
+state 12
+	expr : ASSIGNMENT_statement .  (20)
+
+	.  reduce 20
+
+
+state 13
+	consts : id .  (25)
+	ASSIGNMENT_statement : id . ASSIGNMENT expr  (44)
+
+	ASSIGNMENT  shift 30
+	AND  reduce 25
+	DIVISION  reduce 25
+	EQUAL  reduce 25
+	GREATER  reduce 25
+	GREATEREQUAL  reduce 25
+	LESS  reduce 25
+	LESSEQUAL  reduce 25
+	MINUS  reduce 25
+	NOTEQUAL  reduce 25
+	OR  reduce 25
+	PLUS  reduce 25
+	MULTI  reduce 25
+	SEMICOLON  reduce 25
+	RIGHTPAREN  reduce 25
+
+
 state 14
+<<<<<<< HEAD
 	expr : expr . PLUS expr  (2)
 	expr : expr . MINUS expr  (3)
 	expr : expr . MULTI expr  (4)
@@ -264,8 +424,13 @@ state 14
 	MULTI  shift 42
 	SEMICOLON  shift 43
 	.  error
+=======
+	consts : numbers .  (26)
+>>>>>>> master
 
+	.  reduce 26
 
+<<<<<<< HEAD
 state 15
 	expr : Pexpr .  (15)
 
@@ -616,216 +781,381 @@ state 30
 	.  error
 
 	rightParen  goto 54
+=======
+
+state 15
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+	expr : NOT expr .  (17)
+
+	AND  shift 17
+	DIVISION  shift 18
+	EQUAL  shift 19
+	GREATER  shift 20
+	GREATEREQUAL  shift 21
+	LESS  shift 22
+	LESSEQUAL  shift 23
+	MINUS  shift 24
+	NOTEQUAL  shift 25
+	OR  shift 26
+	PLUS  shift 27
+	MULTI  shift 28
+	SEMICOLON  reduce 17
+	RIGHTPAREN  reduce 17
 
 
-state 31
-	expr : expr AND . expr  (12)
+state 16
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+	Pexpr : LEFTPAREN expr . rightParen  (21)
 
-	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	AND  shift 17
+	DIVISION  shift 18
+	EQUAL  shift 19
+	GREATER  shift 20
+	GREATEREQUAL  shift 21
+	LESS  shift 22
+	LESSEQUAL  shift 23
+	MINUS  shift 24
+	NOTEQUAL  shift 25
+	OR  shift 26
+	PLUS  shift 27
+	MULTI  shift 28
+	RIGHTPAREN  shift 31
 	.  error
 
+	rightParen  goto 32
+>>>>>>> master
+
+
+state 17
+	expr : expr AND . expr  (15)
+
+	ID  shift 1
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
+	.  error
+
+<<<<<<< HEAD
 	expr  goto 55
 	Pexpr  goto 15
 	consts  goto 16
 	ASSIGNMENT_statement  goto 17
 	id  goto 18
 	numbers  goto 19
+=======
+	expr  goto 33
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+>>>>>>> master
 
 
-state 32
-	expr : expr DIVISION . expr  (5)
+state 18
+	expr : expr DIVISION . expr  (8)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
+<<<<<<< HEAD
 	expr  goto 56
 	Pexpr  goto 15
 	consts  goto 16
 	ASSIGNMENT_statement  goto 17
 	id  goto 18
 	numbers  goto 19
+=======
+	expr  goto 34
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+>>>>>>> master
 
 
-state 33
-	expr : expr EQUAL . expr  (6)
+state 19
+	expr : expr EQUAL . expr  (9)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
+<<<<<<< HEAD
 	expr  goto 57
 	Pexpr  goto 15
 	consts  goto 16
 	ASSIGNMENT_statement  goto 17
 	id  goto 18
 	numbers  goto 19
+=======
+	expr  goto 35
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+>>>>>>> master
 
 
-state 34
-	expr : expr GREATER . expr  (7)
+state 20
+	expr : expr GREATER . expr  (10)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
+<<<<<<< HEAD
 	expr  goto 58
 	Pexpr  goto 15
 	consts  goto 16
 	ASSIGNMENT_statement  goto 17
 	id  goto 18
 	numbers  goto 19
+=======
+	expr  goto 36
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+>>>>>>> master
 
 
-state 35
-	expr : expr GREATEREQUAL . expr  (8)
+state 21
+	expr : expr GREATEREQUAL . expr  (11)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
+<<<<<<< HEAD
 	expr  goto 59
 	Pexpr  goto 15
 	consts  goto 16
 	ASSIGNMENT_statement  goto 17
 	id  goto 18
 	numbers  goto 19
+=======
+	expr  goto 37
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+>>>>>>> master
 
 
-state 36
-	expr : expr LESS . expr  (9)
+state 22
+	expr : expr LESS . expr  (12)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
+<<<<<<< HEAD
 	expr  goto 60
 	Pexpr  goto 15
 	consts  goto 16
 	ASSIGNMENT_statement  goto 17
 	id  goto 18
 	numbers  goto 19
+=======
+	expr  goto 38
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+>>>>>>> master
 
 
-state 37
-	expr : expr LESSEQUAL . expr  (10)
+state 23
+	expr : expr LESSEQUAL . expr  (13)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
+<<<<<<< HEAD
 	expr  goto 61
 	Pexpr  goto 15
 	consts  goto 16
 	ASSIGNMENT_statement  goto 17
 	id  goto 18
 	numbers  goto 19
+=======
+	expr  goto 39
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+>>>>>>> master
 
 
-state 38
-	expr : expr MINUS . expr  (3)
+state 24
+	expr : expr MINUS . expr  (6)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
+<<<<<<< HEAD
 	expr  goto 62
 	Pexpr  goto 15
 	consts  goto 16
 	ASSIGNMENT_statement  goto 17
 	id  goto 18
 	numbers  goto 19
+=======
+	expr  goto 40
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+>>>>>>> master
 
 
-state 39
-	expr : expr NOTEQUAL . expr  (11)
+state 25
+	expr : expr NOTEQUAL . expr  (14)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
+<<<<<<< HEAD
 	expr  goto 63
 	Pexpr  goto 15
 	consts  goto 16
 	ASSIGNMENT_statement  goto 17
 	id  goto 18
 	numbers  goto 19
+=======
+	expr  goto 41
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+>>>>>>> master
 
 
-state 40
-	expr : expr OR . expr  (13)
+state 26
+	expr : expr OR . expr  (16)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
+<<<<<<< HEAD
 	expr  goto 64
 	Pexpr  goto 15
 	consts  goto 16
 	ASSIGNMENT_statement  goto 17
 	id  goto 18
 	numbers  goto 19
+=======
+	expr  goto 42
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+>>>>>>> master
 
 
-state 41
-	expr : expr PLUS . expr  (2)
+state 27
+	expr : expr PLUS . expr  (5)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
+<<<<<<< HEAD
 	expr  goto 65
 	Pexpr  goto 15
 	consts  goto 16
 	ASSIGNMENT_statement  goto 17
 	id  goto 18
 	numbers  goto 19
+=======
+	expr  goto 43
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+>>>>>>> master
 
 
-state 42
-	expr : expr MULTI . expr  (4)
+state 28
+	expr : expr MULTI . expr  (7)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
+<<<<<<< HEAD
 	expr  goto 66
 	Pexpr  goto 15
 	consts  goto 16
@@ -910,14 +1240,48 @@ state 51
 
 state 52
 	LOOP_statements : DO block_statements WHILE . expr  (41)
+=======
+	expr  goto 44
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+
+
+state 29
+	newline : expr SEMICOLON . newline  (2)
+	newline : expr SEMICOLON .  (3)
 
 	ID  shift 1
-	INTEGER_POS  shift 8
-	INTEGER_NEG  shift 9
-	NOT  shift 10
-	LEFTPAREN  shift 11
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	SEMICOLON  shift 5
+	LEFTPAREN  shift 6
+	$end  reduce 3
+
+	newline  goto 45
+	expr  goto 9
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+
+
+state 30
+	ASSIGNMENT_statement : id ASSIGNMENT . expr  (44)
+>>>>>>> master
+
+	ID  shift 1
+	INTEGER_POS  shift 2
+	INTEGER_NEG  shift 3
+	NOT  shift 4
+	LEFTPAREN  shift 6
 	.  error
 
+<<<<<<< HEAD
 	expr  goto 72
 	Pexpr  goto 15
 	consts  goto 16
@@ -1172,6 +1536,98 @@ state 60
 	BOOLFALSE  reduce 9
 	INTEGER_POS  reduce 9
 	INTEGER_NEG  reduce 9
+=======
+	expr  goto 46
+	Pexpr  goto 10
+	consts  goto 11
+	ASSIGNMENT_statement  goto 12
+	id  goto 13
+	numbers  goto 14
+
+
+state 31
+	rightParen : RIGHTPAREN .  (22)
+
+	.  reduce 22
+
+
+state 32
+	Pexpr : LEFTPAREN expr rightParen .  (21)
+
+	.  reduce 21
+
+
+state 33
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr AND expr .  (15)
+	expr : expr . OR expr  (16)
+
+	DIVISION  shift 18
+	MULTI  shift 28
+	AND  reduce 15
+	EQUAL  reduce 15
+	GREATER  reduce 15
+	GREATEREQUAL  reduce 15
+	LESS  reduce 15
+	LESSEQUAL  reduce 15
+	MINUS  reduce 15
+	NOTEQUAL  reduce 15
+	OR  reduce 15
+	PLUS  reduce 15
+	SEMICOLON  reduce 15
+	RIGHTPAREN  reduce 15
+
+
+state 34
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr DIVISION expr .  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+
+	.  reduce 8
+
+
+state 35
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr EQUAL expr .  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+
+	AND  shift 17
+	DIVISION  shift 18
+	MINUS  shift 24
+	OR  shift 26
+	PLUS  shift 27
+	MULTI  shift 28
+>>>>>>> master
 	EQUAL  reduce 9
 	GREATER  reduce 9
 	GREATEREQUAL  reduce 9
@@ -1180,6 +1636,7 @@ state 60
 	NOT  reduce 9
 	NOTEQUAL  reduce 9
 	SEMICOLON  reduce 9
+<<<<<<< HEAD
 	LEFTBRACE  reduce 9
 	RIGHTBRACE  reduce 9
 	LEFTPAREN  reduce 9
@@ -1218,6 +1675,32 @@ state 61
 	BOOLFALSE  reduce 10
 	INTEGER_POS  reduce 10
 	INTEGER_NEG  reduce 10
+=======
+	RIGHTPAREN  reduce 9
+
+
+state 36
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr GREATER expr .  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+
+	AND  shift 17
+	DIVISION  shift 18
+	MINUS  shift 24
+	OR  shift 26
+	PLUS  shift 27
+	MULTI  shift 28
+>>>>>>> master
 	EQUAL  reduce 10
 	GREATER  reduce 10
 	GREATEREQUAL  reduce 10
@@ -1226,6 +1709,7 @@ state 61
 	NOT  reduce 10
 	NOTEQUAL  reduce 10
 	SEMICOLON  reduce 10
+<<<<<<< HEAD
 	LEFTBRACE  reduce 10
 	RIGHTBRACE  reduce 10
 	LEFTPAREN  reduce 10
@@ -1310,6 +1794,32 @@ state 63
 	BOOLFALSE  reduce 11
 	INTEGER_POS  reduce 11
 	INTEGER_NEG  reduce 11
+=======
+	RIGHTPAREN  reduce 10
+
+
+state 37
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr GREATEREQUAL expr .  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+
+	AND  shift 17
+	DIVISION  shift 18
+	MINUS  shift 24
+	OR  shift 26
+	PLUS  shift 27
+	MULTI  shift 28
+>>>>>>> master
 	EQUAL  reduce 11
 	GREATER  reduce 11
 	GREATEREQUAL  reduce 11
@@ -1318,6 +1828,7 @@ state 63
 	NOT  reduce 11
 	NOTEQUAL  reduce 11
 	SEMICOLON  reduce 11
+<<<<<<< HEAD
 	LEFTBRACE  reduce 11
 	RIGHTBRACE  reduce 11
 	LEFTPAREN  reduce 11
@@ -1353,11 +1864,69 @@ state 64
 	INTEGER_POS  reduce 13
 	INTEGER_NEG  reduce 13
 	AND  reduce 13
+=======
+	RIGHTPAREN  reduce 11
+
+
+state 38
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr LESS expr .  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+
+	AND  shift 17
+	DIVISION  shift 18
+	MINUS  shift 24
+	OR  shift 26
+	PLUS  shift 27
+	MULTI  shift 28
+	EQUAL  reduce 12
+	GREATER  reduce 12
+	GREATEREQUAL  reduce 12
+	LESS  reduce 12
+	LESSEQUAL  reduce 12
+	NOTEQUAL  reduce 12
+	SEMICOLON  reduce 12
+	RIGHTPAREN  reduce 12
+
+
+state 39
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr LESSEQUAL expr .  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+
+	AND  shift 17
+	DIVISION  shift 18
+	MINUS  shift 24
+	OR  shift 26
+	PLUS  shift 27
+	MULTI  shift 28
+>>>>>>> master
 	EQUAL  reduce 13
 	GREATER  reduce 13
 	GREATEREQUAL  reduce 13
 	LESS  reduce 13
 	LESSEQUAL  reduce 13
+<<<<<<< HEAD
 	MINUS  reduce 13
 	NOT  reduce 13
 	NOTEQUAL  reduce 13
@@ -1519,8 +2088,137 @@ state 69
 	IF_statements : IF expr statements_type else .  (37)
 
 	.  reduce 37
+=======
+	NOTEQUAL  reduce 13
+	SEMICOLON  reduce 13
+	RIGHTPAREN  reduce 13
 
 
+state 40
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr MINUS expr .  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+
+	DIVISION  shift 18
+	MULTI  shift 28
+	AND  reduce 6
+	EQUAL  reduce 6
+	GREATER  reduce 6
+	GREATEREQUAL  reduce 6
+	LESS  reduce 6
+	LESSEQUAL  reduce 6
+	MINUS  reduce 6
+	NOTEQUAL  reduce 6
+	OR  reduce 6
+	PLUS  reduce 6
+	SEMICOLON  reduce 6
+	RIGHTPAREN  reduce 6
+
+
+state 41
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr NOTEQUAL expr .  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+
+	AND  shift 17
+	DIVISION  shift 18
+	MINUS  shift 24
+	OR  shift 26
+	PLUS  shift 27
+	MULTI  shift 28
+	EQUAL  reduce 14
+	GREATER  reduce 14
+	GREATEREQUAL  reduce 14
+	LESS  reduce 14
+	LESSEQUAL  reduce 14
+	NOTEQUAL  reduce 14
+	SEMICOLON  reduce 14
+	RIGHTPAREN  reduce 14
+
+
+state 42
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+	expr : expr OR expr .  (16)
+
+	DIVISION  shift 18
+	MULTI  shift 28
+	AND  reduce 16
+	EQUAL  reduce 16
+	GREATER  reduce 16
+	GREATEREQUAL  reduce 16
+	LESS  reduce 16
+	LESSEQUAL  reduce 16
+	MINUS  reduce 16
+	NOTEQUAL  reduce 16
+	OR  reduce 16
+	PLUS  reduce 16
+	SEMICOLON  reduce 16
+	RIGHTPAREN  reduce 16
+
+>>>>>>> master
+
+state 43
+	expr : expr . PLUS expr  (5)
+	expr : expr PLUS expr .  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+
+	DIVISION  shift 18
+	MULTI  shift 28
+	AND  reduce 5
+	EQUAL  reduce 5
+	GREATER  reduce 5
+	GREATEREQUAL  reduce 5
+	LESS  reduce 5
+	LESSEQUAL  reduce 5
+	MINUS  reduce 5
+	NOTEQUAL  reduce 5
+	OR  reduce 5
+	PLUS  reduce 5
+	SEMICOLON  reduce 5
+	RIGHTPAREN  reduce 5
+
+<<<<<<< HEAD
 state 70
 	rightbrace : RIGHTBRACE .  (21)
 
@@ -1573,3 +2271,82 @@ state 73
 
 55 terminals, 18 nonterminals
 45 grammar rules, 74 states
+=======
+
+state 44
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr MULTI expr .  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+
+	.  reduce 7
+
+
+state 45
+	newline : expr SEMICOLON newline .  (2)
+
+	.  reduce 2
+
+
+state 46
+	expr : expr . PLUS expr  (5)
+	expr : expr . MINUS expr  (6)
+	expr : expr . MULTI expr  (7)
+	expr : expr . DIVISION expr  (8)
+	expr : expr . EQUAL expr  (9)
+	expr : expr . GREATER expr  (10)
+	expr : expr . GREATEREQUAL expr  (11)
+	expr : expr . LESS expr  (12)
+	expr : expr . LESSEQUAL expr  (13)
+	expr : expr . NOTEQUAL expr  (14)
+	expr : expr . AND expr  (15)
+	expr : expr . OR expr  (16)
+	ASSIGNMENT_statement : id ASSIGNMENT expr .  (44)
+
+	AND  shift 17
+	DIVISION  shift 18
+	EQUAL  shift 19
+	GREATER  shift 20
+	GREATEREQUAL  shift 21
+	LESS  shift 22
+	LESSEQUAL  shift 23
+	MINUS  shift 24
+	NOTEQUAL  shift 25
+	OR  shift 26
+	PLUS  shift 27
+	MULTI  shift 28
+	SEMICOLON  reduce 44
+	RIGHTPAREN  reduce 44
+
+
+Rules never reduced:
+	block_statements : LEFTBRACE statements rightbrace  (23)
+	rightbrace : RIGHTBRACE  (24)
+	statements : IF_statements  (30)
+	statements : LOOP_statements  (31)
+	statements : IN.OUT_statements  (32)
+	statements : BOOLEAN_statements  (33)
+	statements : expr  (34)
+	BOOLEAN_statements : BOOLTRUE  (35)
+	BOOLEAN_statements : BOOLFALSE  (36)
+	IF_statements : IF expr block_statements else  (37)
+	IF_statements : IF expr block_statements  (38)
+	else : ELSE block_statements  (39)
+	LOOP_statements : WHILE expr block_statements  (40)
+	LOOP_statements : FOR expr block_statements  (41)
+	LOOP_statements : DO block_statements WHILE expr  (42)
+	IN.OUT_statements :  (43)
+
+
+54 terminals, 18 nonterminals
+45 grammar rules, 47 states
+>>>>>>> master

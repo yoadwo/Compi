@@ -30,13 +30,12 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      
-        statements    {printf ("ok\n");   printtree ($1,0); };
-         
-        
-
-/*block:    block expr   {$$ = mknode ("newline:\n", $1, NULL, NULL); }
-        |   expr  ;*/
-          
+        /*statements    {printf ("ok\n");   printtree ($1,0); };*/
+        newline {printf ("ok\n");   printtree ($1,0); };
+    
+newline: expr SEMICOLON newline  {$$ = mknode ("", $1, NULL, $3); } 
+        |   expr SEMICOLON  
+        |   SEMICOLON;           
         
 expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
@@ -53,7 +52,7 @@ expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | NOT expr {$$ = mknode ("NOT", NULL, NULL, $2); }
         | Pexpr
         | consts 
-        |ASSIGNMENT_statement;   
+        |ASSIGNMENT_statement;
 
 Pexpr:  LEFTPAREN expr rightParen {$$ = mknode ("(", $2, NULL, $3); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
@@ -71,7 +70,7 @@ statements: IF_statements
             | LOOP_statements  
             | IN.OUT_statements
             | BOOLEAN_statements
-            |expr SEMICOLON;
+            | expr;
 
 BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
                     | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); };
