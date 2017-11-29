@@ -30,12 +30,13 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      
-        /*statements    {printf ("ok\n");   printtree ($1,0); };*/
-        newline {printf ("ok\n");   printtree ($1,0); };
+        statements    {printf ("ok\n");   printtree ($1,0); };
+       
     
-newline:   newline expr SEMICOLON  {$$ = mknode ("", $1, NULL, $3); } 
+newline: newline expr SEMICOLON   {$$ = mknode ("", $1, NULL, $3); } 
         |   expr SEMICOLON  
-        |   SEMICOLON;           
+        |   SEMICOLON
+        | statements;           
         
 expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
@@ -63,6 +64,8 @@ id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
             | INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
 
+ cond: expr;           
+            
 statements_type: statements
                  |block_statements;
             
@@ -70,20 +73,20 @@ statements: IF_statements
             | LOOP_statements  
             | IN.OUT_statements
             | BOOLEAN_statements
-            | expr;
+            | newline;
 
 BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
                     | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); };
                     
-IF_statements: IF expr statements_type {$$ = mknode ("IF", $2,$3,NULL); } %prec LOWER_THAN_ELSE
-              | IF expr statements_type else{$$ = mknode ("IF", $2,$3, $4); };
+IF_statements: IF cond statements_type {$$ = mknode ("IF", $2,$3,NULL); } %prec LOWER_THAN_ELSE
+              | IF cond statements_type else{$$ = mknode ("IF", $2,$3, $4); };
                
 else:ELSE statements_type{$$ = mknode ("ELSE", $2,NULL, NULL); };
 
-LOOP_statements: WHILE expr block_statements {$$=mknode("while", $2,$3, NULL);} 
-                 |FOR expr block_statements {$$=mknode("for", $2,$3, NULL);}
-                 |DO block_statements WHILE expr  {$$=mknode("do-while", $2,NULL, $4);}
-                 |WHILE expr statements {$$=mknode("while", $2,$3, NULL);};
+LOOP_statements: WHILE cond block_statements {$$=mknode("while", $2,$3, NULL);} 
+                 |FOR cond block_statements {$$=mknode("for", $2,$3, NULL);}
+                 |DO block_statements WHILE cond  {$$=mknode("do-while", $2,NULL, $4);}
+                 |WHILE cond statements {$$=mknode("while", $2,$3, NULL);};
                  
 IN.OUT_statements:;
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
