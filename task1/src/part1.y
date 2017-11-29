@@ -33,7 +33,7 @@ s:
         /*statements    {printf ("ok\n");   printtree ($1,0); };*/
         newline {printf ("ok\n");   printtree ($1,0); };
     
-newline: expr SEMICOLON newline  {$$ = mknode ("", $1, NULL, $3); } 
+newline:   newline expr SEMICOLON  {$$ = mknode ("", $1, NULL, $3); } 
         |   expr SEMICOLON  
         |   SEMICOLON;           
         
