@@ -76,7 +76,7 @@ else: ELSE block_statements {$$=mknode("else", $2,NULL, NULL);} ;
 
 LOOP_statements: WHILE expr block_statements {$$=mknode("while", $2,$3, NULL);} 
                  |FOR expr block_statements {$$=mknode("for", $2,$3, NULL);}
-                 |DO /*block_statements*/ WHILE expr  {$$=mknode("do-while", NULL,$3, NULL);};
+                 |DO block_statements WHILE expr  {$$=mknode("do-while", $2,NULL, $4);};
                  
 IN.OUT_statements:;
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
