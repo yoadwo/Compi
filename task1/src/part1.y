@@ -20,7 +20,9 @@ void printtree (node *tree, int tab);
 %token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST
 %token ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSUOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT
 
-%right ASSIGNMENT ELSE NOT SEMICOLON 
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
+%right ASSIGNMENT  NOT SEMICOLON 
 %left LEFTBRACE RIGHTBRACE LEFTPAREN RIGHTPAREN
 %left EQUAL GREATER GREATEREQUAL LESSEQUAL LESS NOTEQUAL
 %left PLUS MINUS AND OR
@@ -28,8 +30,8 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      
-        statements    {printf ("ok\n");   printtree ($1,0); }
-         |DO block_statements WHILE expr    {$$=mknode("do-while", $2,NULL, $4);};
+        statements    {printf ("ok\n");   printtree ($1,0); };
+         
         
 
 /*block:    block expr   {$$ = mknode ("newline:\n", $1, NULL, NULL); }
@@ -39,9 +41,9 @@ s:
 expr:       expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
         | expr MULTI expr {$$ = mknode ("*", $1, NULL, $3); }
-        | expr DIVISION expr {$$ = mknode ("/", $1, NULL, $3); }
-        | expr EQUAL expr { $$ = mknode ("==", $1, NULL, $3); }
-        | expr GREATER expr { $$ = mknode (">", $1, NULL, $3); }
+        | expr DIVISION expr  {$$ = mknode ("/", $1, NULL, $3); }
+        | expr EQUAL expr  { $$ = mknode ("==", $1, NULL, $3); }
+        | expr GREATER expr  { $$ = mknode (">", $1, NULL, $3); }
         | expr GREATEREQUAL expr { $$ = mknode (">=", $1, NULL, $3); }
         | expr LESS expr { $$ = mknode ("<", $1, NULL, $3); }
         | expr LESSEQUAL expr { $$ = mknode ("<=", $1, NULL, $3); }
@@ -62,23 +64,27 @@ id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
             | INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
 
+statements_type: statements
+                 |block_statements;
+            
 statements: IF_statements 
             | LOOP_statements  
             | IN.OUT_statements
             | BOOLEAN_statements
-            |expr;
+            |expr SEMICOLON;
 
 BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
                     | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); };
-IF_statements: IF expr block_statements else {$$ = mknode ("IF", $2,$3, $4); }
-               |IF expr block_statements {$$ = mknode ("IF", $2,$3,NULL); };
+                    
+IF_statements: IF expr statements_type {$$ = mknode ("IF", $2,$3,NULL); } %prec LOWER_THAN_ELSE
+              | IF expr statements_type else{$$ = mknode ("IF", $2,$3, $4); };
                
-else: ELSE block_statements {$$=mknode("else", $2,NULL, NULL);} ;
+else:ELSE statements_type{$$ = mknode ("ELSE", $2,NULL, NULL); };
 
 LOOP_statements: WHILE expr block_statements {$$=mknode("while", $2,$3, NULL);} 
-<<<<<<< Updated upstream
                  |FOR expr block_statements {$$=mknode("for", $2,$3, NULL);}
-                 |DO block_statements WHILE expr  {$$=mknode("do-while", $2,NULL, $4);};
+                 |DO block_statements WHILE expr  {$$=mknode("do-while", $2,NULL, $4);}
+                 |WHILE expr statements {$$=mknode("while", $2,$3, NULL);};
                  
 IN.OUT_statements:;
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
