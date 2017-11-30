@@ -33,11 +33,9 @@ s:
         newline {printf ("ok\n");   printtree ($1,0); };
      
     
-   newline: newline statements   {$$ = mknode ("", $1, NULL,$2); }
-           |statements;
-        
-                  
-        
+newline: newline statement   {$$ = mknode ("", $1, NULL,$2); }
+           |statement;
+                                  
 expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
         | expr MULTI expr {$$ = mknode ("*", $1, NULL, $3); }
@@ -65,16 +63,15 @@ numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); }
             | INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
 
              
-statements_type: statements
-                 |block_statements;
-            
-statements: IF_statements 
+statement: IF_statements 
             | LOOP_statements  
            /* | IN.OUT_statements*/
             | BOOLEAN_statements
+            | variable_declare_statements
             | expr SEMICOLON;
 
-cond:expr;
+statements_type: statement
+                 |block_statements;
                     
 IF_statements: IF cond statements_type {$$ = mknode ("IF", $2,$3,NULL); } %prec LOWER_THAN_ELSE
              | IF cond statements_type else{$$ = mknode ("IF", $2,$3, $4); };
@@ -82,14 +79,31 @@ IF_statements: IF cond statements_type {$$ = mknode ("IF", $2,$3,NULL); } %prec 
 else:    ELSE statements_type{$$ = mknode ("ELSE", $2,NULL, NULL); };
 
 LOOP_statements: WHILE cond statements_type {$$=mknode("while", $2,$3, NULL);} 
-                 |FOR cond statements_type{$$=mknode("for", $2,$3, NULL);}
-                 |DO statements_type WHILE cond  {$$=mknode("do-while", $2,NULL, $4);};
-
+                 | FOR cond statements_type{$$=mknode("for", $2,$3, NULL);}
+                 | DO statements_type WHILE cond  {$$=mknode("do-while", $2,NULL, $4);};
+                 
+cond:expr;
+                 
 BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); } 
                     | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); }; 
                  
 /*IN.OUT_statements:;*/
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
+
+variable_declare_statements: varType mul_id SEMICOLON {$$ = mknode ("DECLARE", $1, NULL, $2); };
+
+varType: BOOL              {$$ = mknode ("boolean: ", NULL, NULL, NULL); }
+            | CHAR          {$$ = mknode ("char: ", NULL, NULL, NULL); }
+            | INT              {$$ = mknode ("integer: ", NULL, NULL, NULL); }
+            | STRING       {$$ = mknode ("string: ", NULL, NULL, NULL); }
+            | INTPTR        {$$ = mknode ("integer ptr: ", NULL, NULL, NULL); }
+            | CHARPTR    {$$ = mknode ("char ptr: ", NULL, NULL, NULL); };
+
+mul_id: mul_id COMMA id    {$$ = mknode ("", $1, NULL, $3); }
+            | mul_id COMMA ASSIGNMENT_statement    {$$ = mknode ("", $1, NULL, $3); }
+            | ASSIGNMENT_statement 
+            | id;
+            
 %%
 
 #include "lex.yy.c"
@@ -113,7 +127,8 @@ void printtree (node *tree, int tab){
     for (i = 0; i< tab; i++)
         printf ("\t");
     char* token = tree->token;
-    printf ("%s\n", token);
+/*     if (strlen(token) > 0) */
+        printf ("[%s]\n", token);
     if (tree -> left)
         printtree (tree-> left, tab + 1);
     if (tree -> middle)
