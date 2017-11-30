@@ -14,9 +14,9 @@ node *mknode (char *token, node *left, node* middle, node *right);
 void printtree (node *tree, int tab);
 #define YYSTYPE struct node *
 %}
-%token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID
+%token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID
 %token IF, ELSE, WHILE, FOR ,DO
-%token MAIN, PROCEDURE, RETURN
+%token MAIN,  RETURN
 %token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST
 %token ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSUOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT
 
@@ -30,9 +30,16 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      
-        newline {printf ("ok\n");   printtree ($1,0); };
+        procValue  {printf ("ok\n");   printtree ($1,0); };
      
-    
+procValue: procID LEFTPAREN params RIGHTPAREN  block_statements {$$ = mknode ("procedure", $1, $3, $5); };
+procID: procType id {$$ = mknode ("procID", $1, $2, NULL); };
+params: /* no params  */
+        |paramsDeclare {$$ = mknode ("params:", $1, NULL, NULL); };
+paramsDeclare: paramsDeclare COMMA varType id    {$$ = mknode ("", $1, $3, $4); }   
+        | varType id {$$ = mknode ("", $1, $2, NULL); }  ;
+        
+        
 newline: newline statement   {$$ = mknode ("", $1, NULL,$2); }
            |statement;
                                   
@@ -68,7 +75,7 @@ statement: IF_statements
            /* | IN.OUT_statements*/
             | BOOLEAN_statements
             | variable_declare_statements
-            | expr SEMICOLON;
+            | /*expr */SEMICOLON; //no integer can be declared with type first
 
 statements_type: statement
                  |block_statements;
@@ -90,17 +97,19 @@ BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
 /*IN.OUT_statements:;*/
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
 
-variable_declare_statements: varType mul_id SEMICOLON {$$ = mknode ("DECLARE", $1, NULL, $2); };
+variable_declare_statements: varType variablesDeclare SEMICOLON {$$ = mknode ("DECLARE", $1, NULL, $2); };
 
-varType: BOOL              {$$ = mknode ("boolean: ", NULL, NULL, NULL); }
-            | CHAR          {$$ = mknode ("char: ", NULL, NULL, NULL); }
-            | INT              {$$ = mknode ("integer: ", NULL, NULL, NULL); }
-            | STRING       {$$ = mknode ("string: ", NULL, NULL, NULL); }
-            | INTPTR        {$$ = mknode ("integer ptr: ", NULL, NULL, NULL); }
-            | CHARPTR    {$$ = mknode ("char ptr: ", NULL, NULL, NULL); };
+procType: VOID      {$$ = mknode ("void", NULL, NULL, NULL); }
+            | varType;
+varType: BOOL        {$$ = mknode ("boolean", NULL, NULL, NULL); }
+            | CHAR          {$$ = mknode ("char", NULL, NULL, NULL); }
+            | INT              {$$ = mknode ("integer", NULL, NULL, NULL); }
+            | STRING       {$$ = mknode ("string", NULL, NULL, NULL); }
+            | INTPTR        {$$ = mknode ("intptr", NULL, NULL, NULL); }
+            | CHARPTR    {$$ = mknode ("charptr", NULL, NULL, NULL); };
 
-mul_id: mul_id COMMA id    {$$ = mknode ("", $1, NULL, $3); }
-            | mul_id COMMA ASSIGNMENT_statement    {$$ = mknode ("", $1, NULL, $3); }
+variablesDeclare: variablesDeclare COMMA id    {$$ = mknode ("", $1, NULL, $3); }
+            | variablesDeclare COMMA ASSIGNMENT_statement    {$$ = mknode ("", $1, NULL, $3); }
             | ASSIGNMENT_statement 
             | id;
             
