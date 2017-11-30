@@ -74,9 +74,7 @@ statements: IF_statements
             | BOOLEAN_statements
             | expr SEMICOLON;
 
-block_statements:LEFTBRACE statements rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };   
-rightbrace:RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
-            
+cond:expr;
                     
 IF_statements: IF cond statements_type {$$ = mknode ("IF", $2,$3,NULL); } %prec LOWER_THAN_ELSE
              | IF cond statements_type else{$$ = mknode ("IF", $2,$3, $4); };
@@ -86,7 +84,9 @@ else:    ELSE statements_type{$$ = mknode ("ELSE", $2,NULL, NULL); };
 LOOP_statements: WHILE cond statements_type {$$=mknode("while", $2,$3, NULL);} 
                  |FOR cond statements_type{$$=mknode("for", $2,$3, NULL);}
                  |DO statements_type WHILE cond  {$$=mknode("do-while", $2,NULL, $4);};
-                
+
+BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); } 
+                    | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); }; 
                  
 /*IN.OUT_statements:;*/
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
