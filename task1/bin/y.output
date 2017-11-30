@@ -582,6 +582,52 @@ state 31
 	.  error
 
 
+state 31
+	expr : expr . PLUS expr  (4)
+	expr : expr . MINUS expr  (5)
+	expr : expr . MULTI expr  (6)
+	expr : expr . DIVISION expr  (7)
+	expr : expr . EQUAL expr  (8)
+	expr : expr . GREATER expr  (9)
+	expr : expr . GREATEREQUAL expr  (10)
+	expr : expr . LESS expr  (11)
+	expr : expr . LESSEQUAL expr  (12)
+	expr : expr . NOTEQUAL expr  (13)
+	expr : expr . AND expr  (14)
+	expr : expr . OR expr  (15)
+	expr : NOT expr .  (16)
+
+	AND  shift 34
+	DIVISION  shift 35
+	EQUAL  shift 36
+	GREATER  shift 37
+	GREATEREQUAL  shift 38
+	LESS  shift 39
+	LESSEQUAL  shift 40
+	MINUS  shift 41
+	NOTEQUAL  shift 42
+	OR  shift 43
+	PLUS  shift 44
+	MULTI  shift 45
+	$end  reduce 16
+	ID  reduce 16
+	IF  reduce 16
+	ELSE  reduce 16
+	WHILE  reduce 16
+	FOR  reduce 16
+	DO  reduce 16
+	BOOLTRUE  reduce 16
+	BOOLFALSE  reduce 16
+	INTEGER_POS  reduce 16
+	INTEGER_NEG  reduce 16
+	NOT  reduce 16
+	SEMICOLON  reduce 16
+	LEFTBRACE  reduce 16
+	RIGHTBRACE  reduce 16
+	LEFTPAREN  reduce 16
+	RIGHTPAREN  reduce 16
+
+
 state 32
 	expr : expr . PLUS expr  (4)
 	expr : expr . MINUS expr  (5)
@@ -627,6 +673,8 @@ state 32
 	LEFTPAREN  reduce 16
 	RIGHTPAREN  reduce 16
 
+	rightParen  goto 57
+
 
 state 33
 	expr : expr . PLUS expr  (4)
@@ -660,11 +708,17 @@ state 33
 
 	rightParen  goto 55
 
-
 state 34
 	newline : newline statements .  (2)
 
 	.  reduce 2
+
+	expr  goto 59
+	Pexpr  goto 16
+	consts  goto 17
+	ASSIGNMENT_statement  goto 18
+	id  goto 19
+	numbers  goto 20
 
 
 state 35
@@ -1198,12 +1252,12 @@ state 61
 	expr : expr . AND expr  (14)
 	expr : expr . OR expr  (15)
 
-	AND  shift 35
-	DIVISION  shift 36
-	MINUS  shift 42
-	OR  shift 44
-	PLUS  shift 45
-	MULTI  shift 46
+	AND  shift 34
+	DIVISION  shift 35
+	MINUS  shift 41
+	OR  shift 43
+	PLUS  shift 44
+	MULTI  shift 45
 	$end  reduce 11
 	ID  reduce 11
 	IF  reduce 11
@@ -1244,12 +1298,12 @@ state 62
 	expr : expr . AND expr  (14)
 	expr : expr . OR expr  (15)
 
-	AND  shift 35
-	DIVISION  shift 36
-	MINUS  shift 42
-	OR  shift 44
-	PLUS  shift 45
-	MULTI  shift 46
+	AND  shift 34
+	DIVISION  shift 35
+	MINUS  shift 41
+	OR  shift 43
+	PLUS  shift 44
+	MULTI  shift 45
 	$end  reduce 12
 	ID  reduce 12
 	IF  reduce 12

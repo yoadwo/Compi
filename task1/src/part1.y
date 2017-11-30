@@ -64,8 +64,7 @@ id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
             | INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
 
- cond: expr;           
-            
+             
 statements_type: statements
                  |block_statements;
             
@@ -75,13 +74,14 @@ statements: IF_statements
             | BOOLEAN_statements
             | expr SEMICOLON;
 
-BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
-                    | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); };
+block_statements:LEFTBRACE statements rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };   
+rightbrace:RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
+            
                     
 IF_statements: IF cond statements_type {$$ = mknode ("IF", $2,$3,NULL); } %prec LOWER_THAN_ELSE
-              | IF cond statements_type else{$$ = mknode ("IF", $2,$3, $4); };
+             | IF cond statements_type else{$$ = mknode ("IF", $2,$3, $4); };
                
-else:ELSE statements_type{$$ = mknode ("ELSE", $2,NULL, NULL); };
+else:    ELSE statements_type{$$ = mknode ("ELSE", $2,NULL, NULL); };
 
 LOOP_statements: WHILE cond statements_type {$$=mknode("while", $2,$3, NULL);} 
                  |FOR cond statements_type{$$=mknode("for", $2,$3, NULL);}
