@@ -26,7 +26,7 @@
 
   21  rightParen : RIGHTPAREN
 
-  22  block_statements : LEFTBRACE statements rightbrace
+  22  block_statements : LEFTBRACE newline rightbrace
 
   23  rightbrace : RIGHTBRACE
 
@@ -536,7 +536,7 @@ state 27
 
 
 state 28
-	block_statements : LEFTBRACE . statements rightbrace  (22)
+	block_statements : LEFTBRACE . newline rightbrace  (22)
 
 	ID  shift 1
 	IF  shift 2
@@ -551,7 +551,8 @@ state 28
 	LEFTPAREN  shift 11
 	.  error
 
-	statements  goto 52
+	newline  goto 52
+	statements  goto 14
 	expr  goto 15
 	Pexpr  goto 16
 	consts  goto 17
@@ -942,12 +943,34 @@ state 51
 
 
 state 52
-	block_statements : LEFTBRACE statements . rightbrace  (22)
+	newline : newline . statements  (2)
+	block_statements : LEFTBRACE newline . rightbrace  (22)
 
+	ID  shift 1
+	IF  shift 2
+	WHILE  shift 3
+	FOR  shift 4
+	DO  shift 5
+	BOOLTRUE  shift 6
+	BOOLFALSE  shift 7
+	INTEGER_POS  shift 8
+	INTEGER_NEG  shift 9
+	NOT  shift 10
 	RIGHTBRACE  shift 71
+	LEFTPAREN  shift 11
 	.  error
 
+	statements  goto 34
+	expr  goto 15
+	Pexpr  goto 16
+	consts  goto 17
+	ASSIGNMENT_statement  goto 18
 	rightbrace  goto 72
+	id  goto 19
+	numbers  goto 20
+	IF_statements  goto 21
+	LOOP_statements  goto 22
+	BOOLEAN_statements  goto 23
 
 
 state 53
@@ -1567,7 +1590,7 @@ state 71
 
 
 state 72
-	block_statements : LEFTBRACE statements rightbrace .  (22)
+	block_statements : LEFTBRACE newline rightbrace .  (22)
 
 	.  reduce 22
 

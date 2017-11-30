@@ -57,7 +57,7 @@ expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
 
 Pexpr:  LEFTPAREN expr rightParen {$$ = mknode ("(", $2, NULL, $3); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
-block_statements: LEFTBRACE statements rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };   
+block_statements: LEFTBRACE newline rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };   
 rightbrace: RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
 consts: id | numbers    ;
 id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
