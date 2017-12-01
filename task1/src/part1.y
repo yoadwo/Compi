@@ -30,19 +30,20 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      
-        /*procValue  {printf ("ok\n");   printtree ($1,0); };*/
-        newline     {printf ("ok\n");   printtree ($1,0); };
+        procValue  {printf ("ok\n");   printtree ($1,0); };
+        /*newline     {printf ("ok\n");   printtree ($1,0); };*/
      
 procValue: procID LEFTPAREN params RIGHTPAREN  block_statements {$$ = mknode ("procedure", $1, $3, $5); };
-procID: procType id {$$ = mknode ("procID", $1, $2, NULL); };
+procID: varType id {$$ = mknode ("procID", $1, $2, NULL); };
 params: /* no params  */
-        |paramsDeclare {$$ = mknode ("params:", $1, NULL, NULL); };
-paramsDeclare: paramsDeclare COMMA varType id    {$$ = mknode ("", $1, $3, $4); }   
-        | varType id {$$ = mknode ("", $1, $2, NULL); }  ;
+        | paramsDeclare {$$ = mknode ("params:", $1, NULL, NULL); };
+paramsDeclare: varType id COMMA   paramsDeclare  {$$ = mknode ("", $1, $2, $4); }   
+        | varType id ;
         
         
-newline:  statement newline   {$$ = mknode ("", $1, NULL,$2); }
-           |statement;
+newline:  
+           statement newline   {$$ = mknode ("", $1, NULL,$2); }
+           | statement;
                                   
 expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
@@ -63,7 +64,9 @@ expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
 
 Pexpr:  LEFTPAREN expr rightParen {$$ = mknode ("(", $2, NULL, $3); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
-block_statements: LEFTBRACE newline rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };   
+block_statements: emptyBlock 
+            | LEFTBRACE newline rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };
+emptyBlock: LEFTBRACE rightbrace {$$ = mknode ("(BLOCK", $2, NULL, NULL); };   
 rightbrace: RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
 consts: id | numbers    ;
 id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
