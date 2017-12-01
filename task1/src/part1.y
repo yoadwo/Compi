@@ -37,8 +37,10 @@ procValue: procID LEFTPAREN params RIGHTPAREN  block_statements {$$ = mknode ("p
 procID: varType id {$$ = mknode ("procID", $1, $2, NULL); };
 params: /* no params  */
         | paramsDeclare {$$ = mknode ("params:", $1, NULL, NULL); };
-paramsDeclare: varType id COMMA   paramsDeclare  {$$ = mknode ("", $1, $2, $4); }   
-        | varType id ;
+paramsDeclare: param COMMA  paramsDeclare  {$$ = mknode ("", $1, NULL, $3); }   
+        | param ;
+/*param: varType id {char *s = " "; s=  strcat ($1->token,s);  $$ = mknode (strcat($1->token,$2->token), NULL, NULL, NULL); }   ;*/
+param: varType id {$$ = mknode ("", $1, NULL, $2); }   ;
         
         
 newline:  
