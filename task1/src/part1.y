@@ -41,7 +41,7 @@ paramsDeclare: paramsDeclare COMMA varType id    {$$ = mknode ("", $1, $3, $4); 
         | varType id {$$ = mknode ("", $1, $2, NULL); }  ;
         
         
-newline: newline statement   {$$ = mknode ("", $1, NULL,$2); }
+newline:  statement newline   {$$ = mknode ("", $1, NULL,$2); }
            |statement;
                                   
 expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
