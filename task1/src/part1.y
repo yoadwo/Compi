@@ -30,21 +30,24 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      
-        procValue  {printf ("ok\n");   printtree ($1,0); };
+        procMain  {printf ("ok\n");   printtree ($1,0); };
         /*newline     {printf ("ok\n");   printtree ($1,0); };*/
-     
-procValue: procID LEFTPAREN params RIGHTPAREN  block_statements {$$ = mknode ("procedure", $1, $3, $5); };
+procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_statements {$$ = mknode ("main", $5,NULL, NULL); };
+proc: procValue | procVoid;
+procVoid: VOID id LEFTPAREN params RIGHTPAREN  block_statements {$$ = mknode ("procedure", $2, $4, $6); };
+procValue: procID LEFTPAREN params RIGHTPAREN  block_return_statements {$$ = mknode ("procedure", $1, $3, $5); };
 procID: varType id {$$ = mknode ("procID", $1, $2, NULL); };
 params: /* no params  */
         | paramsDeclare {$$ = mknode ("params:", $1, NULL, NULL); };
 paramsDeclare: param COMMA  paramsDeclare  {$$ = mknode ("", $1, NULL, $3); }   
         | param ;
+/* to change tree design\print, toggle between following: 1) [type id] 2) [][type][id] */
 /*param: varType id {char *s = " "; s=  strcat ($1->token,s);  $$ = mknode (strcat($1->token,$2->token), NULL, NULL, NULL); }   ;*/
 param: varType id {$$ = mknode ("", $1, NULL, $2); }   ;
         
         
 newline:  
-           statement newline   {$$ = mknode ("", $1, NULL,$2); }
+        statement newline   {$$ = mknode ("", $1, NULL,$2); }
            | statement;
                                   
 expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
@@ -62,12 +65,17 @@ expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | NOT expr {$$ = mknode ("NOT", NULL, NULL, $2); }
         | Pexpr
         | consts 
-        | ASSIGNMENT_statement;
+        /*| ASSIGNMENT_statement*/;
 
 Pexpr:  LEFTPAREN expr rightParen {$$ = mknode ("(", $2, NULL, $3); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
-block_statements: emptyBlock 
+block_return_statements: LEFTBRACE newline RETURN expr SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, $4, $6); }
+            | LEFTBRACE RETURN expr SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $3, NULL, $5); };
+
+
+block_statements: emptyBlock
             | LEFTBRACE newline rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };
+            
 emptyBlock: LEFTBRACE rightbrace {$$ = mknode ("(BLOCK", $2, NULL, NULL); };   
 rightbrace: RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
 consts: id | numbers    ;
