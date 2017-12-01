@@ -30,10 +30,15 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      
-        procMain  {printf ("ok\n");   printtree ($1,0); };
+        procsBeforeMain procMain;
+procsBeforeMain:   procsBeforeMain proc
+                | proc;
+
+        /*procMain  {printf ("ok\n");   printtree ($1,0); };*/
         /*newline     {printf ("ok\n");   printtree ($1,0); };*/
-procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_statements {$$ = mknode ("main", $5,NULL, NULL); };
+
 proc: procValue | procVoid;
+procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_statements {$$ = mknode ("main", $5,NULL, NULL); };
 procVoid: VOID id LEFTPAREN params RIGHTPAREN  block_statements {$$ = mknode ("procedure", $2, $4, $6); };
 procValue: procID LEFTPAREN params RIGHTPAREN  block_return_statements {$$ = mknode ("procedure", $1, $3, $5); };
 procID: varType id {$$ = mknode ("procID", $1, $2, NULL); };
@@ -113,9 +118,9 @@ BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
 
 variable_declare_statements: varType variablesDeclare SEMICOLON {$$ = mknode ("DECLARE", $1, NULL, $2); };
-
+/*
 procType: VOID      {$$ = mknode ("void", NULL, NULL, NULL); }
-            | varType;
+            | varType;*/
 varType: BOOL        {$$ = mknode ("boolean", NULL, NULL, NULL); }
             | CHAR          {$$ = mknode ("char", NULL, NULL, NULL); }
             | INT              {$$ = mknode ("integer", NULL, NULL, NULL); }
