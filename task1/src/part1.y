@@ -30,7 +30,8 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      
-        procValue  {printf ("ok\n");   printtree ($1,0); };
+        /*procValue  {printf ("ok\n");   printtree ($1,0); };*/
+        newline     {printf ("ok\n");   printtree ($1,0); };
      
 procValue: procID LEFTPAREN params RIGHTPAREN  block_statements {$$ = mknode ("procedure", $1, $3, $5); };
 procID: procType id {$$ = mknode ("procID", $1, $2, NULL); };
@@ -89,7 +90,8 @@ LOOP_statements: WHILE cond statements_type {$$=mknode("while", $2,$3, NULL);}
                  | FOR cond statements_type{$$=mknode("for", $2,$3, NULL);}
                  | DO statements_type WHILE cond  {$$=mknode("do-while", $2,NULL, $4);};
                  
-cond:expr;
+/*cond:expr;*/
+cond: LEFTPAREN expr rightParen {$$ = mknode ("(COND", $2, NULL, $3); };
                  
 BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); } 
                     | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); }; 
@@ -108,8 +110,8 @@ varType: BOOL        {$$ = mknode ("boolean", NULL, NULL, NULL); }
             | INTPTR        {$$ = mknode ("intptr", NULL, NULL, NULL); }
             | CHARPTR    {$$ = mknode ("charptr", NULL, NULL, NULL); };
 
-variablesDeclare: variablesDeclare COMMA id    {$$ = mknode ("", $1, NULL, $3); }
-            | variablesDeclare COMMA ASSIGNMENT_statement    {$$ = mknode ("", $1, NULL, $3); }
+variablesDeclare: id COMMA variablesDeclare    {$$ = mknode ("", $1, NULL, $3); }
+            |  ASSIGNMENT_statement COMMA  variablesDeclare   {$$ = mknode ("", $1, NULL, $3); }
             | ASSIGNMENT_statement 
             | id;
             
