@@ -82,6 +82,9 @@ block_statements: emptyBlock
             | LEFTBRACE newline rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };
             
 emptyBlock: LEFTBRACE rightbrace {$$ = mknode ("(BLOCK", $2, NULL, NULL); };   
+=======
+block_statements: LEFTBRACE newline rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };   
+>>>>>>> Stashed changes
 rightbrace: RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
 consts: id | numbers    ;
 id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
@@ -93,8 +96,13 @@ statement: IF_statements
             | LOOP_statements  
            /* | IN.OUT_statements*/
             | BOOLEAN_statements
+<<<<<<< Updated upstream
             | variable_declare_statements
             | /*expr */SEMICOLON; //no integer can be declared with type first
+=======
+            | expr SEMICOLON;
+            
+>>>>>>> Stashed changes
 
 statements_type: statement
                  |block_statements;
