@@ -22,22 +22,22 @@ void printtree (node *tree, int tab);
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
-%right ASSIGNMENT  NOT SEMICOLON 
+%right ASSIGNMENT NOT SEMICOLON 
 %left LEFTBRACE RIGHTBRACE LEFTPAREN RIGHTPAREN
 %left EQUAL GREATER GREATEREQUAL LESSEQUAL LESS NOTEQUAL
 %left PLUS MINUS AND OR
 %left MULTI DIVISION
 %start s
 %%
-s:      
-        procsBeforeMain procMain;
-procsBeforeMain:   procsBeforeMain proc
-                | proc;
+s:      global {printf ("ok\n");   printtree ($1,0); };
+global:  procsBeforeMain procMain {$$ = mknode ("global", $1,NULL, $2); };
 
-        /*procMain  {printf ("ok\n");   printtree ($1,0); };*/
-        /*newline     {printf ("ok\n");   printtree ($1,0); };*/
+procsBeforeMain:  
+                  procsBeforeMain proc {$$ = mknode ("", $1,NULL, $2); }
+                | proc   {$$ = mknode ("", $1, NULL,NULL); };
+            
 
-proc: procValue | procVoid;
+proc:  procValue | procVoid;
 procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_statements {$$ = mknode ("main", $5,NULL, NULL); };
 procVoid: VOID id LEFTPAREN params RIGHTPAREN  block_statements {$$ = mknode ("procedure", $2, $4, $6); };
 procValue: procID LEFTPAREN params RIGHTPAREN  block_return_statements {$$ = mknode ("procedure", $1, $3, $5); };
@@ -125,7 +125,7 @@ BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); }
 /*IN.OUT_statements:;*/
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
 
-variable_declare_statements: varType variablesDeclare SEMICOLON {$$ = mknode ("DECLARE", $1, NULL, $2); };
+variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {$$ = mknode ("DECLARE", $1, NULL, $2); };
 /*
 procType: VOID      {$$ = mknode ("void", NULL, NULL, NULL); }
             | varType;*/
