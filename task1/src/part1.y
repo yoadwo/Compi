@@ -103,9 +103,13 @@ IF_statements: IF cond statements_type {$$ = mknode ("IF", $2,$3,NULL); } %prec 
                
 else:    ELSE statements_type{$$ = mknode ("ELSE", $2,NULL, NULL); };
 
-LOOP_statements: WHILE cond statements_type {$$=mknode("while", $2,NULL, $3);} 
-                 | FOR for_cond  rightParen statements_type{$$=mknode("for", $2,$3, $4);}
-                 | DO statements_type WHILE cond  {$$=mknode("do-while", $2,NULL, $4);};
+LOOP_statements: while | whileDO | for;
+
+//note: while\DO's right paren is their right grand-child
+while: WHILE cond statements_type {$$=mknode("while", $2,NULL, $3);} ;
+whileDO: DO statements_type WHILE cond  {$$=mknode("do-while", $2,NULL, $4);};
+//note: for right paren is its right child
+for:  FOR for_cond  rightParen statements_type{$$=mknode("for", $2,$3, $4);};
                  
 for_cond: LEFTPAREN preCondition SEMICOLON postCondition SEMICOLON iteration {$$=mknode("for conditions:", $2,$4, $6);};
 preCondition: /* empty */ |  expr | ASSIGNMENT_statement;
