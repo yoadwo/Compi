@@ -22,7 +22,7 @@ void printtree (node *tree, int tab);
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
-%right ASSIGNMENT NOT SEMICOLON 
+%right ASSIGNMENT NOT SEMICOLON MAIN
 %left LEFTBRACE RIGHTBRACE LEFTPAREN RIGHTPAREN
 %left EQUAL GREATER GREATEREQUAL LESSEQUAL LESS NOTEQUAL
 %left PLUS MINUS AND OR
@@ -30,12 +30,11 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      global {printf ("ok\n");   printtree ($1,0); };
-global:  procsBeforeMain procMain {$$ = mknode ("global", $1,NULL, $2); };
+global:  procsBeforeMain procMain  {$$ = mknode ("global", $1,NULL,$2); };
 
-procsBeforeMain:  
-                  procsBeforeMain proc {$$ = mknode ("", $1,NULL, $2); }
-                | proc   {$$ = mknode ("", $1, NULL,NULL); };
-            
+procsBeforeMain: 
+                 procsBeforeMain proc   {$$ = mknode ("", $1,NULL, NULL); }
+                | proc    {$$ = mknode ("", $1, NULL,NULL); };
 
 proc:  procValue | procVoid;
 procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_statements {$$ = mknode ("main", $5,NULL, NULL); };
@@ -104,12 +103,16 @@ IF_statements: IF cond statements_type {$$ = mknode ("IF", $2,$3,NULL); } %prec 
                
 else:    ELSE statements_type{$$ = mknode ("ELSE", $2,NULL, NULL); };
 
-LOOP_statements: WHILE cond statements_type {$$=mknode("while", $2,$3, NULL);} 
-                 | FOR cond statements_type{$$=mknode("for", $2,$3, NULL);}
+LOOP_statements: WHILE cond statements_type {$$=mknode("while", $2,NULL, $3);} 
+                 | FOR for_cond  rightParen statements_type{$$=mknode("for", $2,$3, $4);}
                  | DO statements_type WHILE cond  {$$=mknode("do-while", $2,NULL, $4);};
                  
-/*cond:expr;*/
+for_cond: LEFTPAREN preCondition SEMICOLON postCondition SEMICOLON iteration {$$=mknode("for conditions:", $2,$4, $6);};
+preCondition: /* empty */ |  expr | ASSIGNMENT_statement;
+postCondition: /* empty */ | expr;
+iteration: /* empty */ | ASSIGNMENT_statement;
 cond: LEFTPAREN expr rightParen {$$ = mknode ("(COND", $2, NULL, $3); };
+
                  
 BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); } 
                     | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); }; 
