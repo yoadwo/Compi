@@ -30,16 +30,16 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      global {printf ("ok\n");   printtree ($1,0); };
-global:  procsBeforeMain procMain  {$$ = mknode ("global", $1,NULL,$2); };
+global:  procedures procMain  {$$ = mknode ("global", $1,NULL,$2); };
 
-procsBeforeMain: 
-                 procsBeforeMain proc   {$$ = mknode ("", $1,NULL, NULL); }
+procedures: 
+                 procedures proc   {$$ = mknode ("", $1,NULL, NULL); }
                 | proc    {$$ = mknode ("", $1, NULL,NULL); };
 
 proc:  procValue | procVoid;
-procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_statements {$$ = mknode ("main", $5,NULL, NULL); };
-procVoid: VOID id LEFTPAREN params RIGHTPAREN  block_statements {$$ = mknode ("procedure", $2, $4, $6); };
-procValue: procID LEFTPAREN params RIGHTPAREN  block_return_statements {$$ = mknode ("procedure", $1, $3, $5); };
+procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements {$$ = mknode ("main", $5,NULL, NULL); };
+procVoid: VOID id LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mknode ("procedure", $2, $4, $6); };
+procValue: procID LEFTPAREN params RIGHTPAREN  block_return_value_statements {$$ = mknode ("procedure", $1, $3, $5); };
 procID: varType id {$$ = mknode ("procID", $1, $2, NULL); };
 params: /* no params  */
         | paramsDeclare {$$ = mknode ("params:", $1, NULL, NULL); };
@@ -73,14 +73,18 @@ expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
 
 Pexpr:  LEFTPAREN expr rightParen {$$ = mknode ("(", $2, NULL, $3); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
-block_return_statements: LEFTBRACE newline RETURN expr SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, $4, $6); }
+block_return_value_statements: LEFTBRACE newline RETURN expr SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, $4, $6); }
             | LEFTBRACE RETURN expr SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $3, NULL, $5); };
-
+block_return_void_statements :   emptyBlock 
+            | LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $4); }
+            | LEFTBRACE RETURN SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $4); };
 
 block_statements: emptyBlock
             | LEFTBRACE newline rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };
+            /*| LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $4); }*/ //why is this working?? enables any block to end with RETURN
+
             
-emptyBlock: LEFTBRACE rightbrace {$$ = mknode ("(BLOCK", $2, NULL, NULL); };   
+emptyBlock: LEFTBRACE rightbrace {$$ = mknode ("(BLOCK", $2, NULL, NULL); };
 rightbrace: RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
 consts: id | numbers | booleans | csnull   ;
 id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
@@ -95,6 +99,7 @@ booleans: BOOLTRUE { $$ = mknode (yytext, NULL, NULL, NULL); }
              
 statement: IF_statements 
             | LOOP_statements  
+            | proc
            /* | IN.OUT_statements*/
             /*| BOOLEAN_statements*/
             | variable_declare_statements
