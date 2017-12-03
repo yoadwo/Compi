@@ -82,13 +82,14 @@ block_statements: emptyBlock
             
 emptyBlock: LEFTBRACE rightbrace {$$ = mknode ("(BLOCK", $2, NULL, NULL); };   
 rightbrace: RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
-consts: id | numbers | booleans   ;
+consts: id | numbers | booleans | csnull   ;
 id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
             | INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); }
             | HEX_CONST { $$ = mknode (yytext, NULL, NULL, NULL); }
             | OCTAL_CONST { $$ = mknode (yytext, NULL, NULL, NULL); }
             | BINARY_CONST { $$ = mknode (yytext, NULL, NULL, NULL); };
+csnull: CSNULL  { $$ = mknode (yytext, NULL, NULL, NULL); };
 booleans: BOOLTRUE { $$ = mknode (yytext, NULL, NULL, NULL); }
             | BOOLFALSE { $$ = mknode (yytext, NULL, NULL, NULL); };
              
