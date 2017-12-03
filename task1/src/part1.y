@@ -82,16 +82,17 @@ block_statements: emptyBlock
             
 emptyBlock: LEFTBRACE rightbrace {$$ = mknode ("(BLOCK", $2, NULL, NULL); };   
 rightbrace: RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
-consts: id | numbers    ;
+consts: id | numbers | booleans   ;
 id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
             | INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); };
-
+booleans: BOOLTRUE { $$ = mknode (yytext, NULL, NULL, NULL); }
+            | BOOLFALSE { $$ = mknode (yytext, NULL, NULL, NULL); };
              
 statement: IF_statements 
             | LOOP_statements  
            /* | IN.OUT_statements*/
-            | BOOLEAN_statements
+            /*| BOOLEAN_statements*/
             | variable_declare_statements
             | /*expr */SEMICOLON; //no integer can be declared with type first
 
@@ -117,10 +118,7 @@ postCondition: /* empty */ | expr;
 iteration: /* empty */ | ASSIGNMENT_statement;
 cond: LEFTPAREN expr rightParen {$$ = mknode ("(COND", $2, NULL, $3); };
 
-                 
-BOOLEAN_statements: BOOLTRUE {$$ = mknode ("true", NULL,NULL, NULL); } 
-                    | BOOLFALSE {$$ = mknode ("false", NULL, NULL, NULL); }; 
-                 
+
 /*IN.OUT_statements:;*/
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
 
