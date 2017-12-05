@@ -67,8 +67,7 @@ expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         |ADDRESS id  {$$ = mknode ("&", $2, NULL,NULL ); }
         | DEREFERENCE id  {$$ = mknode ("^", $2, NULL, NULL); } 
         | Pexpr
-        | consts 
-        /*| ASSIGNMENT_statement*/;
+        | consts ;
 
 Pexpr:  LEFTPAREN expr rightParen {$$ = mknode ("(", $2, NULL, $3); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
@@ -109,6 +108,7 @@ statement: IF_statements
            /* | IN.OUT_statements*/
             /*| BOOLEAN_statements*/
             | variable_declare_statements
+            | ASSIGNMENT_statement
             | SEMICOLON; //no integer can be declared with type first
 
           
