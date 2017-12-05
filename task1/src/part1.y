@@ -64,8 +64,8 @@ expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | expr AND expr {$$ = mknode ("&&", $1, NULL, $3); }
         | expr OR expr {$$ = mknode ("||", $1, NULL, $3); }
         | NOT expr {$$ = mknode ("NOT", NULL, NULL, $2); }
-        |ADDRESS id  {$$ = mknode ("&", $2, NULL,NULL ); }
-        | DEREFERENCE id  {$$ = mknode ("^", $2, NULL, NULL); } 
+        | ADDRESS id  {$$ = mknode ("&", $2, NULL,NULL ); }
+        | derefID 
         | Pexpr
         | consts ;
 
@@ -97,6 +97,8 @@ booleans: BOOLTRUE { $$ = mknode (yytext, NULL, NULL, NULL); }
 strings: STRING_CONST { $$ = mknode (yytext, NULL, NULL, NULL); };
 chars: CHAR_CONST { $$ = mknode (yytext, NULL, NULL, NULL); };
 
+derefID: DEREFERENCE id  {char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); $$ = mknode (s,NULL, NULL, NULL); } 
+
 newline:  
         statement newline   {$$ = mknode ("", $1, NULL,$2); }
            | statement;
@@ -109,10 +111,6 @@ statement: IF_statements
             | variable_declare_statements
             | ASSIGNMENT_statement
             | SEMICOLON; //no integer can be declared with type first
-
-          
-            
-
 
 statements_type: statement
                  |block_statements;
@@ -138,7 +136,8 @@ cond: LEFTPAREN expr rightParen {$$ = mknode ("(COND", $2, NULL, $3); };
 
 
 /*IN.OUT_statements:;*/
-ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
+ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); } 
+            | derefID ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); } ;
 str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings  {$$ = mknode ("=", $1, NULL, $6); };
 variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {$$ = mknode ("DECLARE", $1, NULL, $2); }
                               |STRING StringDeclare {$$ = mknode ("DECLARE", $2, NULL, NULL); }
