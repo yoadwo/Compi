@@ -48,11 +48,6 @@ paramsDeclare: param COMMA  paramsDeclare  {$$ = mknode ("", $1, NULL, $3); }
 /* to change tree design\print, toggle between following: 1) [type id] 2) [][type][id] */
 /*param: varType id {char *s = " "; s=  strcat ($1->token,s);  $$ = mknode (strcat($1->token,$2->token), NULL, NULL, NULL); }   ;*/
 param: varType id {$$ = mknode ("", $1, NULL, $2); }   ;
-        
-        
-newline:  
-        statement newline   {$$ = mknode ("", $1, NULL,$2); }
-           | statement;
                                   
 expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
@@ -81,7 +76,7 @@ block_return_void_statements :   emptyBlock
 
 block_statements: emptyBlock
             | LEFTBRACE newline rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };
-            /*| LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $4); }*/ //why is this working?? enables any block to end with RETURN
+            //| LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $4);};  //why is this working?? enables any block to end with RETURN
 
             
 emptyBlock: LEFTBRACE rightbrace {$$ = mknode ("(BLOCK", $2, NULL, NULL); };
@@ -96,7 +91,10 @@ numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); }
 csnull: CSNULL  { $$ = mknode (yytext, NULL, NULL, NULL); };
 booleans: BOOLTRUE { $$ = mknode (yytext, NULL, NULL, NULL); }
             | BOOLFALSE { $$ = mknode (yytext, NULL, NULL, NULL); };
-             
+newline:  
+        statement newline   {$$ = mknode ("", $1, NULL,$2); }
+           | statement;
+           
 statement: IF_statements 
             | LOOP_statements  
             | proc
@@ -136,9 +134,7 @@ cond: LEFTPAREN expr rightParen {$$ = mknode ("(COND", $2, NULL, $3); };
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
 
 variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {$$ = mknode ("DECLARE", $1, NULL, $2); };
-/*
-procType: VOID      {$$ = mknode ("void", NULL, NULL, NULL); }
-            | varType;*/
+
 varType: BOOL        {$$ = mknode ("boolean", NULL, NULL, NULL); }
             | CHAR          {$$ = mknode ("char", NULL, NULL, NULL); }
             | INT              {$$ = mknode ("integer", NULL, NULL, NULL); }
