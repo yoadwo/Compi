@@ -10,7 +10,7 @@
 "boolean" return BOOL;
 "char" return CHAR;
 "integer" return INT;
- /*"string" return STRING;*/
+"string" return STRING;
 "intptr" return INTPTR;
 "charptr" return CHARPTR;
 "void" return VOID;

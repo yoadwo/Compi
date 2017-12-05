@@ -10,11 +10,7 @@ typedef struct node{
     struct node *right;
 } node;
 
-union{
- char *string;
-}
 
-token <string> STRING
 
 node *mknode (char *token, node *left, node* middle, node *right);
 void printtree (node *tree, int tab);
@@ -139,7 +135,7 @@ cond: LEFTPAREN expr rightParen {$$ = mknode ("(COND", $2, NULL, $3); };
 
 /*IN.OUT_statements:;*/
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
-str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT  {$$ = mknode ("=", $1, NULL, NULL); };
+str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings  {$$ = mknode ("=", $1, NULL, $6); };
 variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {$$ = mknode ("DECLARE", $1, NULL, $2); }
                               |varType StringDeclare {$$ = mknode ("DECLARE", $1, NULL, $2); };
 
@@ -150,9 +146,9 @@ varType: BOOL        {$$ = mknode ("boolean", NULL, NULL, NULL); }
             | INTPTR        {$$ = mknode ("intptr", NULL, NULL, NULL); }
             | CHARPTR    {$$ = mknode ("charptr", NULL, NULL, NULL); };
             
-StringDeclare:id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare {$$ = mknode ("", $1, NULL, $5); }
+StringDeclare:id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare {$$ = mknode ("", $1, NULL, $6); }
               | str_ASSIGNMENT_statement{$$ = mknode ("", $1, NULL,NULL); }
-              |str_ASSIGNMENT_statement COMMA StringDeclare {$$ = mknode ("", $1,NULL, $3); }
+              |str_ASSIGNMENT_statement COMMA StringDeclare {$$ = mknode ("", $1,$3, NULL); }
               |id LEFTBRACKET numbers RIGHTBRACKET;
                           
 

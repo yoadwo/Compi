@@ -64,69 +64,6 @@
   43         | numbers
   44         | booleans
   45         | csnull
-<<<<<<< Updated upstream
-
-  46  id : ID
-
-  47  numbers : INTEGER_NEG
-  48          | INTEGER_POS
-  49          | HEX_CONST
-  50          | OCTAL_CONST
-  51          | BINARY_CONST
-
-  52  csnull : CSNULL
-
-  53  booleans : BOOLTRUE
-  54           | BOOLFALSE
-
-  55  newline : statement newline
-  56          | statement
-
-  57  statement : IF_statements
-  58            | LOOP_statements
-  59            | proc
-  60            | variable_declare_statements
-  61            | SEMICOLON
-
-  62  statements_type : statement
-  63                  | block_statements
-
-  64  IF_statements : IF cond statements_type
-  65                | IF cond statements_type else
-
-  66  else : ELSE statements_type
-
-  67  LOOP_statements : while
-  68                  | whileDO
-  69                  | for
-
-  70  while : WHILE cond statements_type
-
-  71  whileDO : DO statements_type WHILE cond
-
-  72  for : FOR for_cond rightParen statements_type
-
-  73  for_cond : LEFTPAREN preCondition SEMICOLON postCondition SEMICOLON iteration
-
-  74  preCondition :
-  75               | expr
-  76               | ASSIGNMENT_statement
-
-  77  postCondition :
-  78                | expr
-
-  79  iteration :
-  80            | ASSIGNMENT_statement
-
-  81  cond : LEFTPAREN expr rightParen
-
-  82  ASSIGNMENT_statement : id ASSIGNMENT expr
-
-  83  str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT
-
-  84  variable_declare_statements : varType variablesDeclare
-  85                              | varType StringDeclare
-=======
   46         | strings
 
   47  id : ID
@@ -187,32 +124,27 @@
 
   84  ASSIGNMENT_statement : id ASSIGNMENT expr
 
-  85  variable_declare_statements : varType variablesDeclare
->>>>>>> Stashed changes
+  85  str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings
 
-  86  varType : BOOL
-  87          | CHAR
-  88          | INT
-  89          | STRING
-  90          | INTPTR
-  91          | CHARPTR
+  86  variable_declare_statements : varType variablesDeclare
+  87                              | varType StringDeclare
 
-<<<<<<< Updated upstream
-  92  StringDeclare : id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare
-  93                | str_ASSIGNMENT_statement
-  94                | str_ASSIGNMENT_statement COMMA StringDeclare
-  95                | id LEFTBRACKET numbers RIGHTBRACKET
+  88  varType : BOOL
+  89          | CHAR
+  90          | INT
+  91          | STRING
+  92          | INTPTR
+  93          | CHARPTR
 
-  96  variablesDeclare : id COMMA variablesDeclare
-  97                   | ASSIGNMENT_statement COMMA variablesDeclare
-  98                   | ASSIGNMENT_statement
-  99                   | id
-=======
-  92  variablesDeclare : id COMMA variablesDeclare
-  93                   | ASSIGNMENT_statement COMMA variablesDeclare
-  94                   | ASSIGNMENT_statement
-  95                   | id
->>>>>>> Stashed changes
+  94  StringDeclare : id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare
+  95                | str_ASSIGNMENT_statement
+  96                | str_ASSIGNMENT_statement COMMA StringDeclare
+  97                | id LEFTBRACKET numbers RIGHTBRACKET
+
+  98  variablesDeclare : id COMMA variablesDeclare
+  99                   | ASSIGNMENT_statement COMMA variablesDeclare
+ 100                   | ASSIGNMENT_statement
+ 101                   | id
 
 state 0
 	$accept : . s $end  (0)
@@ -237,39 +169,39 @@ state 0
 
 
 state 1
-	varType : BOOL .  (86)
-
-	.  reduce 86
-
-
-state 2
-	varType : CHAR .  (87)
-
-	.  reduce 87
-
-
-state 3
-	varType : INT .  (88)
+	varType : BOOL .  (88)
 
 	.  reduce 88
 
 
-state 4
-	varType : STRING .  (89)
+state 2
+	varType : CHAR .  (89)
 
 	.  reduce 89
 
 
-state 5
-	varType : INTPTR .  (90)
+state 3
+	varType : INT .  (90)
 
 	.  reduce 90
 
 
-state 6
-	varType : CHARPTR .  (91)
+state 4
+	varType : STRING .  (91)
 
 	.  reduce 91
+
+
+state 5
+	varType : INTPTR .  (92)
+
+	.  reduce 92
+
+
+state 6
+	varType : CHARPTR .  (93)
+
+	.  reduce 93
 
 
 state 7
@@ -349,15 +281,9 @@ state 15
 
 
 state 16
-<<<<<<< Updated upstream
-	id : ID .  (46)
-
-	.  reduce 46
-=======
 	id : ID .  (47)
 
 	.  reduce 47
->>>>>>> Stashed changes
 
 
 state 17
@@ -636,13 +562,8 @@ state 42
 
 
 state 43
-<<<<<<< Updated upstream
-	IF_statements : IF . cond statements_type  (64)
-	IF_statements : IF . cond statements_type else  (65)
-=======
 	IF_statements : IF . cond statements_type  (66)
 	IF_statements : IF . cond statements_type else  (67)
->>>>>>> Stashed changes
 
 	LEFTPAREN  shift 63
 	.  error
@@ -651,11 +572,7 @@ state 43
 
 
 state 44
-<<<<<<< Updated upstream
-	while : WHILE . cond statements_type  (70)
-=======
 	while : WHILE . cond statements_type  (72)
->>>>>>> Stashed changes
 
 	LEFTPAREN  shift 63
 	.  error
@@ -664,11 +581,7 @@ state 44
 
 
 state 45
-<<<<<<< Updated upstream
-	for : FOR . for_cond rightParen statements_type  (72)
-=======
 	for : FOR . for_cond rightParen statements_type  (74)
->>>>>>> Stashed changes
 
 	LEFTPAREN  shift 66
 	.  error
@@ -677,11 +590,7 @@ state 45
 
 
 state 46
-<<<<<<< Updated upstream
-	whileDO : DO . statements_type WHILE cond  (71)
-=======
 	whileDO : DO . statements_type WHILE cond  (73)
->>>>>>> Stashed changes
 
 	BOOL  shift 1
 	CHAR  shift 2
@@ -724,34 +633,6 @@ state 47
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 84
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-
-
-state 48
-	statement : SEMICOLON .  (61)
-
-	.  reduce 61
-
-
-state 49
-	statement : proc .  (59)
-
-	.  reduce 59
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -780,49 +661,33 @@ state 49
 	statement : proc .  (61)
 
 	.  reduce 61
->>>>>>> Stashed changes
 
 
 state 50
 	procID : varType . id  (10)
-<<<<<<< Updated upstream
-	variable_declare_statements : varType . variablesDeclare  (84)
-	variable_declare_statements : varType . StringDeclare  (85)
-=======
-	variable_declare_statements : varType . variablesDeclare  (85)
->>>>>>> Stashed changes
+	variable_declare_statements : varType . variablesDeclare  (86)
+	variable_declare_statements : varType . StringDeclare  (87)
 
 	ID  shift 16
 	.  error
 
-<<<<<<< Updated upstream
-	id  goto 90
-	ASSIGNMENT_statement  goto 91
-	str_ASSIGNMENT_statement  goto 92
-	variablesDeclare  goto 93
-	StringDeclare  goto 94
-=======
 	id  goto 92
 	ASSIGNMENT_statement  goto 93
-	variablesDeclare  goto 94
->>>>>>> Stashed changes
+	str_ASSIGNMENT_statement  goto 94
+	variablesDeclare  goto 95
+	StringDeclare  goto 96
 
 
 state 51
 	block_return_value_statements : LEFTBRACE newline . RETURN expr SEMICOLON rightbrace  (33)
 
-	RETURN  shift 95
+	RETURN  shift 97
 	.  error
 
 
 state 52
-<<<<<<< Updated upstream
-	newline : statement . newline  (55)
-	newline : statement .  (56)
-=======
 	newline : statement . newline  (57)
 	newline : statement .  (58)
->>>>>>> Stashed changes
 
 	BOOL  shift 1
 	CHAR  shift 2
@@ -836,20 +701,15 @@ state 52
 	FOR  shift 45
 	DO  shift 46
 	SEMICOLON  shift 48
-<<<<<<< Updated upstream
-	RETURN  reduce 56
-	RIGHTBRACE  reduce 56
-=======
 	RETURN  reduce 58
 	RIGHTBRACE  reduce 58
->>>>>>> Stashed changes
 
 	proc  goto 49
 	procValue  goto 12
 	procVoid  goto 13
 	procID  goto 14
 	varType  goto 50
-	newline  goto 96
+	newline  goto 98
 	statement  goto 52
 	IF_statements  goto 53
 	LOOP_statements  goto 54
@@ -860,41 +720,6 @@ state 52
 
 
 state 53
-<<<<<<< Updated upstream
-	statement : IF_statements .  (57)
-
-	.  reduce 57
-
-
-state 54
-	statement : LOOP_statements .  (58)
-
-	.  reduce 58
-
-
-state 55
-	statement : variable_declare_statements .  (60)
-
-	.  reduce 60
-
-
-state 56
-	LOOP_statements : while .  (67)
-
-	.  reduce 67
-
-
-state 57
-	LOOP_statements : whileDO .  (68)
-
-	.  reduce 68
-
-
-state 58
-	LOOP_statements : for .  (69)
-
-	.  reduce 69
-=======
 	statement : IF_statements .  (59)
 
 	.  reduce 59
@@ -928,13 +753,12 @@ state 58
 	LOOP_statements : for .  (71)
 
 	.  reduce 71
->>>>>>> Stashed changes
 
 
 state 59
 	block_return_void_statements : LEFTBRACE RETURN . SEMICOLON rightbrace  (37)
 
-	SEMICOLON  shift 97
+	SEMICOLON  shift 99
 	.  error
 
 
@@ -947,7 +771,7 @@ state 60
 state 61
 	block_return_void_statements : LEFTBRACE newline . RETURN SEMICOLON rightbrace  (36)
 
-	RETURN  shift 98
+	RETURN  shift 100
 	.  error
 
 
@@ -958,11 +782,7 @@ state 62
 
 
 state 63
-<<<<<<< Updated upstream
-	cond : LEFTPAREN . expr rightParen  (81)
-=======
 	cond : LEFTPAREN . expr rightParen  (83)
->>>>>>> Stashed changes
 
 	ID  shift 16
 	BOOLTRUE  shift 73
@@ -970,27 +790,6 @@ state 63
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 99
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-
-
-state 64
-	IF_statements : IF cond . statements_type  (64)
-	IF_statements : IF cond . statements_type else  (65)
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -1000,7 +799,7 @@ state 64
 	.  error
 
 	id  goto 84
-	expr  goto 99
+	expr  goto 101
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
@@ -1012,7 +811,6 @@ state 64
 state 64
 	IF_statements : IF cond . statements_type  (66)
 	IF_statements : IF cond . statements_type else  (67)
->>>>>>> Stashed changes
 
 	BOOL  shift 1
 	CHAR  shift 2
@@ -1040,18 +838,14 @@ state 64
 	IF_statements  goto 53
 	LOOP_statements  goto 54
 	variable_declare_statements  goto 55
-	statements_type  goto 100
+	statements_type  goto 102
 	while  goto 56
 	whileDO  goto 57
 	for  goto 58
 
 
 state 65
-<<<<<<< Updated upstream
-	while : WHILE cond . statements_type  (70)
-=======
 	while : WHILE cond . statements_type  (72)
->>>>>>> Stashed changes
 
 	BOOL  shift 1
 	CHAR  shift 2
@@ -1079,20 +873,15 @@ state 65
 	IF_statements  goto 53
 	LOOP_statements  goto 54
 	variable_declare_statements  goto 55
-	statements_type  goto 101
+	statements_type  goto 103
 	while  goto 56
 	whileDO  goto 57
 	for  goto 58
 
 
 state 66
-<<<<<<< Updated upstream
-	for_cond : LEFTPAREN . preCondition SEMICOLON postCondition SEMICOLON iteration  (73)
-	preCondition : .  (74)
-=======
 	for_cond : LEFTPAREN . preCondition SEMICOLON postCondition SEMICOLON iteration  (75)
 	preCondition : .  (76)
->>>>>>> Stashed changes
 
 	ID  shift 16
 	BOOLTRUE  shift 73
@@ -1100,22 +889,6 @@ state 66
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	SEMICOLON  reduce 74
-
-	id  goto 102
-	expr  goto 103
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -1124,30 +897,25 @@ state 66
 	LEFTPAREN  shift 83
 	SEMICOLON  reduce 76
 
-	id  goto 102
-	expr  goto 103
+	id  goto 104
+	expr  goto 105
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
->>>>>>> Stashed changes
-	preCondition  goto 104
-	ASSIGNMENT_statement  goto 105
+	preCondition  goto 106
+	ASSIGNMENT_statement  goto 107
 
 
 state 67
-<<<<<<< Updated upstream
-	for : FOR for_cond . rightParen statements_type  (72)
-=======
 	for : FOR for_cond . rightParen statements_type  (74)
->>>>>>> Stashed changes
 
-	RIGHTPAREN  shift 106
+	RIGHTPAREN  shift 108
 	.  error
 
-	rightParen  goto 107
+	rightParen  goto 109
 
 
 state 68
@@ -1174,7 +942,7 @@ state 68
 	procVoid  goto 13
 	procID  goto 14
 	varType  goto 50
-	newline  goto 108
+	newline  goto 110
 	rightbrace  goto 62
 	statement  goto 52
 	IF_statements  goto 53
@@ -1192,21 +960,6 @@ state 69
 
 
 state 70
-<<<<<<< Updated upstream
-	statements_type : block_statements .  (63)
-
-	.  reduce 63
-
-
-state 71
-	statements_type : statement .  (62)
-
-	.  reduce 62
-
-
-state 72
-	whileDO : DO statements_type . WHILE cond  (71)
-=======
 	statements_type : block_statements .  (65)
 
 	.  reduce 65
@@ -1220,52 +973,12 @@ state 71
 
 state 72
 	whileDO : DO statements_type . WHILE cond  (73)
->>>>>>> Stashed changes
 
-	WHILE  shift 109
+	WHILE  shift 111
 	.  error
 
 
 state 73
-<<<<<<< Updated upstream
-	booleans : BOOLTRUE .  (53)
-
-	.  reduce 53
-
-
-state 74
-	booleans : BOOLFALSE .  (54)
-
-	.  reduce 54
-
-
-state 75
-	csnull : CSNULL .  (52)
-
-	.  reduce 52
-
-
-state 76
-	numbers : INTEGER_POS .  (48)
-
-	.  reduce 48
-
-
-state 77
-	numbers : INTEGER_NEG .  (47)
-
-	.  reduce 47
-
-
-state 78
-	numbers : HEX_CONST .  (49)
-
-	.  reduce 49
-
-
-state 79
-	numbers : OCTAL_CONST .  (50)
-=======
 	booleans : BOOLTRUE .  (54)
 
 	.  reduce 54
@@ -1303,31 +1016,23 @@ state 78
 
 state 79
 	numbers : HEX_CONST .  (50)
->>>>>>> Stashed changes
 
 	.  reduce 50
 
 
 state 80
-<<<<<<< Updated upstream
-	numbers : BINARY_CONST .  (51)
-=======
 	numbers : OCTAL_CONST .  (51)
->>>>>>> Stashed changes
 
 	.  reduce 51
 
 
 state 81
-<<<<<<< Updated upstream
-=======
 	numbers : BINARY_CONST .  (52)
 
 	.  reduce 52
 
 
 state 82
->>>>>>> Stashed changes
 	expr : NOT . expr  (28)
 
 	ID  shift 16
@@ -1336,25 +1041,6 @@ state 82
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 110
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-
-
-state 82
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -1364,7 +1050,7 @@ state 82
 	.  error
 
 	id  goto 84
-	expr  goto 110
+	expr  goto 112
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
@@ -1374,7 +1060,6 @@ state 82
 
 
 state 83
->>>>>>> Stashed changes
 	Pexpr : LEFTPAREN . expr rightParen  (31)
 
 	ID  shift 16
@@ -1383,25 +1068,6 @@ state 83
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 111
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-
-
-state 83
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -1411,7 +1077,7 @@ state 83
 	.  error
 
 	id  goto 84
-	expr  goto 111
+	expr  goto 113
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
@@ -1421,17 +1087,12 @@ state 83
 
 
 state 84
->>>>>>> Stashed changes
 	consts : id .  (42)
 
 	.  reduce 42
 
 
-<<<<<<< Updated upstream
-state 84
-=======
 state 85
->>>>>>> Stashed changes
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -1446,156 +1107,52 @@ state 85
 	expr : expr . OR expr  (27)
 	block_return_value_statements : LEFTBRACE RETURN expr . SEMICOLON rightbrace  (34)
 
-	AND  shift 112
-	DIVISION  shift 113
-	EQUAL  shift 114
-	GREATER  shift 115
-	GREATEREQUAL  shift 116
-	LESS  shift 117
-	LESSEQUAL  shift 118
-	MINUS  shift 119
-	NOTEQUAL  shift 120
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
-	SEMICOLON  shift 124
+	AND  shift 114
+	DIVISION  shift 115
+	EQUAL  shift 116
+	GREATER  shift 117
+	GREATEREQUAL  shift 118
+	LESS  shift 119
+	LESSEQUAL  shift 120
+	MINUS  shift 121
+	NOTEQUAL  shift 122
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
+	SEMICOLON  shift 126
 	.  error
 
 
-<<<<<<< Updated upstream
-state 85
-=======
 state 86
->>>>>>> Stashed changes
 	expr : Pexpr .  (29)
 
 	.  reduce 29
 
 
-<<<<<<< Updated upstream
-state 86
-=======
 state 87
->>>>>>> Stashed changes
 	expr : consts .  (30)
 
 	.  reduce 30
 
 
-<<<<<<< Updated upstream
-state 87
-=======
 state 88
->>>>>>> Stashed changes
 	consts : numbers .  (43)
 
 	.  reduce 43
 
 
-<<<<<<< Updated upstream
-state 88
-=======
 state 89
->>>>>>> Stashed changes
 	consts : booleans .  (44)
 
 	.  reduce 44
 
 
-<<<<<<< Updated upstream
-state 89
-=======
 state 90
->>>>>>> Stashed changes
 	consts : csnull .  (45)
 
 	.  reduce 45
 
 
-<<<<<<< Updated upstream
-state 90
-	procID : varType id .  (10)
-	ASSIGNMENT_statement : id . ASSIGNMENT expr  (82)
-	str_ASSIGNMENT_statement : id . LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT  (83)
-	StringDeclare : id . LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare  (92)
-	StringDeclare : id . LEFTBRACKET numbers RIGHTBRACKET  (95)
-	variablesDeclare : id . COMMA variablesDeclare  (96)
-	variablesDeclare : id .  (99)
-
-	ASSIGNMENT  shift 125
-	COMMA  shift 126
-	LEFTBRACKET  shift 127
-	BOOL  reduce 99
-	CHAR  reduce 99
-	INT  reduce 99
-	STRING  reduce 99
-	INTPTR  reduce 99
-	CHARPTR  reduce 99
-	VOID  reduce 99
-	IF  reduce 99
-	ELSE  reduce 99
-	WHILE  reduce 99
-	FOR  reduce 99
-	DO  reduce 99
-	RETURN  reduce 99
-	SEMICOLON  reduce 99
-	RIGHTBRACE  reduce 99
-	LEFTPAREN  reduce 10
-
-
-state 91
-	variablesDeclare : ASSIGNMENT_statement . COMMA variablesDeclare  (97)
-	variablesDeclare : ASSIGNMENT_statement .  (98)
-
-	COMMA  shift 128
-	BOOL  reduce 98
-	CHAR  reduce 98
-	INT  reduce 98
-	STRING  reduce 98
-	INTPTR  reduce 98
-	CHARPTR  reduce 98
-	VOID  reduce 98
-	IF  reduce 98
-	ELSE  reduce 98
-	WHILE  reduce 98
-	FOR  reduce 98
-	DO  reduce 98
-	RETURN  reduce 98
-	SEMICOLON  reduce 98
-	RIGHTBRACE  reduce 98
-
-
-state 92
-	StringDeclare : str_ASSIGNMENT_statement .  (93)
-	StringDeclare : str_ASSIGNMENT_statement . COMMA StringDeclare  (94)
-
-	COMMA  shift 129
-	BOOL  reduce 93
-	CHAR  reduce 93
-	INT  reduce 93
-	STRING  reduce 93
-	INTPTR  reduce 93
-	CHARPTR  reduce 93
-	VOID  reduce 93
-	IF  reduce 93
-	ELSE  reduce 93
-	WHILE  reduce 93
-	FOR  reduce 93
-	DO  reduce 93
-	RETURN  reduce 93
-	SEMICOLON  reduce 93
-	RIGHTBRACE  reduce 93
-
-
-state 93
-	variable_declare_statements : varType variablesDeclare .  (84)
-
-	.  reduce 84
-
-
-state 94
-	variable_declare_statements : varType StringDeclare .  (85)
-=======
 state 91
 	consts : strings .  (46)
 
@@ -1605,11 +1162,60 @@ state 91
 state 92
 	procID : varType id .  (10)
 	ASSIGNMENT_statement : id . ASSIGNMENT expr  (84)
-	variablesDeclare : id . COMMA variablesDeclare  (92)
-	variablesDeclare : id .  (95)
+	str_ASSIGNMENT_statement : id . LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings  (85)
+	StringDeclare : id . LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare  (94)
+	StringDeclare : id . LEFTBRACKET numbers RIGHTBRACKET  (97)
+	variablesDeclare : id . COMMA variablesDeclare  (98)
+	variablesDeclare : id .  (101)
 
-	ASSIGNMENT  shift 125
-	COMMA  shift 126
+	ASSIGNMENT  shift 127
+	COMMA  shift 128
+	LEFTBRACKET  shift 129
+	BOOL  reduce 101
+	CHAR  reduce 101
+	INT  reduce 101
+	STRING  reduce 101
+	INTPTR  reduce 101
+	CHARPTR  reduce 101
+	VOID  reduce 101
+	IF  reduce 101
+	ELSE  reduce 101
+	WHILE  reduce 101
+	FOR  reduce 101
+	DO  reduce 101
+	RETURN  reduce 101
+	SEMICOLON  reduce 101
+	RIGHTBRACE  reduce 101
+	LEFTPAREN  reduce 10
+
+
+state 93
+	variablesDeclare : ASSIGNMENT_statement . COMMA variablesDeclare  (99)
+	variablesDeclare : ASSIGNMENT_statement .  (100)
+
+	COMMA  shift 130
+	BOOL  reduce 100
+	CHAR  reduce 100
+	INT  reduce 100
+	STRING  reduce 100
+	INTPTR  reduce 100
+	CHARPTR  reduce 100
+	VOID  reduce 100
+	IF  reduce 100
+	ELSE  reduce 100
+	WHILE  reduce 100
+	FOR  reduce 100
+	DO  reduce 100
+	RETURN  reduce 100
+	SEMICOLON  reduce 100
+	RIGHTBRACE  reduce 100
+
+
+state 94
+	StringDeclare : str_ASSIGNMENT_statement .  (95)
+	StringDeclare : str_ASSIGNMENT_statement . COMMA StringDeclare  (96)
+
+	COMMA  shift 131
 	BOOL  reduce 95
 	CHAR  reduce 95
 	INT  reduce 95
@@ -1625,39 +1231,21 @@ state 92
 	RETURN  reduce 95
 	SEMICOLON  reduce 95
 	RIGHTBRACE  reduce 95
-	LEFTPAREN  reduce 10
-
-
-state 93
-	variablesDeclare : ASSIGNMENT_statement . COMMA variablesDeclare  (93)
-	variablesDeclare : ASSIGNMENT_statement .  (94)
-
-	COMMA  shift 127
-	BOOL  reduce 94
-	CHAR  reduce 94
-	INT  reduce 94
-	STRING  reduce 94
-	INTPTR  reduce 94
-	CHARPTR  reduce 94
-	VOID  reduce 94
-	IF  reduce 94
-	ELSE  reduce 94
-	WHILE  reduce 94
-	FOR  reduce 94
-	DO  reduce 94
-	RETURN  reduce 94
-	SEMICOLON  reduce 94
-	RIGHTBRACE  reduce 94
-
-
-state 94
-	variable_declare_statements : varType variablesDeclare .  (85)
->>>>>>> Stashed changes
-
-	.  reduce 85
 
 
 state 95
+	variable_declare_statements : varType variablesDeclare .  (86)
+
+	.  reduce 86
+
+
+state 96
+	variable_declare_statements : varType StringDeclare .  (87)
+
+	.  reduce 87
+
+
+state 97
 	block_return_value_statements : LEFTBRACE newline RETURN . expr SEMICOLON rightbrace  (33)
 
 	ID  shift 16
@@ -1666,28 +1254,6 @@ state 95
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 130
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-
-
-state 96
-	newline : statement newline .  (55)
-
-	.  reduce 55
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -1697,7 +1263,7 @@ state 96
 	.  error
 
 	id  goto 84
-	expr  goto 128
+	expr  goto 132
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
@@ -1706,38 +1272,29 @@ state 96
 	strings  goto 91
 
 
-state 96
+state 98
 	newline : statement newline .  (57)
 
 	.  reduce 57
->>>>>>> Stashed changes
 
 
-state 97
+state 99
 	block_return_void_statements : LEFTBRACE RETURN SEMICOLON . rightbrace  (37)
 
 	RIGHTBRACE  shift 60
 	.  error
 
-<<<<<<< Updated upstream
-	rightbrace  goto 131
-=======
-	rightbrace  goto 129
->>>>>>> Stashed changes
+	rightbrace  goto 133
 
 
-state 98
+state 100
 	block_return_void_statements : LEFTBRACE newline RETURN . SEMICOLON rightbrace  (36)
 
-<<<<<<< Updated upstream
-	SEMICOLON  shift 132
-=======
-	SEMICOLON  shift 130
->>>>>>> Stashed changes
+	SEMICOLON  shift 134
 	.  error
 
 
-state 99
+state 101
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -1750,67 +1307,31 @@ state 99
 	expr : expr . NOTEQUAL expr  (25)
 	expr : expr . AND expr  (26)
 	expr : expr . OR expr  (27)
-<<<<<<< Updated upstream
-	cond : LEFTPAREN expr . rightParen  (81)
-=======
 	cond : LEFTPAREN expr . rightParen  (83)
->>>>>>> Stashed changes
 
-	AND  shift 112
-	DIVISION  shift 113
-	EQUAL  shift 114
-	GREATER  shift 115
-	GREATEREQUAL  shift 116
-	LESS  shift 117
-	LESSEQUAL  shift 118
-	MINUS  shift 119
-	NOTEQUAL  shift 120
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
-	RIGHTPAREN  shift 106
+	AND  shift 114
+	DIVISION  shift 115
+	EQUAL  shift 116
+	GREATER  shift 117
+	GREATEREQUAL  shift 118
+	LESS  shift 119
+	LESSEQUAL  shift 120
+	MINUS  shift 121
+	NOTEQUAL  shift 122
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
+	RIGHTPAREN  shift 108
 	.  error
 
-<<<<<<< Updated upstream
-	rightParen  goto 133
+	rightParen  goto 135
 
 
-state 100
-	IF_statements : IF cond statements_type .  (64)
-	IF_statements : IF cond statements_type . else  (65)
-
-	ELSE  shift 134
-	BOOL  reduce 64
-	CHAR  reduce 64
-	INT  reduce 64
-	STRING  reduce 64
-	INTPTR  reduce 64
-	CHARPTR  reduce 64
-	VOID  reduce 64
-	IF  reduce 64
-	WHILE  reduce 64
-	FOR  reduce 64
-	DO  reduce 64
-	RETURN  reduce 64
-	SEMICOLON  reduce 64
-	RIGHTBRACE  reduce 64
-
-	else  goto 135
-
-
-state 101
-	while : WHILE cond statements_type .  (70)
-
-	.  reduce 70
-=======
-	rightParen  goto 131
-
-
-state 100
+state 102
 	IF_statements : IF cond statements_type .  (66)
 	IF_statements : IF cond statements_type . else  (67)
 
-	ELSE  shift 132
+	ELSE  shift 136
 	BOOL  reduce 66
 	CHAR  reduce 66
 	INT  reduce 66
@@ -1826,25 +1347,20 @@ state 100
 	SEMICOLON  reduce 66
 	RIGHTBRACE  reduce 66
 
-	else  goto 133
+	else  goto 137
 
 
-state 101
+state 103
 	while : WHILE cond statements_type .  (72)
 
 	.  reduce 72
->>>>>>> Stashed changes
 
 
-state 102
+state 104
 	consts : id .  (42)
-<<<<<<< Updated upstream
-	ASSIGNMENT_statement : id . ASSIGNMENT expr  (82)
-=======
 	ASSIGNMENT_statement : id . ASSIGNMENT expr  (84)
->>>>>>> Stashed changes
 
-	ASSIGNMENT  shift 125
+	ASSIGNMENT  shift 127
 	AND  reduce 42
 	DIVISION  reduce 42
 	EQUAL  reduce 42
@@ -1860,7 +1376,7 @@ state 102
 	SEMICOLON  reduce 42
 
 
-state 103
+state 105
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -1873,68 +1389,44 @@ state 103
 	expr : expr . NOTEQUAL expr  (25)
 	expr : expr . AND expr  (26)
 	expr : expr . OR expr  (27)
-<<<<<<< Updated upstream
-	preCondition : expr .  (75)
-=======
 	preCondition : expr .  (77)
->>>>>>> Stashed changes
 
-	AND  shift 112
-	DIVISION  shift 113
-	EQUAL  shift 114
-	GREATER  shift 115
-	GREATEREQUAL  shift 116
-	LESS  shift 117
-	LESSEQUAL  shift 118
-	MINUS  shift 119
-	NOTEQUAL  shift 120
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
-<<<<<<< Updated upstream
-	SEMICOLON  reduce 75
-
-
-state 104
-	for_cond : LEFTPAREN preCondition . SEMICOLON postCondition SEMICOLON iteration  (73)
-
-	SEMICOLON  shift 136
-=======
+	AND  shift 114
+	DIVISION  shift 115
+	EQUAL  shift 116
+	GREATER  shift 117
+	GREATEREQUAL  shift 118
+	LESS  shift 119
+	LESSEQUAL  shift 120
+	MINUS  shift 121
+	NOTEQUAL  shift 122
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
 	SEMICOLON  reduce 77
 
 
-state 104
+state 106
 	for_cond : LEFTPAREN preCondition . SEMICOLON postCondition SEMICOLON iteration  (75)
 
-	SEMICOLON  shift 134
->>>>>>> Stashed changes
+	SEMICOLON  shift 138
 	.  error
 
 
-state 105
-<<<<<<< Updated upstream
-	preCondition : ASSIGNMENT_statement .  (76)
-
-	.  reduce 76
-=======
+state 107
 	preCondition : ASSIGNMENT_statement .  (78)
 
 	.  reduce 78
->>>>>>> Stashed changes
 
 
-state 106
+state 108
 	rightParen : RIGHTPAREN .  (32)
 
 	.  reduce 32
 
 
-state 107
-<<<<<<< Updated upstream
-	for : FOR for_cond rightParen . statements_type  (72)
-=======
+state 109
 	for : FOR for_cond rightParen . statements_type  (74)
->>>>>>> Stashed changes
 
 	BOOL  shift 1
 	CHAR  shift 2
@@ -1962,47 +1454,31 @@ state 107
 	IF_statements  goto 53
 	LOOP_statements  goto 54
 	variable_declare_statements  goto 55
-<<<<<<< Updated upstream
-	statements_type  goto 137
-=======
-	statements_type  goto 135
->>>>>>> Stashed changes
+	statements_type  goto 139
 	while  goto 56
 	whileDO  goto 57
 	for  goto 58
 
 
-state 108
+state 110
 	block_statements : LEFTBRACE newline . rightbrace  (39)
 
 	RIGHTBRACE  shift 60
 	.  error
 
-<<<<<<< Updated upstream
-	rightbrace  goto 138
+	rightbrace  goto 140
 
 
-state 109
-	whileDO : DO statements_type WHILE . cond  (71)
-=======
-	rightbrace  goto 136
-
-
-state 109
+state 111
 	whileDO : DO statements_type WHILE . cond  (73)
->>>>>>> Stashed changes
 
 	LEFTPAREN  shift 63
 	.  error
 
-<<<<<<< Updated upstream
-	cond  goto 139
-=======
-	cond  goto 137
->>>>>>> Stashed changes
+	cond  goto 141
 
 
-state 110
+state 112
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -2017,18 +1493,18 @@ state 110
 	expr : expr . OR expr  (27)
 	expr : NOT expr .  (28)
 
-	AND  shift 112
-	DIVISION  shift 113
-	EQUAL  shift 114
-	GREATER  shift 115
-	GREATEREQUAL  shift 116
-	LESS  shift 117
-	LESSEQUAL  shift 118
-	MINUS  shift 119
-	NOTEQUAL  shift 120
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
+	AND  shift 114
+	DIVISION  shift 115
+	EQUAL  shift 116
+	GREATER  shift 117
+	GREATEREQUAL  shift 118
+	LESS  shift 119
+	LESSEQUAL  shift 120
+	MINUS  shift 121
+	NOTEQUAL  shift 122
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
 	BOOL  reduce 28
 	CHAR  reduce 28
 	INT  reduce 28
@@ -2048,7 +1524,7 @@ state 110
 	RIGHTPAREN  reduce 28
 
 
-state 111
+state 113
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -2063,29 +1539,25 @@ state 111
 	expr : expr . OR expr  (27)
 	Pexpr : LEFTPAREN expr . rightParen  (31)
 
-	AND  shift 112
-	DIVISION  shift 113
-	EQUAL  shift 114
-	GREATER  shift 115
-	GREATEREQUAL  shift 116
-	LESS  shift 117
-	LESSEQUAL  shift 118
-	MINUS  shift 119
-	NOTEQUAL  shift 120
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
-	RIGHTPAREN  shift 106
+	AND  shift 114
+	DIVISION  shift 115
+	EQUAL  shift 116
+	GREATER  shift 117
+	GREATEREQUAL  shift 118
+	LESS  shift 119
+	LESSEQUAL  shift 120
+	MINUS  shift 121
+	NOTEQUAL  shift 122
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
+	RIGHTPAREN  shift 108
 	.  error
 
-<<<<<<< Updated upstream
-	rightParen  goto 140
-=======
-	rightParen  goto 138
->>>>>>> Stashed changes
+	rightParen  goto 142
 
 
-state 112
+state 114
 	expr : expr AND . expr  (26)
 
 	ID  shift 16
@@ -2094,22 +1566,6 @@ state 112
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 141
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2119,17 +1575,16 @@ state 112
 	.  error
 
 	id  goto 84
-	expr  goto 139
+	expr  goto 143
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
->>>>>>> Stashed changes
 
 
-state 113
+state 115
 	expr : expr DIVISION . expr  (19)
 
 	ID  shift 16
@@ -2138,22 +1593,6 @@ state 113
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 142
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2163,17 +1602,16 @@ state 113
 	.  error
 
 	id  goto 84
-	expr  goto 140
+	expr  goto 144
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
->>>>>>> Stashed changes
 
 
-state 114
+state 116
 	expr : expr EQUAL . expr  (20)
 
 	ID  shift 16
@@ -2182,22 +1620,6 @@ state 114
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 143
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2207,17 +1629,16 @@ state 114
 	.  error
 
 	id  goto 84
-	expr  goto 141
+	expr  goto 145
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
->>>>>>> Stashed changes
 
 
-state 115
+state 117
 	expr : expr GREATER . expr  (21)
 
 	ID  shift 16
@@ -2226,22 +1647,6 @@ state 115
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 144
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2251,17 +1656,16 @@ state 115
 	.  error
 
 	id  goto 84
-	expr  goto 142
+	expr  goto 146
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
->>>>>>> Stashed changes
 
 
-state 116
+state 118
 	expr : expr GREATEREQUAL . expr  (22)
 
 	ID  shift 16
@@ -2270,22 +1674,6 @@ state 116
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 145
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2295,17 +1683,16 @@ state 116
 	.  error
 
 	id  goto 84
-	expr  goto 143
+	expr  goto 147
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
->>>>>>> Stashed changes
 
 
-state 117
+state 119
 	expr : expr LESS . expr  (23)
 
 	ID  shift 16
@@ -2314,22 +1701,6 @@ state 117
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 146
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2339,17 +1710,16 @@ state 117
 	.  error
 
 	id  goto 84
-	expr  goto 144
+	expr  goto 148
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
->>>>>>> Stashed changes
 
 
-state 118
+state 120
 	expr : expr LESSEQUAL . expr  (24)
 
 	ID  shift 16
@@ -2358,22 +1728,6 @@ state 118
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 147
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2383,17 +1737,16 @@ state 118
 	.  error
 
 	id  goto 84
-	expr  goto 145
+	expr  goto 149
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
->>>>>>> Stashed changes
 
 
-state 119
+state 121
 	expr : expr MINUS . expr  (17)
 
 	ID  shift 16
@@ -2402,22 +1755,6 @@ state 119
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 148
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2427,17 +1764,16 @@ state 119
 	.  error
 
 	id  goto 84
-	expr  goto 146
+	expr  goto 150
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
->>>>>>> Stashed changes
 
 
-state 120
+state 122
 	expr : expr NOTEQUAL . expr  (25)
 
 	ID  shift 16
@@ -2446,22 +1782,6 @@ state 120
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 149
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2471,17 +1791,16 @@ state 120
 	.  error
 
 	id  goto 84
-	expr  goto 147
+	expr  goto 151
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
->>>>>>> Stashed changes
 
 
-state 121
+state 123
 	expr : expr OR . expr  (27)
 
 	ID  shift 16
@@ -2490,22 +1809,6 @@ state 121
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 150
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2515,17 +1818,16 @@ state 121
 	.  error
 
 	id  goto 84
-	expr  goto 148
+	expr  goto 152
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
->>>>>>> Stashed changes
 
 
-state 122
+state 124
 	expr : expr PLUS . expr  (16)
 
 	ID  shift 16
@@ -2534,22 +1836,6 @@ state 122
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 151
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2559,17 +1845,16 @@ state 122
 	.  error
 
 	id  goto 84
-	expr  goto 149
+	expr  goto 153
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
->>>>>>> Stashed changes
 
 
-state 123
+state 125
 	expr : expr MULTI . expr  (18)
 
 	ID  shift 16
@@ -2578,22 +1863,6 @@ state 123
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 152
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2603,35 +1872,26 @@ state 123
 	.  error
 
 	id  goto 84
-	expr  goto 150
+	expr  goto 154
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
->>>>>>> Stashed changes
 
 
-state 124
+state 126
 	block_return_value_statements : LEFTBRACE RETURN expr SEMICOLON . rightbrace  (34)
 
 	RIGHTBRACE  shift 60
 	.  error
 
-<<<<<<< Updated upstream
-	rightbrace  goto 153
+	rightbrace  goto 155
 
 
-state 125
-	ASSIGNMENT_statement : id ASSIGNMENT . expr  (82)
-=======
-	rightbrace  goto 151
-
-
-state 125
+state 127
 	ASSIGNMENT_statement : id ASSIGNMENT . expr  (84)
->>>>>>> Stashed changes
 
 	ID  shift 16
 	BOOLTRUE  shift 73
@@ -2639,26 +1899,6 @@ state 125
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	.  error
-
-	id  goto 83
-	expr  goto 154
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-
-
-state 126
-	variablesDeclare : id COMMA . variablesDeclare  (96)
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2668,7 +1908,7 @@ state 126
 	.  error
 
 	id  goto 84
-	expr  goto 152
+	expr  goto 156
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
@@ -2677,75 +1917,55 @@ state 126
 	strings  goto 91
 
 
-state 126
-	variablesDeclare : id COMMA . variablesDeclare  (92)
->>>>>>> Stashed changes
-
-	ID  shift 16
-	.  error
-
-<<<<<<< Updated upstream
-	id  goto 155
-	ASSIGNMENT_statement  goto 91
-	variablesDeclare  goto 156
-
-
-state 127
-	str_ASSIGNMENT_statement : id LEFTBRACKET . numbers RIGHTBRACKET ASSIGNMENT  (83)
-	StringDeclare : id LEFTBRACKET . numbers RIGHTBRACKET COMMA StringDeclare  (92)
-	StringDeclare : id LEFTBRACKET . numbers RIGHTBRACKET  (95)
-
-	INTEGER_POS  shift 76
-	INTEGER_NEG  shift 77
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	.  error
-
-	numbers  goto 157
-
-
 state 128
-	variablesDeclare : ASSIGNMENT_statement COMMA . variablesDeclare  (97)
-=======
-	id  goto 153
-	ASSIGNMENT_statement  goto 93
-	variablesDeclare  goto 154
-
-
-state 127
-	variablesDeclare : ASSIGNMENT_statement COMMA . variablesDeclare  (93)
->>>>>>> Stashed changes
+	variablesDeclare : id COMMA . variablesDeclare  (98)
 
 	ID  shift 16
 	.  error
 
-<<<<<<< Updated upstream
-	id  goto 155
-	ASSIGNMENT_statement  goto 91
+	id  goto 157
+	ASSIGNMENT_statement  goto 93
 	variablesDeclare  goto 158
 
 
 state 129
-	StringDeclare : str_ASSIGNMENT_statement COMMA . StringDeclare  (94)
+	str_ASSIGNMENT_statement : id LEFTBRACKET . numbers RIGHTBRACKET ASSIGNMENT strings  (85)
+	StringDeclare : id LEFTBRACKET . numbers RIGHTBRACKET COMMA StringDeclare  (94)
+	StringDeclare : id LEFTBRACKET . numbers RIGHTBRACKET  (97)
+
+	INTEGER_POS  shift 76
+	INTEGER_NEG  shift 77
+	HEX_CONST  shift 79
+	OCTAL_CONST  shift 80
+	BINARY_CONST  shift 81
+	.  error
+
+	numbers  goto 159
+
+
+state 130
+	variablesDeclare : ASSIGNMENT_statement COMMA . variablesDeclare  (99)
 
 	ID  shift 16
 	.  error
 
-	id  goto 159
-	str_ASSIGNMENT_statement  goto 92
-	StringDeclare  goto 160
-
-
-state 130
-=======
-	id  goto 153
+	id  goto 157
 	ASSIGNMENT_statement  goto 93
-	variablesDeclare  goto 155
+	variablesDeclare  goto 160
 
 
-state 128
->>>>>>> Stashed changes
+state 131
+	StringDeclare : str_ASSIGNMENT_statement COMMA . StringDeclare  (96)
+
+	ID  shift 16
+	.  error
+
+	id  goto 161
+	str_ASSIGNMENT_statement  goto 94
+	StringDeclare  goto 162
+
+
+state 132
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -2760,71 +1980,45 @@ state 128
 	expr : expr . OR expr  (27)
 	block_return_value_statements : LEFTBRACE newline RETURN expr . SEMICOLON rightbrace  (33)
 
-	AND  shift 112
-	DIVISION  shift 113
-	EQUAL  shift 114
-	GREATER  shift 115
-	GREATEREQUAL  shift 116
-	LESS  shift 117
-	LESSEQUAL  shift 118
-	MINUS  shift 119
-	NOTEQUAL  shift 120
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
-<<<<<<< Updated upstream
-	SEMICOLON  shift 161
+	AND  shift 114
+	DIVISION  shift 115
+	EQUAL  shift 116
+	GREATER  shift 117
+	GREATEREQUAL  shift 118
+	LESS  shift 119
+	LESSEQUAL  shift 120
+	MINUS  shift 121
+	NOTEQUAL  shift 122
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
+	SEMICOLON  shift 163
 	.  error
 
 
-state 131
-=======
-	SEMICOLON  shift 156
-	.  error
-
-
-state 129
->>>>>>> Stashed changes
+state 133
 	block_return_void_statements : LEFTBRACE RETURN SEMICOLON rightbrace .  (37)
 
 	.  reduce 37
 
 
-<<<<<<< Updated upstream
-state 132
-=======
-state 130
->>>>>>> Stashed changes
+state 134
 	block_return_void_statements : LEFTBRACE newline RETURN SEMICOLON . rightbrace  (36)
 
 	RIGHTBRACE  shift 60
 	.  error
 
-<<<<<<< Updated upstream
-	rightbrace  goto 162
+	rightbrace  goto 164
 
 
-state 133
-	cond : LEFTPAREN expr rightParen .  (81)
-
-	.  reduce 81
-
-
-state 134
-	else : ELSE . statements_type  (66)
-=======
-	rightbrace  goto 157
-
-
-state 131
+state 135
 	cond : LEFTPAREN expr rightParen .  (83)
 
 	.  reduce 83
 
 
-state 132
+state 136
 	else : ELSE . statements_type  (68)
->>>>>>> Stashed changes
 
 	BOOL  shift 1
 	CHAR  shift 2
@@ -2852,37 +2046,21 @@ state 132
 	IF_statements  goto 53
 	LOOP_statements  goto 54
 	variable_declare_statements  goto 55
-<<<<<<< Updated upstream
-	statements_type  goto 163
-=======
-	statements_type  goto 158
->>>>>>> Stashed changes
+	statements_type  goto 165
 	while  goto 56
 	whileDO  goto 57
 	for  goto 58
 
 
-<<<<<<< Updated upstream
-state 135
-	IF_statements : IF cond statements_type else .  (65)
-
-	.  reduce 65
-
-
-state 136
-	for_cond : LEFTPAREN preCondition SEMICOLON . postCondition SEMICOLON iteration  (73)
-	postCondition : .  (77)
-=======
-state 133
+state 137
 	IF_statements : IF cond statements_type else .  (67)
 
 	.  reduce 67
 
 
-state 134
+state 138
 	for_cond : LEFTPAREN preCondition SEMICOLON . postCondition SEMICOLON iteration  (75)
 	postCondition : .  (79)
->>>>>>> Stashed changes
 
 	ID  shift 16
 	BOOLTRUE  shift 73
@@ -2890,32 +2068,6 @@ state 134
 	CSNULL  shift 75
 	INTEGER_POS  shift 76
 	INTEGER_NEG  shift 77
-<<<<<<< Updated upstream
-	HEX_CONST  shift 78
-	OCTAL_CONST  shift 79
-	BINARY_CONST  shift 80
-	NOT  shift 81
-	LEFTPAREN  shift 82
-	SEMICOLON  reduce 77
-
-	id  goto 83
-	expr  goto 164
-	Pexpr  goto 85
-	consts  goto 86
-	numbers  goto 87
-	booleans  goto 88
-	csnull  goto 89
-	postCondition  goto 165
-
-
-state 137
-	for : FOR for_cond rightParen statements_type .  (72)
-
-	.  reduce 72
-
-
-state 138
-=======
 	STRING_CONST  shift 78
 	HEX_CONST  shift 79
 	OCTAL_CONST  shift 80
@@ -2925,56 +2077,41 @@ state 138
 	SEMICOLON  reduce 79
 
 	id  goto 84
-	expr  goto 159
+	expr  goto 166
 	Pexpr  goto 86
 	consts  goto 87
 	numbers  goto 88
 	booleans  goto 89
 	csnull  goto 90
 	strings  goto 91
-	postCondition  goto 160
+	postCondition  goto 167
 
 
-state 135
+state 139
 	for : FOR for_cond rightParen statements_type .  (74)
 
 	.  reduce 74
 
 
-state 136
->>>>>>> Stashed changes
+state 140
 	block_statements : LEFTBRACE newline rightbrace .  (39)
 
 	.  reduce 39
 
 
-<<<<<<< Updated upstream
-state 139
-	whileDO : DO statements_type WHILE cond .  (71)
-
-	.  reduce 71
-
-
-state 140
-=======
-state 137
+state 141
 	whileDO : DO statements_type WHILE cond .  (73)
 
 	.  reduce 73
 
 
-state 138
->>>>>>> Stashed changes
+state 142
 	Pexpr : LEFTPAREN expr rightParen .  (31)
 
 	.  reduce 31
 
 
-<<<<<<< Updated upstream
-state 141
-=======
-state 139
->>>>>>> Stashed changes
+state 143
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -2989,8 +2126,8 @@ state 139
 	expr : expr AND expr .  (26)
 	expr : expr . OR expr  (27)
 
-	DIVISION  shift 113
-	MULTI  shift 123
+	DIVISION  shift 115
+	MULTI  shift 125
 	BOOL  reduce 26
 	CHAR  reduce 26
 	INT  reduce 26
@@ -3020,11 +2157,7 @@ state 139
 	RIGHTPAREN  reduce 26
 
 
-<<<<<<< Updated upstream
-state 142
-=======
-state 140
->>>>>>> Stashed changes
+state 144
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -3042,11 +2175,7 @@ state 140
 	.  reduce 19
 
 
-<<<<<<< Updated upstream
-state 143
-=======
-state 141
->>>>>>> Stashed changes
+state 145
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -3061,12 +2190,12 @@ state 141
 	expr : expr . AND expr  (26)
 	expr : expr . OR expr  (27)
 
-	AND  shift 112
-	DIVISION  shift 113
-	MINUS  shift 119
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
+	AND  shift 114
+	DIVISION  shift 115
+	MINUS  shift 121
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
 	BOOL  reduce 20
 	CHAR  reduce 20
 	INT  reduce 20
@@ -3092,11 +2221,7 @@ state 141
 	RIGHTPAREN  reduce 20
 
 
-<<<<<<< Updated upstream
-state 144
-=======
-state 142
->>>>>>> Stashed changes
+state 146
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -3111,12 +2236,12 @@ state 142
 	expr : expr . AND expr  (26)
 	expr : expr . OR expr  (27)
 
-	AND  shift 112
-	DIVISION  shift 113
-	MINUS  shift 119
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
+	AND  shift 114
+	DIVISION  shift 115
+	MINUS  shift 121
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
 	BOOL  reduce 21
 	CHAR  reduce 21
 	INT  reduce 21
@@ -3142,11 +2267,7 @@ state 142
 	RIGHTPAREN  reduce 21
 
 
-<<<<<<< Updated upstream
-state 145
-=======
-state 143
->>>>>>> Stashed changes
+state 147
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -3161,12 +2282,12 @@ state 143
 	expr : expr . AND expr  (26)
 	expr : expr . OR expr  (27)
 
-	AND  shift 112
-	DIVISION  shift 113
-	MINUS  shift 119
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
+	AND  shift 114
+	DIVISION  shift 115
+	MINUS  shift 121
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
 	BOOL  reduce 22
 	CHAR  reduce 22
 	INT  reduce 22
@@ -3192,11 +2313,7 @@ state 143
 	RIGHTPAREN  reduce 22
 
 
-<<<<<<< Updated upstream
-state 146
-=======
-state 144
->>>>>>> Stashed changes
+state 148
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -3211,12 +2328,12 @@ state 144
 	expr : expr . AND expr  (26)
 	expr : expr . OR expr  (27)
 
-	AND  shift 112
-	DIVISION  shift 113
-	MINUS  shift 119
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
+	AND  shift 114
+	DIVISION  shift 115
+	MINUS  shift 121
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
 	BOOL  reduce 23
 	CHAR  reduce 23
 	INT  reduce 23
@@ -3242,11 +2359,7 @@ state 144
 	RIGHTPAREN  reduce 23
 
 
-<<<<<<< Updated upstream
-state 147
-=======
-state 145
->>>>>>> Stashed changes
+state 149
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -3261,12 +2374,12 @@ state 145
 	expr : expr . AND expr  (26)
 	expr : expr . OR expr  (27)
 
-	AND  shift 112
-	DIVISION  shift 113
-	MINUS  shift 119
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
+	AND  shift 114
+	DIVISION  shift 115
+	MINUS  shift 121
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
 	BOOL  reduce 24
 	CHAR  reduce 24
 	INT  reduce 24
@@ -3292,11 +2405,7 @@ state 145
 	RIGHTPAREN  reduce 24
 
 
-<<<<<<< Updated upstream
-state 148
-=======
-state 146
->>>>>>> Stashed changes
+state 150
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr MINUS expr .  (17)
@@ -3311,8 +2420,8 @@ state 146
 	expr : expr . AND expr  (26)
 	expr : expr . OR expr  (27)
 
-	DIVISION  shift 113
-	MULTI  shift 123
+	DIVISION  shift 115
+	MULTI  shift 125
 	BOOL  reduce 17
 	CHAR  reduce 17
 	INT  reduce 17
@@ -3342,11 +2451,7 @@ state 146
 	RIGHTPAREN  reduce 17
 
 
-<<<<<<< Updated upstream
-state 149
-=======
-state 147
->>>>>>> Stashed changes
+state 151
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -3361,12 +2466,12 @@ state 147
 	expr : expr . AND expr  (26)
 	expr : expr . OR expr  (27)
 
-	AND  shift 112
-	DIVISION  shift 113
-	MINUS  shift 119
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
+	AND  shift 114
+	DIVISION  shift 115
+	MINUS  shift 121
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
 	BOOL  reduce 25
 	CHAR  reduce 25
 	INT  reduce 25
@@ -3392,11 +2497,7 @@ state 147
 	RIGHTPAREN  reduce 25
 
 
-<<<<<<< Updated upstream
-state 150
-=======
-state 148
->>>>>>> Stashed changes
+state 152
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -3411,8 +2512,8 @@ state 148
 	expr : expr . OR expr  (27)
 	expr : expr OR expr .  (27)
 
-	DIVISION  shift 113
-	MULTI  shift 123
+	DIVISION  shift 115
+	MULTI  shift 125
 	BOOL  reduce 27
 	CHAR  reduce 27
 	INT  reduce 27
@@ -3442,11 +2543,7 @@ state 148
 	RIGHTPAREN  reduce 27
 
 
-<<<<<<< Updated upstream
-state 151
-=======
-state 149
->>>>>>> Stashed changes
+state 153
 	expr : expr . PLUS expr  (16)
 	expr : expr PLUS expr .  (16)
 	expr : expr . MINUS expr  (17)
@@ -3461,8 +2558,8 @@ state 149
 	expr : expr . AND expr  (26)
 	expr : expr . OR expr  (27)
 
-	DIVISION  shift 113
-	MULTI  shift 123
+	DIVISION  shift 115
+	MULTI  shift 125
 	BOOL  reduce 16
 	CHAR  reduce 16
 	INT  reduce 16
@@ -3492,11 +2589,7 @@ state 149
 	RIGHTPAREN  reduce 16
 
 
-<<<<<<< Updated upstream
-state 152
-=======
-state 150
->>>>>>> Stashed changes
+state 154
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -3514,21 +2607,13 @@ state 150
 	.  reduce 18
 
 
-<<<<<<< Updated upstream
-state 153
-=======
-state 151
->>>>>>> Stashed changes
+state 155
 	block_return_value_statements : LEFTBRACE RETURN expr SEMICOLON rightbrace .  (34)
 
 	.  reduce 34
 
 
-<<<<<<< Updated upstream
-state 154
-=======
-state 152
->>>>>>> Stashed changes
+state 156
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -3541,106 +2626,20 @@ state 152
 	expr : expr . NOTEQUAL expr  (25)
 	expr : expr . AND expr  (26)
 	expr : expr . OR expr  (27)
-<<<<<<< Updated upstream
-	ASSIGNMENT_statement : id ASSIGNMENT expr .  (82)
-=======
 	ASSIGNMENT_statement : id ASSIGNMENT expr .  (84)
->>>>>>> Stashed changes
 
-	AND  shift 112
-	DIVISION  shift 113
-	EQUAL  shift 114
-	GREATER  shift 115
-	GREATEREQUAL  shift 116
-	LESS  shift 117
-	LESSEQUAL  shift 118
-	MINUS  shift 119
-	NOTEQUAL  shift 120
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
-<<<<<<< Updated upstream
-	BOOL  reduce 82
-	CHAR  reduce 82
-	INT  reduce 82
-	STRING  reduce 82
-	INTPTR  reduce 82
-	CHARPTR  reduce 82
-	VOID  reduce 82
-	IF  reduce 82
-	ELSE  reduce 82
-	WHILE  reduce 82
-	FOR  reduce 82
-	DO  reduce 82
-	RETURN  reduce 82
-	SEMICOLON  reduce 82
-	COMMA  reduce 82
-	RIGHTBRACE  reduce 82
-	RIGHTPAREN  reduce 82
-
-
-state 155
-	ASSIGNMENT_statement : id . ASSIGNMENT expr  (82)
-	variablesDeclare : id . COMMA variablesDeclare  (96)
-	variablesDeclare : id .  (99)
-
-	ASSIGNMENT  shift 125
-	COMMA  shift 126
-	BOOL  reduce 99
-	CHAR  reduce 99
-	INT  reduce 99
-	STRING  reduce 99
-	INTPTR  reduce 99
-	CHARPTR  reduce 99
-	VOID  reduce 99
-	IF  reduce 99
-	ELSE  reduce 99
-	WHILE  reduce 99
-	FOR  reduce 99
-	DO  reduce 99
-	RETURN  reduce 99
-	SEMICOLON  reduce 99
-	RIGHTBRACE  reduce 99
-
-
-state 156
-	variablesDeclare : id COMMA variablesDeclare .  (96)
-
-	.  reduce 96
-
-
-state 157
-	str_ASSIGNMENT_statement : id LEFTBRACKET numbers . RIGHTBRACKET ASSIGNMENT  (83)
-	StringDeclare : id LEFTBRACKET numbers . RIGHTBRACKET COMMA StringDeclare  (92)
-	StringDeclare : id LEFTBRACKET numbers . RIGHTBRACKET  (95)
-
-	RIGHTBRACKET  shift 166
-	.  error
-
-
-state 158
-	variablesDeclare : ASSIGNMENT_statement COMMA variablesDeclare .  (97)
-
-	.  reduce 97
-
-
-state 159
-	str_ASSIGNMENT_statement : id . LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT  (83)
-	StringDeclare : id . LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare  (92)
-	StringDeclare : id . LEFTBRACKET numbers RIGHTBRACKET  (95)
-
-	LEFTBRACKET  shift 127
-	.  error
-
-
-state 160
-	StringDeclare : str_ASSIGNMENT_statement COMMA StringDeclare .  (94)
-
-	.  reduce 94
-
-
-state 161
-=======
+	AND  shift 114
+	DIVISION  shift 115
+	EQUAL  shift 116
+	GREATER  shift 117
+	GREATEREQUAL  shift 118
+	LESS  shift 119
+	LESSEQUAL  shift 120
+	MINUS  shift 121
+	NOTEQUAL  shift 122
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
 	BOOL  reduce 84
 	CHAR  reduce 84
 	INT  reduce 84
@@ -3660,82 +2659,88 @@ state 161
 	RIGHTPAREN  reduce 84
 
 
-state 153
+state 157
 	ASSIGNMENT_statement : id . ASSIGNMENT expr  (84)
-	variablesDeclare : id . COMMA variablesDeclare  (92)
-	variablesDeclare : id .  (95)
+	variablesDeclare : id . COMMA variablesDeclare  (98)
+	variablesDeclare : id .  (101)
 
-	ASSIGNMENT  shift 125
-	COMMA  shift 126
-	BOOL  reduce 95
-	CHAR  reduce 95
-	INT  reduce 95
-	STRING  reduce 95
-	INTPTR  reduce 95
-	CHARPTR  reduce 95
-	VOID  reduce 95
-	IF  reduce 95
-	ELSE  reduce 95
-	WHILE  reduce 95
-	FOR  reduce 95
-	DO  reduce 95
-	RETURN  reduce 95
-	SEMICOLON  reduce 95
-	RIGHTBRACE  reduce 95
-
-
-state 154
-	variablesDeclare : id COMMA variablesDeclare .  (92)
-
-	.  reduce 92
+	ASSIGNMENT  shift 127
+	COMMA  shift 128
+	BOOL  reduce 101
+	CHAR  reduce 101
+	INT  reduce 101
+	STRING  reduce 101
+	INTPTR  reduce 101
+	CHARPTR  reduce 101
+	VOID  reduce 101
+	IF  reduce 101
+	ELSE  reduce 101
+	WHILE  reduce 101
+	FOR  reduce 101
+	DO  reduce 101
+	RETURN  reduce 101
+	SEMICOLON  reduce 101
+	RIGHTBRACE  reduce 101
 
 
-state 155
-	variablesDeclare : ASSIGNMENT_statement COMMA variablesDeclare .  (93)
+state 158
+	variablesDeclare : id COMMA variablesDeclare .  (98)
 
-	.  reduce 93
+	.  reduce 98
 
 
-state 156
->>>>>>> Stashed changes
+state 159
+	str_ASSIGNMENT_statement : id LEFTBRACKET numbers . RIGHTBRACKET ASSIGNMENT strings  (85)
+	StringDeclare : id LEFTBRACKET numbers . RIGHTBRACKET COMMA StringDeclare  (94)
+	StringDeclare : id LEFTBRACKET numbers . RIGHTBRACKET  (97)
+
+	RIGHTBRACKET  shift 168
+	.  error
+
+
+state 160
+	variablesDeclare : ASSIGNMENT_statement COMMA variablesDeclare .  (99)
+
+	.  reduce 99
+
+
+state 161
+	str_ASSIGNMENT_statement : id . LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings  (85)
+	StringDeclare : id . LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare  (94)
+	StringDeclare : id . LEFTBRACKET numbers RIGHTBRACKET  (97)
+
+	LEFTBRACKET  shift 129
+	.  error
+
+
+state 162
+	StringDeclare : str_ASSIGNMENT_statement COMMA StringDeclare .  (96)
+
+	.  reduce 96
+
+
+state 163
 	block_return_value_statements : LEFTBRACE newline RETURN expr SEMICOLON . rightbrace  (33)
 
 	RIGHTBRACE  shift 60
 	.  error
 
-<<<<<<< Updated upstream
-	rightbrace  goto 167
+	rightbrace  goto 169
 
 
-state 162
-=======
-	rightbrace  goto 161
-
-
-state 157
->>>>>>> Stashed changes
+state 164
 	block_return_void_statements : LEFTBRACE newline RETURN SEMICOLON rightbrace .  (36)
 
 	.  reduce 36
 
 
-<<<<<<< Updated upstream
-state 163
-	else : ELSE statements_type .  (66)
-
-	.  reduce 66
-
-
-state 164
-=======
-state 158
+state 165
 	else : ELSE statements_type .  (68)
 
 	.  reduce 68
 
 
-state 159
->>>>>>> Stashed changes
+state 166
 	expr : expr . PLUS expr  (16)
 	expr : expr . MINUS expr  (17)
 	expr : expr . MULTI expr  (18)
@@ -3748,165 +2753,122 @@ state 159
 	expr : expr . NOTEQUAL expr  (25)
 	expr : expr . AND expr  (26)
 	expr : expr . OR expr  (27)
-<<<<<<< Updated upstream
-	postCondition : expr .  (78)
-=======
 	postCondition : expr .  (80)
->>>>>>> Stashed changes
 
-	AND  shift 112
-	DIVISION  shift 113
-	EQUAL  shift 114
-	GREATER  shift 115
-	GREATEREQUAL  shift 116
-	LESS  shift 117
-	LESSEQUAL  shift 118
-	MINUS  shift 119
-	NOTEQUAL  shift 120
-	OR  shift 121
-	PLUS  shift 122
-	MULTI  shift 123
-<<<<<<< Updated upstream
-	SEMICOLON  reduce 78
-
-
-state 165
-	for_cond : LEFTPAREN preCondition SEMICOLON postCondition . SEMICOLON iteration  (73)
-
-	SEMICOLON  shift 168
-	.  error
-
-
-state 166
-	str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET . ASSIGNMENT  (83)
-	StringDeclare : id LEFTBRACKET numbers RIGHTBRACKET . COMMA StringDeclare  (92)
-	StringDeclare : id LEFTBRACKET numbers RIGHTBRACKET .  (95)
-
-	ASSIGNMENT  shift 169
-	COMMA  shift 170
-	BOOL  reduce 95
-	CHAR  reduce 95
-	INT  reduce 95
-	STRING  reduce 95
-	INTPTR  reduce 95
-	CHARPTR  reduce 95
-	VOID  reduce 95
-	IF  reduce 95
-	ELSE  reduce 95
-	WHILE  reduce 95
-	FOR  reduce 95
-	DO  reduce 95
-	RETURN  reduce 95
-	SEMICOLON  reduce 95
-	RIGHTBRACE  reduce 95
-
-
-state 167
-=======
+	AND  shift 114
+	DIVISION  shift 115
+	EQUAL  shift 116
+	GREATER  shift 117
+	GREATEREQUAL  shift 118
+	LESS  shift 119
+	LESSEQUAL  shift 120
+	MINUS  shift 121
+	NOTEQUAL  shift 122
+	OR  shift 123
+	PLUS  shift 124
+	MULTI  shift 125
 	SEMICOLON  reduce 80
 
 
-state 160
+state 167
 	for_cond : LEFTPAREN preCondition SEMICOLON postCondition . SEMICOLON iteration  (75)
 
-	SEMICOLON  shift 162
+	SEMICOLON  shift 170
 	.  error
 
 
-state 161
->>>>>>> Stashed changes
+state 168
+	str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET . ASSIGNMENT strings  (85)
+	StringDeclare : id LEFTBRACKET numbers RIGHTBRACKET . COMMA StringDeclare  (94)
+	StringDeclare : id LEFTBRACKET numbers RIGHTBRACKET .  (97)
+
+	ASSIGNMENT  shift 171
+	COMMA  shift 172
+	BOOL  reduce 97
+	CHAR  reduce 97
+	INT  reduce 97
+	STRING  reduce 97
+	INTPTR  reduce 97
+	CHARPTR  reduce 97
+	VOID  reduce 97
+	IF  reduce 97
+	ELSE  reduce 97
+	WHILE  reduce 97
+	FOR  reduce 97
+	DO  reduce 97
+	RETURN  reduce 97
+	SEMICOLON  reduce 97
+	RIGHTBRACE  reduce 97
+
+
+state 169
 	block_return_value_statements : LEFTBRACE newline RETURN expr SEMICOLON rightbrace .  (33)
 
 	.  reduce 33
 
 
-<<<<<<< Updated upstream
-state 168
-	for_cond : LEFTPAREN preCondition SEMICOLON postCondition SEMICOLON . iteration  (73)
-	iteration : .  (79)
-
-	ID  shift 16
-	RIGHTPAREN  reduce 79
-
-	id  goto 171
-	iteration  goto 172
-	ASSIGNMENT_statement  goto 173
-
-
-state 169
-	str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT .  (83)
-
-	.  reduce 83
-
-
 state 170
-	StringDeclare : id LEFTBRACKET numbers RIGHTBRACKET COMMA . StringDeclare  (92)
-
-	ID  shift 16
-	.  error
-
-	id  goto 159
-	str_ASSIGNMENT_statement  goto 92
-	StringDeclare  goto 174
-
-
-state 171
-	ASSIGNMENT_statement : id . ASSIGNMENT expr  (82)
-=======
-state 162
 	for_cond : LEFTPAREN preCondition SEMICOLON postCondition SEMICOLON . iteration  (75)
 	iteration : .  (81)
 
 	ID  shift 16
 	RIGHTPAREN  reduce 81
 
-	id  goto 163
-	iteration  goto 164
-	ASSIGNMENT_statement  goto 165
+	id  goto 173
+	iteration  goto 174
+	ASSIGNMENT_statement  goto 175
 
 
-state 163
-	ASSIGNMENT_statement : id . ASSIGNMENT expr  (84)
->>>>>>> Stashed changes
+state 171
+	str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT . strings  (85)
 
-	ASSIGNMENT  shift 125
+	STRING_CONST  shift 78
 	.  error
 
+	strings  goto 176
 
-<<<<<<< Updated upstream
+
 state 172
-	for_cond : LEFTPAREN preCondition SEMICOLON postCondition SEMICOLON iteration .  (73)
+	StringDeclare : id LEFTBRACKET numbers RIGHTBRACKET COMMA . StringDeclare  (94)
 
-	.  reduce 73
+	ID  shift 16
+	.  error
+
+	id  goto 161
+	str_ASSIGNMENT_statement  goto 94
+	StringDeclare  goto 177
 
 
 state 173
-	iteration : ASSIGNMENT_statement .  (80)
+	ASSIGNMENT_statement : id . ASSIGNMENT expr  (84)
 
-	.  reduce 80
+	ASSIGNMENT  shift 127
+	.  error
 
 
 state 174
-	StringDeclare : id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare .  (92)
-
-	.  reduce 92
-
-
-56 terminals, 45 nonterminals
-100 grammar rules, 175 states
-=======
-state 164
 	for_cond : LEFTPAREN preCondition SEMICOLON postCondition SEMICOLON iteration .  (75)
 
 	.  reduce 75
 
 
-state 165
+state 175
 	iteration : ASSIGNMENT_statement .  (82)
 
 	.  reduce 82
 
 
-56 terminals, 44 nonterminals
-96 grammar rules, 166 states
->>>>>>> Stashed changes
+state 176
+	str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings .  (85)
+
+	.  reduce 85
+
+
+state 177
+	StringDeclare : id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare .  (94)
+
+	.  reduce 94
+
+
+56 terminals, 46 nonterminals
+102 grammar rules, 178 states
