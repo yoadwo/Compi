@@ -124,7 +124,11 @@
 
   84  ASSIGNMENT_statement : id ASSIGNMENT expr
 
+<<<<<<< Updated upstream
   85  str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings
+=======
+  85  str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT
+>>>>>>> Stashed changes
 
   86  variable_declare_statements : varType variablesDeclare
   87                              | varType StringDeclare
@@ -1162,7 +1166,11 @@ state 91
 state 92
 	procID : varType id .  (10)
 	ASSIGNMENT_statement : id . ASSIGNMENT expr  (84)
+<<<<<<< Updated upstream
 	str_ASSIGNMENT_statement : id . LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings  (85)
+=======
+	str_ASSIGNMENT_statement : id . LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT  (85)
+>>>>>>> Stashed changes
 	StringDeclare : id . LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare  (94)
 	StringDeclare : id . LEFTBRACKET numbers RIGHTBRACKET  (97)
 	variablesDeclare : id . COMMA variablesDeclare  (98)
@@ -1929,7 +1937,11 @@ state 128
 
 
 state 129
+<<<<<<< Updated upstream
 	str_ASSIGNMENT_statement : id LEFTBRACKET . numbers RIGHTBRACKET ASSIGNMENT strings  (85)
+=======
+	str_ASSIGNMENT_statement : id LEFTBRACKET . numbers RIGHTBRACKET ASSIGNMENT  (85)
+>>>>>>> Stashed changes
 	StringDeclare : id LEFTBRACKET . numbers RIGHTBRACKET COMMA StringDeclare  (94)
 	StringDeclare : id LEFTBRACKET . numbers RIGHTBRACKET  (97)
 
@@ -2690,7 +2702,11 @@ state 158
 
 
 state 159
+<<<<<<< Updated upstream
 	str_ASSIGNMENT_statement : id LEFTBRACKET numbers . RIGHTBRACKET ASSIGNMENT strings  (85)
+=======
+	str_ASSIGNMENT_statement : id LEFTBRACKET numbers . RIGHTBRACKET ASSIGNMENT  (85)
+>>>>>>> Stashed changes
 	StringDeclare : id LEFTBRACKET numbers . RIGHTBRACKET COMMA StringDeclare  (94)
 	StringDeclare : id LEFTBRACKET numbers . RIGHTBRACKET  (97)
 
@@ -2705,7 +2721,11 @@ state 160
 
 
 state 161
+<<<<<<< Updated upstream
 	str_ASSIGNMENT_statement : id . LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings  (85)
+=======
+	str_ASSIGNMENT_statement : id . LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT  (85)
+>>>>>>> Stashed changes
 	StringDeclare : id . LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare  (94)
 	StringDeclare : id . LEFTBRACKET numbers RIGHTBRACKET  (97)
 
@@ -2778,7 +2798,11 @@ state 167
 
 
 state 168
+<<<<<<< Updated upstream
 	str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET . ASSIGNMENT strings  (85)
+=======
+	str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET . ASSIGNMENT  (85)
+>>>>>>> Stashed changes
 	StringDeclare : id LEFTBRACKET numbers RIGHTBRACKET . COMMA StringDeclare  (94)
 	StringDeclare : id LEFTBRACKET numbers RIGHTBRACKET .  (97)
 
@@ -2820,10 +2844,16 @@ state 170
 
 
 state 171
+<<<<<<< Updated upstream
 	str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT . strings  (85)
 
 	STRING_CONST  shift 78
 	.  error
+=======
+	str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT .  (85)
+
+	.  reduce 85
+>>>>>>> Stashed changes
 
 	strings  goto 176
 
@@ -2836,7 +2866,11 @@ state 172
 
 	id  goto 161
 	str_ASSIGNMENT_statement  goto 94
+<<<<<<< Updated upstream
 	StringDeclare  goto 177
+=======
+	StringDeclare  goto 176
+>>>>>>> Stashed changes
 
 
 state 173
@@ -2859,16 +2893,23 @@ state 175
 
 
 state 176
+<<<<<<< Updated upstream
 	str_ASSIGNMENT_statement : id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings .  (85)
 
 	.  reduce 85
 
 
 state 177
+=======
+>>>>>>> Stashed changes
 	StringDeclare : id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare .  (94)
 
 	.  reduce 94
 
 
 56 terminals, 46 nonterminals
+<<<<<<< Updated upstream
 102 grammar rules, 178 states
+=======
+102 grammar rules, 177 states
+>>>>>>> Stashed changes

@@ -1,5 +1,5 @@
 void foo() {}
 void main(){
-    string x[10] = "omg";
+    string x = "omg";
     return;
 }
