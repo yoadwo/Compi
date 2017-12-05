@@ -23,8 +23,8 @@ void printtree (node *tree, int tab);
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID,QUOTES
 %token IF, ELSE, WHILE, FOR ,DO
 %token MAIN,  RETURN
-%token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST
-%token ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSUOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT
+%token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST 
+%token ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSUOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT, QUOTES
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
@@ -87,7 +87,7 @@ block_statements: emptyBlock
             
 emptyBlock: LEFTBRACE rightbrace {$$ = mknode ("(BLOCK", $2, NULL, NULL); };
 rightbrace: RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
-consts: id | numbers | booleans | csnull   ;
+consts: id | numbers | booleans | csnull | strings  ;
 id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
             | INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); }
@@ -97,6 +97,7 @@ numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); }
 csnull: CSNULL  { $$ = mknode (yytext, NULL, NULL, NULL); };
 booleans: BOOLTRUE { $$ = mknode (yytext, NULL, NULL, NULL); }
             | BOOLFALSE { $$ = mknode (yytext, NULL, NULL, NULL); };
+strings: STRING_CONST { $$ = mknode (yytext, NULL, NULL, NULL); };
 newline:  
         statement newline   {$$ = mknode ("", $1, NULL,$2); }
            | statement;

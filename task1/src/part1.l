@@ -1,9 +1,7 @@
 
 %{
 	int counter=1;
-     /*  char buf[100]; 
-    char *s;*/
-            char *yylval1; 
+        //char *yylval; 
         #include <string.h> 
 %}
 %x String 
@@ -55,14 +53,14 @@
 "]" return RIGHTBRACKET;
 "%" return PERCENT;
 "'"  return QUOTES;
-    
+  /*  
 \"[^"\n]*["\n] { 
-               yylval1 = strdup(yytext+1); 
-               if (yylval1[yyleng-2] != '"') 
+               yylval = strdup(yytext+1); 
+               if (yylval[yyleng-2] != '\"') 
                  printf("improperly terminated string"); 
                else 
-                   yylval1[yyleng-2] = 0; 
-               printf("found '%s'\n", yylval1); 
+                   yylval[yyleng-2] = 0; 
+               printf("found '%s'\n", yylval); 
                }
  /*
 \"      { BEGIN String; s = buf; } 

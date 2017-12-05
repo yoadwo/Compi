@@ -1,11 +1,5 @@
-
-do { 
-if(x==4){
-x=3; 
-x=5;
-x=6;
+void foo() {}
+void main(){
+    string x[10] = "omg";
+    return;
 }
-else
- x=2; 
-} while(x>4)
-
