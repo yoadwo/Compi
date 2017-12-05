@@ -64,6 +64,8 @@ expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | expr AND expr {$$ = mknode ("&&", $1, NULL, $3); }
         | expr OR expr {$$ = mknode ("||", $1, NULL, $3); }
         | NOT expr {$$ = mknode ("NOT", NULL, NULL, $2); }
+        |ADDRESS id  {$$ = mknode ("&", $2, NULL,NULL ); }
+        | DEREFERENCE id  {$$ = mknode ("^", $2, NULL, NULL); } 
         | Pexpr
         | consts 
         /*| ASSIGNMENT_statement*/;
@@ -83,7 +85,7 @@ block_statements: emptyBlock
             
 emptyBlock: LEFTBRACE rightbrace {$$ = mknode ("(BLOCK", $2, NULL, NULL); };
 rightbrace: RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
-consts: id | numbers | booleans | csnull | strings  ;
+consts: id | numbers | booleans | csnull | strings|chars  ;
 id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
             | INTEGER_POS  { $$ = mknode (yytext, NULL, NULL, NULL); }
@@ -94,6 +96,8 @@ csnull: CSNULL  { $$ = mknode (yytext, NULL, NULL, NULL); };
 booleans: BOOLTRUE { $$ = mknode (yytext, NULL, NULL, NULL); }
             | BOOLFALSE { $$ = mknode (yytext, NULL, NULL, NULL); };
 strings: STRING_CONST { $$ = mknode (yytext, NULL, NULL, NULL); };
+chars: CHAR_CONST { $$ = mknode (yytext, NULL, NULL, NULL); };
+
 newline:  
         statement newline   {$$ = mknode ("", $1, NULL,$2); }
            | statement;
@@ -101,6 +105,7 @@ newline:
 statement: IF_statements 
             | LOOP_statements  
             | proc
+            |ASSIGNMENT_statement
            /* | IN.OUT_statements*/
             /*| BOOLEAN_statements*/
             | variable_declare_statements
@@ -137,7 +142,9 @@ cond: LEFTPAREN expr rightParen {$$ = mknode ("(COND", $2, NULL, $3); };
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
 str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings  {$$ = mknode ("=", $1, NULL, $6); };
 variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {$$ = mknode ("DECLARE", $1, NULL, $2); }
-                              |STRING StringDeclare {$$ = mknode ("DECLARE", $2, NULL, NULL); };
+                              |STRING StringDeclare {$$ = mknode ("DECLARE", $2, NULL, NULL); }
+                            
+                              
 
 varType: BOOL        {$$ = mknode ("boolean", NULL, NULL, NULL); }
             | CHAR          {$$ = mknode ("char", NULL, NULL, NULL); }
@@ -156,7 +163,11 @@ variablesDeclare: id COMMA variablesDeclare    {$$ = mknode ("", $1, NULL, $3); 
             |  ASSIGNMENT_statement COMMA  variablesDeclare   {$$ = mknode ("", $1, NULL, $3); }
             | ASSIGNMENT_statement 
             | id;
-            
+  
+  
+  
+  
+  
 %%
 
 #include "lex.yy.c"
