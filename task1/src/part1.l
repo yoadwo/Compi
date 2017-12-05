@@ -1,8 +1,12 @@
 
 %{
 	int counter=1;
+     /*  char buf[100]; 
+    char *s;*/
+            char *yylval1; 
+        #include <string.h> 
 %}
-
+%x String 
 %x comment
 %%
 [ ]+ ;
@@ -50,10 +54,34 @@
 "[" return LEFTBRACKET;
 "]" return RIGHTBRACKET;
 "%" return PERCENT;
+"'"  return QUOTES;
+    
+\"[^"\n]*["\n] { 
+               yylval1 = strdup(yytext+1); 
+               if (yylval1[yyleng-2] != '"') 
+                 printf("improperly terminated string"); 
+               else 
+                   yylval1[yyleng-2] = 0; 
+               printf("found '%s'\n", yylval1); 
+               }
+ /*
+\"      { BEGIN String; s = buf; } 
+<String>\\n     { *s++ = '\n'; } 
+<String>\\t     { *s++ = '\t'; } 
+<String>\\\"    { *s++ = '\"'; } 
+<String>\"      {  
+                      *s = 0; 
+                      BEGIN 0; 
+                      printf("found '%s'\n", buf); 
+                    }
+<String>\n      { printf("invalid string"); exit(1); } 
+<String>.       { *s++ = *yytext; } 
+ */
 "/*" BEGIN comment;
 <comment>[^\n] ;
 <comment>\n     ;/*counter++;*/
 <comment>"*/" BEGIN 0;
+
 [a-zA-Z][a-zA-Z0-9_]* return ID;
 [1-9][0-9]*|-?0 return INTEGER_POS;
 \-[1-9]+ return INTEGER_NEG;
