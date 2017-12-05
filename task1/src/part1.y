@@ -103,11 +103,11 @@ statement: IF_statements
            /* | IN.OUT_statements*/
             /*| BOOLEAN_statements*/
             | variable_declare_statements
-            | /*expr */SEMICOLON; //no integer can be declared with type first
-=======
-            | expr SEMICOLON;
+            | SEMICOLON; //no integer can be declared with type first
+
+          
             
->>>>>>> Stashed changes
+
 
 statements_type: statement
                  |block_statements;
