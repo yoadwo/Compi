@@ -104,7 +104,6 @@ newline:
 statement: IF_statements 
             | LOOP_statements  
             | proc
-            |ASSIGNMENT_statement
            /* | IN.OUT_statements*/
             /*| BOOLEAN_statements*/
             | variable_declare_statements
