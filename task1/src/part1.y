@@ -10,11 +10,17 @@ typedef struct node{
     struct node *right;
 } node;
 
+union{
+ char *string;
+}
+
+token <string> STRING
+
 node *mknode (char *token, node *left, node* middle, node *right);
 void printtree (node *tree, int tab);
 #define YYSTYPE struct node *
 %}
-%token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID
+%token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID,QUOTES
 %token IF, ELSE, WHILE, FOR ,DO
 %token MAIN,  RETURN
 %token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST
@@ -132,8 +138,9 @@ cond: LEFTPAREN expr rightParen {$$ = mknode ("(COND", $2, NULL, $3); };
 
 /*IN.OUT_statements:;*/
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
-
-variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {$$ = mknode ("DECLARE", $1, NULL, $2); };
+str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT  {$$ = mknode ("=", $1, NULL, NULL); };
+variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {$$ = mknode ("DECLARE", $1, NULL, $2); }
+                              |varType StringDeclare {$$ = mknode ("DECLARE", $1, NULL, $2); };
 
 varType: BOOL        {$$ = mknode ("boolean", NULL, NULL, NULL); }
             | CHAR          {$$ = mknode ("char", NULL, NULL, NULL); }
@@ -141,6 +148,12 @@ varType: BOOL        {$$ = mknode ("boolean", NULL, NULL, NULL); }
             | STRING       {$$ = mknode ("string", NULL, NULL, NULL); }
             | INTPTR        {$$ = mknode ("intptr", NULL, NULL, NULL); }
             | CHARPTR    {$$ = mknode ("charptr", NULL, NULL, NULL); };
+            
+StringDeclare:id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare {$$ = mknode ("", $1, NULL, $5); }
+              | str_ASSIGNMENT_statement{$$ = mknode ("", $1, NULL,NULL); }
+              |str_ASSIGNMENT_statement COMMA StringDeclare {$$ = mknode ("", $1,NULL, $3); }
+              |id LEFTBRACKET numbers RIGHTBRACKET;
+                          
 
 variablesDeclare: id COMMA variablesDeclare    {$$ = mknode ("", $1, NULL, $3); }
             |  ASSIGNMENT_statement COMMA  variablesDeclare   {$$ = mknode ("", $1, NULL, $3); }
