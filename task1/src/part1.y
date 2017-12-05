@@ -137,12 +137,12 @@ cond: LEFTPAREN expr rightParen {$$ = mknode ("(COND", $2, NULL, $3); };
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); };
 str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings  {$$ = mknode ("=", $1, NULL, $6); };
 variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {$$ = mknode ("DECLARE", $1, NULL, $2); }
-                              | STRING StringDeclare {$$ = mknode ("DECLARE", $2, NULL, NULL); };
+                              |STRING StringDeclare {$$ = mknode ("DECLARE", $2, NULL, NULL); };
 
 varType: BOOL        {$$ = mknode ("boolean", NULL, NULL, NULL); }
             | CHAR          {$$ = mknode ("char", NULL, NULL, NULL); }
             | INT              {$$ = mknode ("integer", NULL, NULL, NULL); }
-            /*| STRING       {$$ = mknode ("string", NULL, NULL, NULL); }*/
+           /* | STRING       {$$ = mknode ("string", NULL, NULL, NULL); }*/
             | INTPTR        {$$ = mknode ("intptr", NULL, NULL, NULL); }
             | CHARPTR    {$$ = mknode ("charptr", NULL, NULL, NULL); };
             
