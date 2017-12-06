@@ -101,7 +101,7 @@ rightbrace: RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
 
 
               /*_________________________________________________TYPES________________________________________________*/
-consts: id | numbers | booleans | csnull | strings|chars  ;
+consts: id | numbers | booleans | csnull | strings|chars | procCall ;
 id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
 
 numbers: INTEGER_NEG {$$ = mknode (yytext, NULL, NULL, NULL); } 
@@ -114,6 +114,13 @@ booleans: BOOLTRUE { $$ = mknode (yytext, NULL, NULL, NULL); }
             | BOOLFALSE { $$ = mknode (yytext, NULL, NULL, NULL); };
 strings: STRING_CONST { $$ = mknode (yytext, NULL, NULL, NULL); };
 chars: CHAR_CONST { $$ = mknode (yytext, NULL, NULL, NULL); };
+procCall: id LEFTPAREN args RIGHTPAREN { $$ = mknode ("func call", $1, NULL, $3); };
+
+args: /* no params  */
+        | argsDeclare {$$ = mknode ("args:", $1, NULL, NULL); };
+argsDeclare: consts COMMA  argsDeclare  {$$ = mknode ("", $1, NULL, $3); }   
+        | consts ;
+
               /*_________________________________________________________________________________________________________*/
 derefID: DEREFERENCE id  {char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); $$ = mknode (s,NULL, NULL, NULL); } ;
 
@@ -135,6 +142,7 @@ statement: /* | IN.OUT_statements*/
             IF_statements 
             | LOOP_statements  
             | proc
+            | procCall SEMICOLON
             | ASSIGNMENT_statement SEMICOLON;
         
 
