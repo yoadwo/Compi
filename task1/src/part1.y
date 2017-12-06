@@ -187,7 +187,7 @@ varType: BOOL        {$$ = mknode ("boolean", NULL, NULL, NULL); }
 StringDeclare:id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare {$$ = mknode ("STRING", $1, NULL, $6); }
               | str_ASSIGNMENT_statement{$$ = mknode ("STRING", $1, NULL,NULL); }
               |str_ASSIGNMENT_statement COMMA StringDeclare {$$ = mknode ("STRING", $1,$3, NULL); }
-              |id LEFTBRACKET numbers RIGHTBRACKET;
+              |id LEFTBRACKET numbers RIGHTBRACKET     {$$ = mknode ("STRING", $1,NULL, NULL); };
                           
 
 variablesDeclare: id COMMA variablesDeclare    {$$ = mknode ("", $1, NULL, $3); }
