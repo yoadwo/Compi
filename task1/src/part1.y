@@ -32,12 +32,12 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      global {printf ("ok\n");   printtree ($1,0); };
-global:  procedures procMain  {$$ = mknode ("global", $1,NULL,$2); };
-
-procedures: 
-                 procedures proc   {$$ = mknode ("", $1,NULL, NULL); }
-                | proc    {$$ = mknode ("", $1, NULL,NULL); };
-
+global:  /*procedures*/ procMain  {$$ = mknode ("global", $1,NULL,NULL); };
+/*
+procedures: //noProc 
+                | procedures proc   {$$ = mknode ("", $1,NULL, NULL); }
+                | proc    {$$ = mknode ("", $1, NULL,NULL); };*/
+                
 proc:  procValue | procVoid;
 procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements {$$ = mknode ("main", $5,NULL, NULL); };
 procVoid: VOID id LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mknode ("procedure", $2, $4, $6); };
@@ -97,20 +97,26 @@ booleans: BOOLTRUE { $$ = mknode (yytext, NULL, NULL, NULL); }
 strings: STRING_CONST { $$ = mknode (yytext, NULL, NULL, NULL); };
 chars: CHAR_CONST { $$ = mknode (yytext, NULL, NULL, NULL); };
 
-derefID: DEREFERENCE id  {char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); $$ = mknode (s,NULL, NULL, NULL); } 
+derefID: DEREFERENCE id  {char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); $$ = mknode (s,NULL, NULL, NULL); } ;
 
 newline:  
-        statement newline   {$$ = mknode ("", $1, NULL,$2); }
-           | statement;
+        declarations newline   {$$ = mknode ("", $1, NULL,$2); }
+           | statements
+           | declarations;
            
-statement: IF_statements 
+declarations:  
+             variable_declare_statements SEMICOLON;
+            //| SEMICOLON; //no integer can be declared with type first
+
+statements: statement statements {$$ = mknode ("STATEMENT", $1, NULL,$2); }
+            | statement;
+
+statement: /* | IN.OUT_statements*/
+            IF_statements 
             | LOOP_statements  
             | proc
-           /* | IN.OUT_statements*/
-            /*| BOOLEAN_statements*/
-            | variable_declare_statements
-            | ASSIGNMENT_statement
-            | SEMICOLON; //no integer can be declared with type first
+            | ASSIGNMENT_statement SEMICOLON;
+        
 
 statements_type: statement
                  |block_statements;
