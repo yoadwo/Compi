@@ -16,7 +16,7 @@ node *mknode (char *token, node *left, node* middle, node *right);
 void printtree (node *tree, int tab);
 #define YYSTYPE struct node *
 %}
-%token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID,QUOTES
+%token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID,QUOTES,NADA
 %token IF, ELSE, WHILE, FOR ,DO
 %token MAIN,  RETURN
 %token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST 
@@ -32,11 +32,11 @@ void printtree (node *tree, int tab);
 %start s
 %%
 s:      global {printf ("ok\n");   printtree ($1,0); };
-global:  /*procedures*/ procMain  {$$ = mknode ("global", $1,NULL,NULL); };
-/*
-procedures: //noProc 
-                | procedures proc   {$$ = mknode ("", $1,NULL, NULL); }
-                | proc    {$$ = mknode ("", $1, NULL,NULL); };*/
+global:  procedures procMain  {$$ = mknode ("global", $1,NULL,$2); }
+            |procMain  {$$ = mknode ("global", $1,NULL,NULL); }     ;
+
+procedures: procedures proc   {$$ = mknode ("", $1,NULL, NULL); }
+                | proc    {$$ = mknode ("", $1, NULL,NULL); };
                 
 proc:  procValue | procVoid;
 procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements {$$ = mknode ("main", $5,NULL, NULL); };
@@ -127,6 +127,8 @@ IF_statements: IF cond statements_type {$$ = mknode ("IF", $2,$3,NULL); } %prec 
                
 else:    ELSE statements_type{$$ = mknode ("ELSE", $2,NULL, NULL); };
 
+
+
 LOOP_statements: while | whileDO | for;
 
 //note: while\DO's right paren is their right grand-child
@@ -136,18 +138,20 @@ whileDO: DO statements_type WHILE cond  {$$=mknode("do-while", $2,NULL, $4);};
 for:  FOR for_cond  rightParen statements_type{$$=mknode("for", $2,$3, $4);};
                  
 for_cond: LEFTPAREN preCondition SEMICOLON postCondition SEMICOLON iteration {$$=mknode("for conditions:", $2,$4, $6);};
+
+
+
 preCondition: /* empty */ |  expr | ASSIGNMENT_statement;
 postCondition: /* empty */ | expr;
 iteration: /* empty */ | ASSIGNMENT_statement;
 cond: LEFTPAREN expr rightParen {$$ = mknode ("(COND", $2, NULL, $3); };
 
 
-/*IN.OUT_statements:;*/
+            /*________________________________ASSIGNMENT STATEMENTS____________________________________*/
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); } 
             | derefID ASSIGNMENT expr  {$$ = mknode ("=", $1, NULL, $3); } ;
 str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings  {$$ = mknode ("=", $1, NULL, $6); };
-variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {$$ = mknode ("DECLARE", $1, NULL, $2); }
-                              |STRING StringDeclare {$$ = mknode ("DECLARE", $2, NULL, NULL); }
+
                             
                               
 
@@ -158,9 +162,13 @@ varType: BOOL        {$$ = mknode ("boolean", NULL, NULL, NULL); }
             | INTPTR        {$$ = mknode ("intptr", NULL, NULL, NULL); }
             | CHARPTR    {$$ = mknode ("charptr", NULL, NULL, NULL); };
             
-StringDeclare:id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare {$$ = mknode ("", $1, NULL, $6); }
-              | str_ASSIGNMENT_statement{$$ = mknode ("", $1, NULL,NULL); }
-              |str_ASSIGNMENT_statement COMMA StringDeclare {$$ = mknode ("", $1,$3, NULL); }
+            
+            
+            /*____________________________________DECLARATIONS_______________________________________*/
+            
+StringDeclare:id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare {$$ = mknode ("STRING", $1, NULL, $6); }
+              | str_ASSIGNMENT_statement{$$ = mknode ("STRING", $1, NULL,NULL); }
+              |str_ASSIGNMENT_statement COMMA StringDeclare {$$ = mknode ("STRING", $1,$3, NULL); }
               |id LEFTBRACKET numbers RIGHTBRACKET;
                           
 
@@ -169,8 +177,8 @@ variablesDeclare: id COMMA variablesDeclare    {$$ = mknode ("", $1, NULL, $3); 
             | ASSIGNMENT_statement 
             | id;
   
-  
-  
+variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {$$ = mknode ("DECLARE", $1, NULL, $2); }
+                              |STRING StringDeclare {$$ = mknode ("DECLARE", $2, NULL, NULL); };
   
   
 %%

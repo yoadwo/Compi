@@ -52,6 +52,7 @@
 "]" return RIGHTBRACKET;
 "%" return PERCENT;
 "'"  return QUOTES;
+"nada" return NADA;
 "/*" BEGIN comment;
 <comment>[^\n] ;
 <comment>\n     ;/*counter++;*/
