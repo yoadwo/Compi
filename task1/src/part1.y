@@ -34,7 +34,9 @@ void printtree (node *tree, int tab);
 s:      global {printf ("ok\n");   printtree ($1,0); };
 global:  procedures procMain  {$$ = mknode ("global", $1,NULL,$2); }
             |procMain  {$$ = mknode ("global", $1,NULL,NULL); }     ;
-
+       
+       
+       /*________________________________________________PROCEDURES________________________________________________*/
 procedures: procedures proc   {$$ = mknode ("", $1,NULL, NULL); }
                 | proc    {$$ = mknode ("", $1, NULL,NULL); };
                 
@@ -43,6 +45,10 @@ procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements {$$ = mkno
 procVoid: VOID id LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mknode ("procedure", $2, $4, $6); };
 procValue: procID LEFTPAREN params RIGHTPAREN  block_return_value_statements {$$ = mknode ("procedure", $1, $3, $5); };
 procID: varType id {$$ = mknode ("procID", $1, $2, NULL); };
+
+
+
+      /*________________________________________________PARAMS DECLARE______________________________________________*/
 params: /* no params  */
         | paramsDeclare {$$ = mknode ("params:", $1, NULL, NULL); };
 paramsDeclare: param COMMA  paramsDeclare  {$$ = mknode ("", $1, NULL, $3); }   
@@ -50,7 +56,10 @@ paramsDeclare: param COMMA  paramsDeclare  {$$ = mknode ("", $1, NULL, $3); }
 /* to change tree design\print, toggle between following: 1) [type id] 2) [][type][id] */
 /*param: varType id {char *s = " "; s=  strcat ($1->token,s);  $$ = mknode (strcat($1->token,$2->token), NULL, NULL, NULL); }   ;*/
 param: varType id {$$ = mknode ("", $1, NULL, $2); }   ;
-                                  
+  
+  
+  
+       /*______________________________________________EXPR____________________________________________________________*/
 expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | expr MINUS expr {$$ = mknode ("-", $1, NULL, $3); }
         | expr MULTI expr {$$ = mknode ("*", $1, NULL, $3); }
@@ -69,6 +78,8 @@ expr:     expr PLUS expr    {$$ = mknode ("+", $1, NULL, $3); }
         | Pexpr
         | consts ;
 
+        
+        /*______________________________________________________BLOCKS_____________________________________________________*/
 Pexpr:  LEFTPAREN expr rightParen {$$ = mknode ("(", $2, NULL, $3); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
 block_return_value_statements: LEFTBRACE newline RETURN expr SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, $4, $6); }
@@ -84,6 +95,12 @@ block_statements: emptyBlock
             
 emptyBlock: LEFTBRACE rightbrace {$$ = mknode ("(BLOCK", $2, NULL, NULL); };
 rightbrace: RIGHTBRACE  {$$ = mknode (")", NULL, NULL,NULL ); };
+
+
+
+
+
+              /*_________________________________________________TYPES________________________________________________*/
 consts: id | numbers | booleans | csnull | strings|chars  ;
 id:   ID            {$$ = mknode (yytext, NULL, NULL, NULL); }  ;
 
@@ -97,7 +114,7 @@ booleans: BOOLTRUE { $$ = mknode (yytext, NULL, NULL, NULL); }
             | BOOLFALSE { $$ = mknode (yytext, NULL, NULL, NULL); };
 strings: STRING_CONST { $$ = mknode (yytext, NULL, NULL, NULL); };
 chars: CHAR_CONST { $$ = mknode (yytext, NULL, NULL, NULL); };
-
+              /*_________________________________________________________________________________________________________*/
 derefID: DEREFERENCE id  {char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); $$ = mknode (s,NULL, NULL, NULL); } ;
 
 newline:  
@@ -109,6 +126,8 @@ declarations:
              variable_declare_statements SEMICOLON;
             //| SEMICOLON; //no integer can be declared with type first
 
+            
+            /*_________________________________________________________STATEMENTS___________________________________________________*/
 statements: statement statements {$$ = mknode ("STATEMENT", $1, NULL,$2); }
             | statement;
 
@@ -128,9 +147,8 @@ IF_statements: IF cond statements_type {$$ = mknode ("IF", $2,$3,NULL); } %prec 
 else:    ELSE statements_type{$$ = mknode ("ELSE", $2,NULL, NULL); };
 
 
-
+            /*_______________________________________LOOP STATEMENTS___________________________________*/
 LOOP_statements: while | whileDO | for;
-
 //note: while\DO's right paren is their right grand-child
 while: WHILE cond statements_type {$$=mknode("while", $2,NULL, $3);} ;
 whileDO: DO statements_type WHILE cond  {$$=mknode("do-while", $2,NULL, $4);};
