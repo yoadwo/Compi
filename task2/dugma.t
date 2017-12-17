@@ -1,6 +1,5 @@
 void main(){
-        while ( x> 3 {
-            t = 3;
-        }
+  integer x=5,z,y=5,t;
+   
         return;
 }

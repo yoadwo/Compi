@@ -32,15 +32,19 @@ typedef struct treeNode{
 typedef struct symbolNode{
 	char* id;
 	char* type;
-	int data;
+	char* data;
 	struct symbolNode *next;
 } symbolNode;
 
 
+ symbolNode* head = NULL;
+
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
+void pushSymbols(char* type,treeNode* tNode);
+void push(struct symbolNode** head_ref, char* id, char* type, char* new_data);
 #define YYSTYPE struct treeNode *
-#line 44 "bin/y.tab.c"
+#line 48 "bin/y.tab.c"
 
 #if ! defined(YYSTYPE) && ! defined(YYSTYPE_IS_DECLARED)
 /* Default: YYSTYPE is the semantic value type. */
@@ -569,7 +573,7 @@ typedef struct {
 } YYSTACKDATA;
 /* variables for the parser stack */
 static YYSTACKDATA yystack;
-#line 217 "src/part2.y"
+#line 221 "src/part2.y"
 
 #include "lex.yy.c"
 int main(){
@@ -610,16 +614,37 @@ int yyerror(char* s){
 // A complete working C program to delete a node in a linked list
 // at a given position
 
+void pushSymbols(char* type,treeNode* tNode){
+  /*left is id or assighment*/
+  /*single assighment */
+   
+  if(!strcmp(tNode->token,"=")){
+    push( &head,tNode->left->token,type,tNode->right->token);
+   
+    }
+ /* else
+    push(&head,tNode->left->token,type,NULL);
+ if(!strcmp(tNode->right->token,"=")){
+    push( &head,tNode->right->left->token,type,tNode->left->right->token);
+ return;
+ }
+ 
+   pushSymbols(type,tNode->right);  */ 
+
+}
 
 
 /* Given a reference (pointer to pointer) to the head of a list
 and an int, inserts a new node on the front of the list. */
-void push(struct symbolNode** head_ref, char* id, char* type, int new_data)
+void push(struct symbolNode** head_ref, char* id, char* type, char* new_data)
 {
 	struct symbolNode* new_node = (struct symbolNode*) malloc(sizeof(struct symbolNode));
-	new_node->data = new_data;
+	
 	new_node->id = (char*)(malloc (sizeof(id) + 1));
 	strncpy(new_node->id, id, sizeof(id)+1);
+	
+	new_node->data = (char*)(malloc (sizeof(new_data) + 1));
+	strncpy(new_node->data, new_data, sizeof(new_data)+1);
 	
 	new_node->type = (char*)(malloc (sizeof(type) + 1));
 	strncpy(new_node->type, type, sizeof(type)+1);
@@ -675,20 +700,20 @@ void printList(struct symbolNode *node)
 {
 	while (node != NULL)
 	{
-		printf("id:{%s}, type:{%s}, data{%d} \n", node->id, node->type, node->data);
+		printf("id:{%s}, type:{%s}, data{%s} \n", node->id, node->type, node->data);
 		node = node->next;
 	}
 }
 
-struct symbolNode* head = NULL;
 
-/* Drier program to test above functions*/
-int main2()
-{
-	/* Start with the empty list */
-	
 
-	push(&head, "a", "int", 7);
+ /* Drier program to test above functions*/
+  /* int main2()
+  {
+   Start with the empty list 
+
+
+    push(&head, "a", "int", 7);
 	push(&head, "b", "float", 1);
 	push(&head, "c", "char", 3);
 	push(&head, "d1", "string", 2);
@@ -700,9 +725,9 @@ int main2()
 	puts("\nLinked List after Deletion at position 4: ");
 	printList(head);
 	return 0;
-}
+ }*/
 
-#line 706 "bin/y.tab.c"
+#line 731 "bin/y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -905,310 +930,310 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 40 "src/part2.y"
-	{printf ("ok\n");   printtree (yystack.l_mark[0],0); }
+#line 44 "src/part2.y"
+	{printf ("ok\n");  printList(head);printf("\n"); printtree (yystack.l_mark[0],0); }
 break;
 case 2:
-#line 41 "src/part2.y"
+#line 45 "src/part2.y"
 	{yyval = mktreeNode ("global", yystack.l_mark[-1],NULL,yystack.l_mark[0]); }
 break;
 case 3:
-#line 42 "src/part2.y"
+#line 46 "src/part2.y"
 	{yyval = mktreeNode ("global", yystack.l_mark[0],NULL,NULL); }
 break;
 case 4:
-#line 46 "src/part2.y"
+#line 50 "src/part2.y"
 	{yyval = mktreeNode ("", yystack.l_mark[-1],NULL, NULL); }
 break;
 case 5:
-#line 47 "src/part2.y"
+#line 51 "src/part2.y"
 	{yyval = mktreeNode ("", yystack.l_mark[0], NULL,NULL); }
 break;
 case 8:
-#line 50 "src/part2.y"
+#line 54 "src/part2.y"
 	{yyval = mktreeNode ("main", yystack.l_mark[0],NULL, NULL); }
 break;
 case 9:
-#line 51 "src/part2.y"
+#line 55 "src/part2.y"
 	{yyval = mktreeNode ("procedure", yystack.l_mark[-4], yystack.l_mark[-2], yystack.l_mark[0]); }
 break;
 case 10:
-#line 52 "src/part2.y"
+#line 56 "src/part2.y"
 	{yyval = mktreeNode ("procedure", yystack.l_mark[-4], yystack.l_mark[-2], yystack.l_mark[0]); }
 break;
 case 11:
-#line 53 "src/part2.y"
+#line 57 "src/part2.y"
 	{yyval = mktreeNode ("procID", yystack.l_mark[-1], yystack.l_mark[0], NULL); }
 break;
 case 13:
-#line 59 "src/part2.y"
+#line 63 "src/part2.y"
 	{yyval = mktreeNode ("params:", yystack.l_mark[0], NULL, NULL); }
 break;
 case 14:
-#line 60 "src/part2.y"
+#line 64 "src/part2.y"
 	{yyval = mktreeNode ("", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 16:
-#line 64 "src/part2.y"
+#line 68 "src/part2.y"
 	{yyval = mktreeNode ("", yystack.l_mark[-1], NULL, yystack.l_mark[0]); }
 break;
 case 17:
-#line 69 "src/part2.y"
+#line 73 "src/part2.y"
 	{yyval = mktreeNode ("+", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 18:
-#line 70 "src/part2.y"
+#line 74 "src/part2.y"
 	{yyval = mktreeNode ("-", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 19:
-#line 71 "src/part2.y"
+#line 75 "src/part2.y"
 	{yyval = mktreeNode ("*", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 20:
-#line 72 "src/part2.y"
+#line 76 "src/part2.y"
 	{yyval = mktreeNode ("/", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 21:
-#line 73 "src/part2.y"
+#line 77 "src/part2.y"
 	{ yyval = mktreeNode ("==", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 22:
-#line 74 "src/part2.y"
+#line 78 "src/part2.y"
 	{ yyval = mktreeNode (">", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 23:
-#line 75 "src/part2.y"
+#line 79 "src/part2.y"
 	{ yyval = mktreeNode (">=", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 24:
-#line 76 "src/part2.y"
+#line 80 "src/part2.y"
 	{ yyval = mktreeNode ("<", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 25:
-#line 77 "src/part2.y"
+#line 81 "src/part2.y"
 	{ yyval = mktreeNode ("<=", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 26:
-#line 78 "src/part2.y"
+#line 82 "src/part2.y"
 	{ yyval = mktreeNode ("!=", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 27:
-#line 79 "src/part2.y"
+#line 83 "src/part2.y"
 	{yyval = mktreeNode ("&&", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 28:
-#line 80 "src/part2.y"
+#line 84 "src/part2.y"
 	{yyval = mktreeNode ("||", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 29:
-#line 81 "src/part2.y"
+#line 85 "src/part2.y"
 	{yyval = mktreeNode ("NOT", NULL, NULL, yystack.l_mark[0]); }
 break;
 case 30:
-#line 82 "src/part2.y"
+#line 86 "src/part2.y"
 	{yyval = mktreeNode ("&", yystack.l_mark[0], NULL,NULL ); }
 break;
 case 34:
-#line 89 "src/part2.y"
+#line 93 "src/part2.y"
 	{yyval = mktreeNode ("(", yystack.l_mark[-1], NULL, yystack.l_mark[0]); }
 break;
 case 35:
-#line 90 "src/part2.y"
+#line 94 "src/part2.y"
 	{yyval = mktreeNode (")", NULL, NULL, NULL); }
 break;
 case 36:
-#line 91 "src/part2.y"
+#line 95 "src/part2.y"
 	{yyval = mktreeNode ("(BLOCK", yystack.l_mark[-4], yystack.l_mark[-2], yystack.l_mark[0]); }
 break;
 case 37:
-#line 92 "src/part2.y"
+#line 96 "src/part2.y"
 	{yyval = mktreeNode ("(BLOCK", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 39:
-#line 94 "src/part2.y"
+#line 98 "src/part2.y"
 	{yyval = mktreeNode ("(BLOCK", yystack.l_mark[-3], NULL, yystack.l_mark[-1]); }
 break;
 case 40:
-#line 95 "src/part2.y"
+#line 99 "src/part2.y"
 	{yyval = mktreeNode ("(BLOCK", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 42:
-#line 98 "src/part2.y"
+#line 102 "src/part2.y"
 	{yyval = mktreeNode ("(BLOCK", yystack.l_mark[-1], NULL, yystack.l_mark[0]); }
 break;
 case 43:
-#line 102 "src/part2.y"
+#line 106 "src/part2.y"
 	{yyval = mktreeNode ("(BLOCK", yystack.l_mark[0], NULL, NULL); }
 break;
 case 44:
-#line 103 "src/part2.y"
+#line 107 "src/part2.y"
 	{yyval = mktreeNode (")", NULL, NULL,NULL ); }
 break;
 case 52:
-#line 111 "src/part2.y"
+#line 115 "src/part2.y"
 	{yyval = mktreeNode (yytext, NULL, NULL, NULL); }
 break;
 case 53:
-#line 113 "src/part2.y"
+#line 117 "src/part2.y"
 	{yyval = mktreeNode (yytext, NULL, NULL, NULL); }
 break;
 case 54:
-#line 114 "src/part2.y"
-	{ yyval = mktreeNode (yytext, NULL, NULL, NULL); }
-break;
-case 55:
-#line 115 "src/part2.y"
-	{ yyval = mktreeNode (yytext, NULL, NULL, NULL); }
-break;
-case 56:
-#line 116 "src/part2.y"
-	{ yyval = mktreeNode (yytext, NULL, NULL, NULL); }
-break;
-case 57:
-#line 117 "src/part2.y"
-	{ yyval = mktreeNode (yytext, NULL, NULL, NULL); }
-break;
-case 58:
 #line 118 "src/part2.y"
 	{ yyval = mktreeNode (yytext, NULL, NULL, NULL); }
 break;
-case 59:
+case 55:
 #line 119 "src/part2.y"
 	{ yyval = mktreeNode (yytext, NULL, NULL, NULL); }
 break;
-case 60:
+case 56:
 #line 120 "src/part2.y"
 	{ yyval = mktreeNode (yytext, NULL, NULL, NULL); }
 break;
-case 61:
+case 57:
 #line 121 "src/part2.y"
 	{ yyval = mktreeNode (yytext, NULL, NULL, NULL); }
 break;
-case 62:
+case 58:
 #line 122 "src/part2.y"
 	{ yyval = mktreeNode (yytext, NULL, NULL, NULL); }
 break;
-case 63:
+case 59:
 #line 123 "src/part2.y"
+	{ yyval = mktreeNode (yytext, NULL, NULL, NULL); }
+break;
+case 60:
+#line 124 "src/part2.y"
+	{ yyval = mktreeNode (yytext, NULL, NULL, NULL); }
+break;
+case 61:
+#line 125 "src/part2.y"
+	{ yyval = mktreeNode (yytext, NULL, NULL, NULL); }
+break;
+case 62:
+#line 126 "src/part2.y"
+	{ yyval = mktreeNode (yytext, NULL, NULL, NULL); }
+break;
+case 63:
+#line 127 "src/part2.y"
 	{ yyval = mktreeNode ("func call", yystack.l_mark[-3], NULL, yystack.l_mark[-1]); }
 break;
 case 65:
-#line 126 "src/part2.y"
+#line 130 "src/part2.y"
 	{yyval = mktreeNode ("args:", yystack.l_mark[0], NULL, NULL); }
 break;
 case 66:
-#line 127 "src/part2.y"
+#line 131 "src/part2.y"
 	{yyval = mktreeNode ("", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 68:
-#line 131 "src/part2.y"
+#line 135 "src/part2.y"
 	{char* t = yystack.l_mark[0]->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); yyval = mktreeNode (s,NULL, NULL, NULL); }
 break;
 case 69:
-#line 134 "src/part2.y"
+#line 138 "src/part2.y"
 	{yyval = mktreeNode ("", yystack.l_mark[-1], NULL,yystack.l_mark[0]); }
 break;
 case 73:
-#line 144 "src/part2.y"
+#line 148 "src/part2.y"
 	{yyval = mktreeNode ("STATEMENT", yystack.l_mark[-1], NULL,yystack.l_mark[0]); }
 break;
 case 82:
-#line 158 "src/part2.y"
+#line 162 "src/part2.y"
 	{yyval = mktreeNode ("IF", yystack.l_mark[-1],yystack.l_mark[0],NULL); }
 break;
 case 83:
-#line 159 "src/part2.y"
+#line 163 "src/part2.y"
 	{yyval = mktreeNode ("IF", yystack.l_mark[-2],yystack.l_mark[-1], yystack.l_mark[0]); }
 break;
 case 84:
-#line 161 "src/part2.y"
+#line 165 "src/part2.y"
 	{yyval = mktreeNode ("ELSE", yystack.l_mark[0],NULL, NULL); }
 break;
 case 88:
-#line 167 "src/part2.y"
+#line 171 "src/part2.y"
 	{yyval=mktreeNode("while", yystack.l_mark[-1],NULL, yystack.l_mark[0]);}
 break;
 case 89:
-#line 168 "src/part2.y"
+#line 172 "src/part2.y"
 	{yyval=mktreeNode("do-while", yystack.l_mark[-2],NULL, yystack.l_mark[0]);}
 break;
 case 90:
-#line 170 "src/part2.y"
+#line 174 "src/part2.y"
 	{yyval=mktreeNode("for", yystack.l_mark[-2],yystack.l_mark[-1], yystack.l_mark[0]);}
 break;
 case 91:
-#line 172 "src/part2.y"
+#line 176 "src/part2.y"
 	{yyval=mktreeNode("for conditions:", yystack.l_mark[-4],yystack.l_mark[-2], yystack.l_mark[0]);}
 break;
 case 99:
-#line 179 "src/part2.y"
+#line 183 "src/part2.y"
 	{yyval = mktreeNode ("(COND", yystack.l_mark[-1], NULL, yystack.l_mark[0]); }
 break;
 case 100:
-#line 183 "src/part2.y"
+#line 187 "src/part2.y"
 	{yyval = mktreeNode ("=", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 101:
-#line 184 "src/part2.y"
+#line 188 "src/part2.y"
 	{yyval = mktreeNode ("=", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 102:
-#line 185 "src/part2.y"
+#line 189 "src/part2.y"
 	{yyval = mktreeNode ("=", yystack.l_mark[-5], NULL, yystack.l_mark[0]); }
 break;
 case 103:
-#line 190 "src/part2.y"
+#line 194 "src/part2.y"
 	{yyval = mktreeNode ("boolean", NULL, NULL, NULL); }
 break;
 case 104:
-#line 191 "src/part2.y"
+#line 195 "src/part2.y"
 	{yyval = mktreeNode ("char", NULL, NULL, NULL); }
 break;
 case 105:
-#line 192 "src/part2.y"
+#line 196 "src/part2.y"
 	{yyval = mktreeNode ("integer", NULL, NULL, NULL); }
 break;
 case 106:
-#line 194 "src/part2.y"
+#line 198 "src/part2.y"
 	{yyval = mktreeNode ("intptr", NULL, NULL, NULL); }
 break;
 case 107:
-#line 195 "src/part2.y"
+#line 199 "src/part2.y"
 	{yyval = mktreeNode ("charptr", NULL, NULL, NULL); }
 break;
 case 108:
-#line 201 "src/part2.y"
+#line 205 "src/part2.y"
 	{yyval = mktreeNode ("STRING", yystack.l_mark[-5], NULL, yystack.l_mark[0]); }
 break;
 case 109:
-#line 202 "src/part2.y"
+#line 206 "src/part2.y"
 	{yyval = mktreeNode ("STRING", yystack.l_mark[0], NULL,NULL); }
 break;
 case 110:
-#line 203 "src/part2.y"
+#line 207 "src/part2.y"
 	{yyval = mktreeNode ("STRING", yystack.l_mark[-2],yystack.l_mark[0], NULL); }
 break;
 case 111:
-#line 204 "src/part2.y"
+#line 208 "src/part2.y"
 	{yyval = mktreeNode ("STRING", yystack.l_mark[-3],NULL, NULL); }
 break;
 case 112:
-#line 207 "src/part2.y"
+#line 211 "src/part2.y"
 	{yyval = mktreeNode ("", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 113:
-#line 208 "src/part2.y"
+#line 212 "src/part2.y"
 	{yyval = mktreeNode ("", yystack.l_mark[-2], NULL, yystack.l_mark[0]); }
 break;
 case 116:
-#line 212 "src/part2.y"
-	{yyval = mktreeNode ("DECLARE", yystack.l_mark[-1], NULL, yystack.l_mark[0]); }
+#line 216 "src/part2.y"
+	{pushSymbols(yystack.l_mark[-1]->token,yystack.l_mark[0]); yyval = mktreeNode ("DECLARE", yystack.l_mark[-1], NULL, yystack.l_mark[0]);}
 break;
 case 117:
-#line 213 "src/part2.y"
+#line 217 "src/part2.y"
 	{yyval = mktreeNode ("DECLARE", yystack.l_mark[0], NULL, NULL); }
 break;
-#line 1212 "bin/y.tab.c"
+#line 1237 "bin/y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;

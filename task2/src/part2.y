@@ -13,13 +13,17 @@ typedef struct treeNode{
 typedef struct symbolNode{
 	char* id;
 	char* type;
-	int data;
+	char* data;
 	struct symbolNode *next;
 } symbolNode;
 
 
+ symbolNode* head = NULL;
+
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
+void pushSymbols(char* type,treeNode* tNode);
+void push(struct symbolNode** head_ref, char* id, char* type, char* new_data);
 #define YYSTYPE struct treeNode *
 %}
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID,QUOTES,NADA
@@ -37,7 +41,7 @@ void printtree (treeNode *tree, int tab);
 %left MULTI DIVISION
 %start s
 %%
-s:      global {printf ("ok\n");   printtree ($1,0); };
+s:      global {printf ("ok\n");  printList(head);printf("\n"); printtree ($1,0); };
 global:  procedures procMain  {$$ = mktreeNode ("global", $1,NULL,$2); }
             |procMain  {$$ = mktreeNode ("global", $1,NULL,NULL); }     ;
        
@@ -209,7 +213,7 @@ variablesDeclare: id COMMA variablesDeclare    {$$ = mktreeNode ("", $1, NULL, $
             | ASSIGNMENT_statement 
             | id;
   
-variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {$$ = mktreeNode ("DECLARE", $1, NULL, $2); }
+variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {pushSymbols($1->token,$2); $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
                               |STRING StringDeclare {$$ = mktreeNode ("DECLARE", $2, NULL, NULL); };
   
   
@@ -254,16 +258,41 @@ int yyerror(char* s){
 // A complete working C program to delete a node in a linked list
 // at a given position
 
+void pushSymbols(char* type,treeNode* tNode){
+  /*left is id or assighment*/
+  /*single assighment */
+   
+  if(!strcmp(tNode->token,"=")){
+    push( &head,tNode->left->token,type,tNode->right->token);
+   
+    }
+    
+ 
+  
+  ]
+ /* else
+    push(&head,tNode->left->token,type,NULL);
+ if(!strcmp(tNode->right->token,"=")){
+    push( &head,tNode->right->left->token,type,tNode->left->right->token);
+ return;
+ }
+ 
+   pushSymbols(type,tNode->right);  */ 
+
+}
 
 
 /* Given a reference (pointer to pointer) to the head of a list
 and an int, inserts a new node on the front of the list. */
-void push(struct symbolNode** head_ref, char* id, char* type, int new_data)
+void push(struct symbolNode** head_ref, char* id, char* type, char* new_data)
 {
 	struct symbolNode* new_node = (struct symbolNode*) malloc(sizeof(struct symbolNode));
-	new_node->data = new_data;
+	
 	new_node->id = (char*)(malloc (sizeof(id) + 1));
 	strncpy(new_node->id, id, sizeof(id)+1);
+	
+	new_node->data = (char*)(malloc (sizeof(new_data) + 1));
+	strncpy(new_node->data, new_data, sizeof(new_data)+1);
 	
 	new_node->type = (char*)(malloc (sizeof(type) + 1));
 	strncpy(new_node->type, type, sizeof(type)+1);
@@ -319,20 +348,20 @@ void printList(struct symbolNode *node)
 {
 	while (node != NULL)
 	{
-		printf("id:{%s}, type:{%s}, data{%d} \n", node->id, node->type, node->data);
+		printf("id:{%s}, type:{%s}, data{%s} \n", node->id, node->type, node->data);
 		node = node->next;
 	}
 }
 
-struct symbolNode* head = NULL;
 
-/* Drier program to test above functions*/
-int main2()
-{
-	/* Start with the empty list */
-	
 
-	push(&head, "a", "int", 7);
+ /* Drier program to test above functions*/
+  /* int main2()
+  {
+   Start with the empty list 
+
+
+    push(&head, "a", "int", 7);
 	push(&head, "b", "float", 1);
 	push(&head, "c", "char", 3);
 	push(&head, "d1", "string", 2);
@@ -344,5 +373,5 @@ int main2()
 	puts("\nLinked List after Deletion at position 4: ");
 	printList(head);
 	return 0;
-}
+ }*/
 
