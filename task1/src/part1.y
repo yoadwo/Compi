@@ -84,9 +84,11 @@ Pexpr:  LEFTPAREN expr rightParen {$$ = mknode ("(", $2, NULL, $3); };
 rightParen: RIGHTPAREN {$$ = mknode (")", NULL, NULL, NULL); };
 block_return_value_statements: LEFTBRACE newline RETURN expr SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, $4, $6); }
             | LEFTBRACE RETURN expr SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $3, NULL, $5); };
+            
 block_return_void_statements :   emptyBlock 
-            | LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $4); }
-            | LEFTBRACE RETURN SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $4); };
+            | LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $5); }
+            | LEFTBRACE RETURN SEMICOLON rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $4); }
+            | LEFTBRACE newline rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };
 
 block_statements: emptyBlock
             | LEFTBRACE newline rightbrace {$$ = mknode ("(BLOCK", $2, NULL, $3); };
