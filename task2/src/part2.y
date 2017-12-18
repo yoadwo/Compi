@@ -194,7 +194,7 @@ str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings
 varType: BOOL        {$$ = mktreeNode ("boolean", NULL, NULL, NULL); }
             | CHAR          {$$ = mktreeNode ("char", NULL, NULL, NULL); }
             | INT              {$$ = mktreeNode ("integer", NULL, NULL, NULL); }
-           /* | STRING       {$$ = mktreeNode ("string", NULL, NULL, NULL); }*/
+            | STRING       {$$ = mktreeNode ("string", NULL, NULL, NULL); }
             | INTPTR        {$$ = mktreeNode ("intptr", NULL, NULL, NULL); }
             | CHARPTR    {$$ = mktreeNode ("charptr", NULL, NULL, NULL); };
             
@@ -203,9 +203,9 @@ varType: BOOL        {$$ = mktreeNode ("boolean", NULL, NULL, NULL); }
             /*____________________________________DECLARATIONS_______________________________________*/
             
 StringDeclare:id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare {$$ = mktreeNode ("STRING", $1, NULL, $6); }
-              | str_ASSIGNMENT_statement{$$ = mktreeNode ("STRING", $1, NULL,NULL); }
+              | str_ASSIGNMENT_statement{/*$$ = mktreeNode ("STRING", $1, NULL,NULL); */}
               |str_ASSIGNMENT_statement COMMA StringDeclare {$$ = mktreeNode ("STRING", $1,$3, NULL); }
-              |id LEFTBRACKET numbers RIGHTBRACKET     {$$ = mktreeNode ("STRING", $1,NULL, NULL); };
+              |id LEFTBRACKET numbers RIGHTBRACKET     {/*$$ = mktreeNode ("STRING", $1,NULL, NULL);*/ };
                           
 
 variablesDeclare: id COMMA variablesDeclare    {$$ = mktreeNode ("", $1, NULL, $3); }
@@ -214,7 +214,7 @@ variablesDeclare: id COMMA variablesDeclare    {$$ = mktreeNode ("", $1, NULL, $
             | id;
   
 variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {pushSymbols($1->token,$2); $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
-                              |STRING StringDeclare {$$ = mktreeNode ("DECLARE", $2, NULL, NULL); };
+                              |varType StringDeclare {pushSymbols("String",$2); $$ = mktreeNode ("DECLARE", $1, NULL, $2); };
   
   
 %%
@@ -259,17 +259,23 @@ int yyerror(char* s){
 // at a given position
 
 void pushSymbols(char* type,treeNode* tNode){
-  /*left is id or assighment*/
-  /*single assighment */
+  /*node is aasignment*/
    
-  if(!strcmp(tNode->token,"=")){
-    push( &head,tNode->left->token,type,tNode->right->token);
-   
-    }
+    if(!strcmp(tNode->token,"=")){
+        push( &head,tNode->left->token,type,tNode->right->token);
+        return;
+       }
+       /* node is an ID */
+    if (strcmp(tNode->token,"=") && strcmp(tNode->token,"")){
+        push(&head,tNode->token,type,NULL);
+        return;
+        }
+    pushSymbols(type,tNode->left);
+    pushSymbols(type,tNode->right);
     
  
   
-  ]
+
  /* else
     push(&head,tNode->left->token,type,NULL);
  if(!strcmp(tNode->right->token,"=")){
@@ -290,10 +296,10 @@ void push(struct symbolNode** head_ref, char* id, char* type, char* new_data)
 	
 	new_node->id = (char*)(malloc (sizeof(id) + 1));
 	strncpy(new_node->id, id, sizeof(id)+1);
-	
+	if (new_data != NULL){
 	new_node->data = (char*)(malloc (sizeof(new_data) + 1));
 	strncpy(new_node->data, new_data, sizeof(new_data)+1);
-	
+	}
 	new_node->type = (char*)(malloc (sizeof(type) + 1));
 	strncpy(new_node->type, type, sizeof(type)+1);
 	
