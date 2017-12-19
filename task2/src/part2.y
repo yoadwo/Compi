@@ -264,6 +264,7 @@ int yyerror(char* s){
 
 void pushSymbols(char* type,treeNode* tNode, int isProc)
 {
+    
  
         /*node is aasignment*/
         if(!strcmp(tNode->token,"=")){
