@@ -18,14 +18,24 @@ typedef struct symbolNode{
 	struct symbolNode *next;
 } symbolNode;
 
+typedef struct scopeNode{
+	char* scopeName;
+	symbolNode *symbolTable;
+	struct scopeNode *next;
+} scopeNode;
 
- symbolNode* head = NULL;
+
+symbolNode* head = NULL;
+scopeNode* topStack = NULL;
 
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
 void pushSymbols(char* type,treeNode* tNode);
 void pushProcSymbols(treeNode* tNode);
-void push(struct symbolNode** head_ref, char* id, char* type, char* new_data, int isProc);
+void pushSymbolsToTable(struct symbolNode** head_ref, char* id, char* type, char* new_data, int isProc);
+void pushScopeToStack(struct scopeNode** head_ref, char* scopeName);
+void printSymbolTable(struct symbolNode *node);
+void printScopes(struct scopeNode *node);
 #define YYSTYPE struct treeNode *
 %}
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID,QUOTES,NADA
@@ -43,7 +53,7 @@ void push(struct symbolNode** head_ref, char* id, char* type, char* new_data, in
 %left MULTI DIVISION
 %start s
 %%
-s:      global {printf ("ok\n");  printList(head);printf("\n"); printtree ($1,0); };
+s:      global {printf ("ok\n");  printSymbolTable(head);printf("\n"); printScopes(topStack); printf("\n"); printtree ($1,0); };
 global:  procedures procMain  {$$ = mktreeNode ("global", $1,NULL,$2); }
             |procMain  {$$ = mktreeNode ("global", $1,NULL,NULL); }     ;
        
@@ -149,7 +159,7 @@ declarations:
             
             /*_________________________________________________________STATEMENTS___________________________________________________*/
 statements: statement statements {$$ = mktreeNode ("STATEMENT", $1, NULL,$2); }
-            | statement;
+            | statement {pushScopeToStack(&topStack, $1->token);};
 
 statement: /* | IN.OUT_statements*/
             IF_statements 
@@ -266,12 +276,12 @@ void pushSymbols(char* type,treeNode* tNode)
         // pass 0 to PushSymbols to signify not a proc
         /*node is aasignment*/
         if(!strcmp(tNode->token,"=")){
-            push( &head,tNode->left->token,type,tNode->right->token, 0);
+            pushSymbolsToTable( &head,tNode->left->token,type,tNode->right->token, 0);
             return;
         }
     /* node is an ID */
         if (strcmp(tNode->token,"=") && strcmp(tNode->token,"")){
-            push(&head,tNode->token,type,NULL, 0);
+            pushSymbolsToTable(&head,tNode->token,type,NULL, 0);
             return;
             }
         pushSymbols(type,tNode->left);
@@ -285,13 +295,15 @@ void pushProcSymbols(treeNode* tNode)
 {
     
     int isProc = 1;
-    push(&head, tNode->left->right->token, tNode->left->left->token, "function",1);
+    pushSymbolsToTable(&head, tNode->left->right->token, tNode->left->left->token, "function",1);
     
 }
 
-/* Given a reference (pointer to pointer) to the head of a list
+/* 
+PUSH SYMBOLS TO SYMBOL LIST (TABLE)
+Given a reference (pointer to pointer) to the head of a list
 and an int, inserts a new node on the front of the list. */
-void push(struct symbolNode** head_ref, char* id, char* type, char* new_data, int isProc)
+void pushSymbolsToTable(struct symbolNode** head_ref, char* id, char* type, char* new_data, int isProc)
 {
 	struct symbolNode* new_node = (struct symbolNode*) malloc(sizeof(struct symbolNode));
 	
@@ -307,6 +319,18 @@ void push(struct symbolNode** head_ref, char* id, char* type, char* new_data, in
 	
 	new_node->next = (*head_ref);
 	(*head_ref) = new_node;
+}
+
+void pushScopeToStack(struct scopeNode** head_ref, char* scopeName)
+{
+        printf ("adding scope: %s\n",scopeName);
+	struct scopeNode* new_scope = (struct scopeNode*) malloc(sizeof(struct scopeNode));
+	
+	new_scope->scopeName = (char*)(malloc (sizeof(scopeName) + 1));
+	strncpy(new_scope->scopeName, scopeName, sizeof(scopeName)+1);
+		
+	new_scope->next = (*head_ref);
+	(*head_ref) = new_scope;
 }
 
 /* Given a reference (pointer to pointer) to the head of a list
@@ -352,7 +376,7 @@ struct symbolNode* temp = *head_ref;
 
 // This function prints contents of linked list starting from
 // the given node
-void printList(struct symbolNode *node)
+void printSymbolTable(struct symbolNode *node)
 {
 	while (node != NULL)
 	{
@@ -361,3 +385,9 @@ void printList(struct symbolNode *node)
 	}
 }
 
+void printScopes(struct scopeNode *node){
+    while (node != NULL)	{
+		printf("scope id:{%s}\n", node->scopeName);
+		node = node->next;
+	}
+}
