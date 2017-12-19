@@ -11,6 +11,7 @@ typedef struct treeNode{
 } treeNode;
 
 typedef struct symbolNode{
+        int isProc; //0 if primitive symbol, 1 if is procedure
 	char* id;
 	char* type;
 	char* data;
@@ -22,8 +23,8 @@ typedef struct symbolNode{
 
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
-void pushSymbols(char* type,treeNode* tNode);
-void push(struct symbolNode** head_ref, char* id, char* type, char* new_data);
+void pushSymbols(char* type,treeNode* tNode, int isProc);
+void push(struct symbolNode** head_ref, char* id, char* type, char* new_data, int isProc);
 #define YYSTYPE struct treeNode *
 %}
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID,QUOTES,NADA
@@ -51,10 +52,12 @@ procedures: procedures proc   {$$ = mktreeNode ("", $1,NULL, NULL); }
                 | proc    {$$ = mktreeNode ("", $1, NULL,NULL); };
                 
 proc:  procValue | procVoid;
-procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements {pushProcSymbols("void", "main"), $$ = mktreeNode ("main", $5,NULL, NULL); };
-procVoid: VOID id LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mktreeNode ("procedure", $2, $4, $6); };
+procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements {/*pushSymbols("void", "main",1),*/ $$ = mktreeNode ("main", $5,NULL, NULL); };
+/*procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements {treeNode *t = mktreeNode ("main", $5,NULL, NULL);     pushSymbols("void", t,1); $$ =t  };*/
+procVoid: procID LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mktreeNode ("procedure", $1, $3, $5); };
 procValue: procID LEFTPAREN params RIGHTPAREN  block_return_value_statements {$$ = mktreeNode ("procedure", $1, $3, $5); };
-procID: varType id {pushProcSymbols($1->token, $2->token),$$ = mktreeNode ("procID", $1, $2, NULL); };
+procID: varType id {/*pushSymbols($1->token, $2->token,1),*/$$ = mktreeNode ("procID", $1, $2, NULL); }
+        | void id {/*pushSymbols($1->token, $2->token,1),*/$$ = mktreeNode ("procID", $1, $2, NULL); };
 
 
 
@@ -196,7 +199,7 @@ varType: BOOL        {$$ = mktreeNode ("boolean", NULL, NULL, NULL); }
             | STRING       {$$ = mktreeNode ("string", NULL, NULL, NULL); }
             | INTPTR        {$$ = mktreeNode ("intptr", NULL, NULL, NULL); }
             | CHARPTR    {$$ = mktreeNode ("charptr", NULL, NULL, NULL); };
-            
+void: VOID        {$$ = mktreeNode ("void", NULL, NULL, NULL); };
             
             
             /*____________________________________DECLARATIONS_______________________________________*/
@@ -212,8 +215,8 @@ variablesDeclare: id COMMA variablesDeclare    {$$ = mktreeNode ("", $1, NULL, $
             | ASSIGNMENT_statement 
             | id;
   
-variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {pushSymbols($1->token,$2); $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
-                              |varType StringDeclare {pushSymbols("String",$2); $$ = mktreeNode ("DECLARE", $1, NULL, $2); };
+variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {pushSymbols($1->token,$2,0); $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
+                              |varType StringDeclare {pushSymbols("String",$2,0); $$ = mktreeNode ("DECLARE", $1, NULL, $2); };
   
   
 %%
@@ -257,44 +260,38 @@ int yyerror(char* s){
 // A complete working C program to delete a node in a linked list
 // at a given position
 
-void pushSymbols(char* type,treeNode* tNode, bool isPremative)
+void pushSymbols(char* type,treeNode* tNode, int isProc)
 {
-    if (isPremative)
-    {
-    /*node is aasignment*/
-    if(!strcmp(tNode->token,"=")){
-        push( &head,tNode->left->token,type,tNode->right->token);
-        return;
-       }
-    /* node is an ID */
-    if (strcmp(tNode->token,"=") && strcmp(tNode->token,"")){
-        push(&head,tNode->token,type,NULL);
-        return;
+ 
+        /*node is aasignment*/
+        if(!strcmp(tNode->token,"=")){
+            push( &head,tNode->left->token,type,tNode->right->token, isProc);
+            return;
         }
-    pushSymbols(type,tNode->left);
-    pushSymbols(type,tNode->right);
-    }
-    else
-    {
-    
-    }
+    /* node is an ID */
+        if (strcmp(tNode->token,"=") && strcmp(tNode->token,"")){
+            push(&head,tNode->token,type,NULL, isProc);
+            return;
+            }
+        pushSymbols(type,tNode->left, isProc);
+        
 }
 
-void pushProcSymbols(char* type, char* id)
+void pushProcSymbols(treeNode* tNode , int isProc)
 {
-    /*node is void*/
     
-    /*node is typeVar*/
+    
     
     
 }
 
 /* Given a reference (pointer to pointer) to the head of a list
 and an int, inserts a new node on the front of the list. */
-void push(struct symbolNode** head_ref, char* id, char* type, char* new_data)
+void push(struct symbolNode** head_ref, char* id, char* type, char* new_data, int isProc)
 {
 	struct symbolNode* new_node = (struct symbolNode*) malloc(sizeof(struct symbolNode));
 	
+	new_node->isProc = isProc;
 	new_node->id = (char*)(malloc (sizeof(id) + 1));
 	strncpy(new_node->id, id, sizeof(id)+1);
 	if (new_data != NULL){
