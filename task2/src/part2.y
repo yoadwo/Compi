@@ -30,12 +30,13 @@ scopeNode* topStack = NULL;
 
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
-void pushSymbols(char* type,treeNode* tNode);
-void pushProcSymbols(treeNode* tNode);
+void pushSymbols(struct scopeNode** head_ref, char* type,treeNode* tNode);
+void pushProcSymbols(struct scopeNode** head_ref, treeNode* tNode);
 void pushSymbolsToTable(struct symbolNode** head_ref, char* id, char* type, char* new_data, int isProc);
 void pushScopeToStack(struct scopeNode** head_ref, char* scopeName);
 void printSymbolTable(struct symbolNode *node);
 void printScopes(struct scopeNode *node);
+int searchSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode);
 #define YYSTYPE struct treeNode *
 %}
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID,QUOTES,NADA
@@ -59,11 +60,11 @@ global:  procedures procMain  {$$ = mktreeNode ("global", $1,NULL,$2); }
        
        
        /*________________________________________________PROCEDURES________________________________________________*/
-procedures: procedures proc   {$$ = mktreeNode ("", $1,NULL, NULL); pushProcSymbols($2);}
-                | proc    {$$ = mktreeNode ("", $1, NULL,NULL);  pushProcSymbols($1);};
+procedures: procedures proc   {$$ = mktreeNode ("", $1,NULL, NULL); pushProcSymbols(&topStack, $2);}
+                | proc    {$$ = mktreeNode ("", $1, NULL,NULL);  pushProcSymbols(&topStack, $1);};
                 
-proc:  procValue  { pushProcSymbols($1);}
-            | procVoid { pushProcSymbols($1);};
+proc:  procValue  { pushProcSymbols(&topStack, $1);}
+            | procVoid { pushProcSymbols(&topStack, $1);};
 procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements { $$ = mktreeNode ("main", $5,NULL, NULL); };
 procVoid: procID LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mktreeNode ("procedure", $1, $3, $5); };
 procValue: procID LEFTPAREN params RIGHTPAREN  block_return_value_statements {$$ = mktreeNode ("procedure", $1, $3, $5); };
@@ -226,8 +227,8 @@ variablesDeclare: id COMMA variablesDeclare    {$$ = mktreeNode ("", $1, NULL, $
             | ASSIGNMENT_statement 
             | id;
   
-variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {pushSymbols($1->token,$2); $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
-                              |varType StringDeclare {pushSymbols("String",$2); $$ = mktreeNode ("DECLARE", $1, NULL, $2); };
+variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {pushSymbols(&topStack, $1->token,$2); $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
+                              |varType StringDeclare {pushSymbols(&topStack, "String",$2); $$ = mktreeNode ("DECLARE", $1, NULL, $2); };
   
   
 %%
@@ -271,8 +272,9 @@ int yyerror(char* s){
 // A complete working C program to delete a node in a linked list
 // at a given position
 
-void pushSymbols(char* type,treeNode* tNode)
+void pushSymbols(struct scopeNode** head_ref, char* type,treeNode* tNode)
 {
+    symbolNode* head = (*head_ref)->symbolTable;
         // pass 0 to PushSymbols to signify not a proc
         /*node is aasignment*/
         if(!strcmp(tNode->token,"=")){
@@ -284,16 +286,31 @@ void pushSymbols(char* type,treeNode* tNode)
             pushSymbolsToTable(&head,tNode->token,type,NULL, 0);
             return;
             }
-        pushSymbols(type,tNode->left);
-        pushSymbols(type, tNode->right);
+        pushSymbols(&topStack, type,tNode->left);
+        pushSymbols(&topStack, type, tNode->right);
         
+}
+
+int searchSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode)
+{
+    int res = 0;
+    struct symbolNode* temp = *head_ref;
+    
+    while (temp != NULL)
+    {
+        if (strcmp(temp->id, tNode->token))
+            return 1;
+        temp = temp->next;
+    }
+    return res;
 }
 
 /* wrapper function to add procedures to symbol table */
 /* pass on to "push" with value "1" to identify it as a fucntion   */
-void pushProcSymbols(treeNode* tNode)
+void pushProcSymbols(struct scopeNode** head_ref, treeNode* tNode)
 {
-    
+    symbolNode* head = (*head_ref)->symbolTable;
+
     int isProc = 1;
     pushSymbolsToTable(&head, tNode->left->right->token, tNode->left->left->token, "function",1);
     
