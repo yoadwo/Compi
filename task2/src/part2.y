@@ -51,10 +51,10 @@ procedures: procedures proc   {$$ = mktreeNode ("", $1,NULL, NULL); }
                 | proc    {$$ = mktreeNode ("", $1, NULL,NULL); };
                 
 proc:  procValue | procVoid;
-procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements {$$ = mktreeNode ("main", $5,NULL, NULL); };
+procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements {pushProcSymbols("void", "main"), $$ = mktreeNode ("main", $5,NULL, NULL); };
 procVoid: VOID id LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mktreeNode ("procedure", $2, $4, $6); };
 procValue: procID LEFTPAREN params RIGHTPAREN  block_return_value_statements {$$ = mktreeNode ("procedure", $1, $3, $5); };
-procID: varType id {$$ = mktreeNode ("procID", $1, $2, NULL); };
+procID: varType id {pushProcSymbols($1->token, $2->token),$$ = mktreeNode ("procID", $1, $2, NULL); };
 
 
 
@@ -66,7 +66,6 @@ paramsDeclare: param COMMA  paramsDeclare  {$$ = mktreeNode ("", $1, NULL, $3); 
 /* to change tree design\print, toggle between following: 1) [type id] 2) [][type][id] */
 /*param: varType id {char *s = " "; s=  strcat ($1->token,s);  $$ = mktreeNode (strcat($1->token,$2->token), NULL, NULL, NULL); }   ;*/
 param: varType id {$$ = mktreeNode ("", $1, NULL, $2); }   ;
-  
   
   
        /*______________________________________________EXPR____________________________________________________________*/
@@ -258,35 +257,37 @@ int yyerror(char* s){
 // A complete working C program to delete a node in a linked list
 // at a given position
 
-void pushSymbols(char* type,treeNode* tNode){
-  /*node is aasignment*/
-   
+void pushSymbols(char* type,treeNode* tNode, bool isPremative)
+{
+    if (isPremative)
+    {
+    /*node is aasignment*/
     if(!strcmp(tNode->token,"=")){
         push( &head,tNode->left->token,type,tNode->right->token);
         return;
        }
-       /* node is an ID */
+    /* node is an ID */
     if (strcmp(tNode->token,"=") && strcmp(tNode->token,"")){
         push(&head,tNode->token,type,NULL);
         return;
         }
     pushSymbols(type,tNode->left);
     pushSymbols(type,tNode->right);
+    }
+    else
+    {
     
- 
-  
-
- /* else
-    push(&head,tNode->left->token,type,NULL);
- if(!strcmp(tNode->right->token,"=")){
-    push( &head,tNode->right->left->token,type,tNode->left->right->token);
- return;
- }
- 
-   pushSymbols(type,tNode->right);  */ 
-
+    }
 }
 
+void pushProcSymbols(char* type, char* id)
+{
+    /*node is void*/
+    
+    /*node is typeVar*/
+    
+    
+}
 
 /* Given a reference (pointer to pointer) to the head of a list
 and an int, inserts a new node on the front of the list. */
@@ -354,30 +355,8 @@ void printList(struct symbolNode *node)
 {
 	while (node != NULL)
 	{
-		printf("id:{%s}, type:{%s}, data{%s} \n", node->id, node->type, node->data);
+		printf("id:{%s}, type:{%s}, value{%s} \n", node->id, node->type, node->data);
 		node = node->next;
 	}
 }
-
-
-
- /* Drier program to test above functions*/
-  /* int main2()
-  {
-   Start with the empty list 
-
-
-    push(&head, "a", "int", 7);
-	push(&head, "b", "float", 1);
-	push(&head, "c", "char", 3);
-	push(&head, "d1", "string", 2);
-	push(&head, "e23", "bool", 8);
-
-	puts("Created Linked List: ");
-	printList(head);
-	deletesymbolNode(&head, 4);
-	puts("\nLinked List after Deletion at position 4: ");
-	printList(head);
-	return 0;
- }*/
 

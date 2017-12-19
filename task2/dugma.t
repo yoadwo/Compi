@@ -1,9 +1,7 @@
 void main(){
-<<<<<<< Updated upstream
-  integer x=5,z,y=5,t;
+ 	integer x=5;
+	string f[5]="ppppp";
+	
    
         return;
-=======
-        int x = 3;
->>>>>>> Stashed changes
 }
