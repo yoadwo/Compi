@@ -37,6 +37,7 @@ void pushScopeToStack(struct scopeNode** head_ref, char* scopeName);
 void printSymbolTable(struct symbolNode *node);
 void printScopes(struct scopeNode *node);
 int isSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode);
+int symbolLookup (struct symbolNode** head_ref, treeNode* tNode);
 #define YYSTYPE struct treeNode *
 %}
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID,QUOTES,NADA
@@ -100,7 +101,7 @@ expr:     expr PLUS expr    {$$ = mktreeNode ("+", $1, NULL, $3); }
         | ADDRESS id  {$$ = mktreeNode ("&", $2, NULL,NULL ); }
         | derefID 
         | Pexpr
-        | consts ;
+        | consts  ;
 
         
         /*______________________________________________________BLOCKS_____________________________________________________*/
@@ -125,8 +126,8 @@ rightbrace: RIGHTBRACE  {$$ = mktreeNode (")", NULL, NULL,NULL ); };
 
 
               /*_________________________________________________TYPES________________________________________________*/
-consts: id | numbers | booleans | csnull | strings|chars | procCall ;
-id:   ID            {$$ = mktreeNode (yytext, NULL, NULL, NULL); }  ;
+consts: id {if (!symbolLookup(&head, $1)) { yyerror("unknown variable is used"); YYERROR;};} | numbers | booleans | csnull | strings|chars | procCall ;
+id:   ID            { $$ = mktreeNode (yytext, NULL, NULL, NULL); }  ;
 
 numbers: INTEGER_NEG {$$ = mktreeNode (yytext, NULL, NULL, NULL); } 
             | INTEGER_POS  { $$ = mktreeNode (yytext, NULL, NULL, NULL); }
@@ -138,7 +139,7 @@ booleans: BOOLTRUE { $$ = mktreeNode (yytext, NULL, NULL, NULL); }
             | BOOLFALSE { $$ = mktreeNode (yytext, NULL, NULL, NULL); };
 strings: STRING_CONST { $$ = mktreeNode (yytext, NULL, NULL, NULL); };
 chars: CHAR_CONST { $$ = mktreeNode (yytext, NULL, NULL, NULL); };
-procCall: id LEFTPAREN args RIGHTPAREN { $$ = mktreeNode ("func call", $1, NULL, $3); };
+procCall: id LEFTPAREN args RIGHTPAREN { if (!symbolLookup(&head, $1)) { yyerror("applied function is undeclared"); YYERROR;};  $$ = mktreeNode ("func call", $1, NULL, $3); };
 
 args: /* no params  */
         | argsDeclare {$$ = mktreeNode ("args:", $1, NULL, NULL); };
@@ -160,7 +161,7 @@ declarations:
             
             /*_________________________________________________________STATEMENTS___________________________________________________*/
 statements: statement statements {$$ = mktreeNode ("STATEMENT", $1, NULL,$2); }
-            | statement {pushScopeToStack(&topStack, $1->token);};
+            | statement {/*pushScopeToStack(&topStack, $1->token);*/};
 
 statement: /* | IN.OUT_statements*/
             IF_statements 
@@ -266,7 +267,7 @@ void printtree (treeNode *tree, int tab){
         printtree (tree-> right, tab + 1); 
 }
 int yyerror(char* s){
-    printf ("%s: at line %d found token [%s]\n",  s,counter, yytext);
+    printf ("%s: at line %d near token [%s]\n",  s,counter, yytext);
     return 0;
 }
 
@@ -299,7 +300,21 @@ int pushSymbols(struct symbolNode** head_ref, char* type,treeNode* tNode)
         return pushSymbols(&head, type,tNode->left)  &&   pushSymbols(&head, type, tNode->right);
         
 }
+int symbolLookup (struct symbolNode** head_ref, treeNode* tNode){
+    /* function returns 1 if symbol already declared, otherwise 0 */
+    struct symbolNode* temp = *head_ref;
+    
+    while (temp != NULL)
+    {
+        if (!strcmp(temp->id, tNode->token)){
+            return 1;
+            }
+        temp = temp->next;
+    }
+    return 0;;
+    
 
+}
 int isSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode)
 {
     /* return 1 if given symbol already exists  */
