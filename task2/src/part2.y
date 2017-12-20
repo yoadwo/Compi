@@ -30,13 +30,13 @@ scopeNode* topStack = NULL;
 
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
-void pushSymbols(struct symbolNode** head_ref, char* type,treeNode* tNode);
+int pushSymbols(struct symbolNode** head_ref, char* type,treeNode* tNode);
 void pushProcSymbols(struct symbolNode** head_ref, treeNode* tNode);
 void pushSymbolsToTable(struct symbolNode** head_ref, char* id, char* type, char* new_data, int isProc);
 void pushScopeToStack(struct scopeNode** head_ref, char* scopeName);
 void printSymbolTable(struct symbolNode *node);
 void printScopes(struct scopeNode *node);
-int searchSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode);
+int isSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode);
 #define YYSTYPE struct treeNode *
 %}
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID,QUOTES,NADA
@@ -227,8 +227,10 @@ variablesDeclare: id COMMA variablesDeclare    {$$ = mktreeNode ("", $1, NULL, $
             | ASSIGNMENT_statement 
             | id;
   
-variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {pushSymbols(&head, $1->token,$2); $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
-                              |varType StringDeclare {pushSymbols(&head, "String",$2); $$ = mktreeNode ("DECLARE", $1, NULL, $2); };
+variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ { if (!pushSymbols(&head, $1->token,$2)){ yyerror("duplicate identifier found"); YYERROR;};
+                                                                                                                        $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
+                              |varType StringDeclare { if (!pushSymbols(&head, $1->token,$2)){ yyerror("duplicate identifier found"); YYERROR;};
+                              $$ = mktreeNode ("DECLARE", $1, NULL, $2); };
   
   
 %%
@@ -272,33 +274,44 @@ int yyerror(char* s){
 // A complete working C program to delete a node in a linked list
 // at a given position
 
-void pushSymbols(struct symbolNode** head_ref, char* type,treeNode* tNode)
+int pushSymbols(struct symbolNode** head_ref, char* type,treeNode* tNode)
 {
+        
         // pass 0 to PushSymbols to signify not a proc
         /*node is aasignment*/
         if(!strcmp(tNode->token,"=")){
-            pushSymbolsToTable( &head,tNode->left->token,type,tNode->right->token, 0);
-            return;
+            if (!isSimilarSymbols(&head, tNode->left)){
+                pushSymbolsToTable( &head,tNode->left->token,type,tNode->right->token, 0);
+                return 1;
+            }
+            else
+                return 0;
         }
     /* node is an ID */
         if (strcmp(tNode->token,"=") && strcmp(tNode->token,"")){
+            if (!isSimilarSymbols(&head, tNode)){
             pushSymbolsToTable(&head,tNode->token,type,NULL, 0);
-            return;
+            return 1;
             }
-        pushSymbols(&head, type,tNode->left);
-        pushSymbols(&head, type, tNode->right);
+            else
+                return 0;
+        }
+        return pushSymbols(&head, type,tNode->left)  &&   pushSymbols(&head, type, tNode->right);
         
 }
 
-int searchSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode)
+int isSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode)
 {
+    /* return 1 if given symbol already exists  */
+    
     int res = 0;
     struct symbolNode* temp = *head_ref;
     
     while (temp != NULL)
     {
-        if (strcmp(temp->id, tNode->token))
+        if (!strcmp(temp->id, tNode->token)){
             return 1;
+            }
         temp = temp->next;
     }
     return res;
