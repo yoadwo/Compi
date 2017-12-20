@@ -31,7 +31,7 @@ scopeNode* topStack = NULL;
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
 int pushSymbols(struct symbolNode** head_ref, char* type,treeNode* tNode);
-void pushProcSymbols(struct symbolNode** head_ref, treeNode* tNode);
+int pushProcSymbols(struct symbolNode** head_ref, treeNode* tNode);
 void pushSymbolsToTable(struct symbolNode** head_ref, char* id, char* type, char* new_data, int isProc);
 void pushScopeToStack(struct scopeNode** head_ref, char* scopeName);
 void printSymbolTable(struct symbolNode *node);
@@ -63,8 +63,8 @@ global:  procedures procMain  {$$ = mktreeNode ("global", $1,NULL,$2); }
 procedures: procedures proc   {$$ = mktreeNode ("", $1,NULL, NULL); pushProcSymbols(&head, $2);}
                 | proc    {$$ = mktreeNode ("", $1, NULL,NULL);  pushProcSymbols(&head, $1);};
                 
-proc:  procValue  { pushProcSymbols(&head, $1);}
-            | procVoid { pushProcSymbols(&head, $1);};
+proc:  procValue  { if (!pushProcSymbols(&head, $1)) { yyerror("duplicate identifier found"); YYERROR;};}
+            | procVoid { if (!pushProcSymbols(&head, $1)) { yyerror("duplicate identifier found"); YYERROR;};};
 procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements { $$ = mktreeNode ("main", $5,NULL, NULL); };
 procVoid: procID LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mktreeNode ("procedure", $1, $3, $5); };
 procValue: procID LEFTPAREN params RIGHTPAREN  block_return_value_statements {$$ = mktreeNode ("procedure", $1, $3, $5); };
@@ -276,7 +276,7 @@ int yyerror(char* s){
 
 int pushSymbols(struct symbolNode** head_ref, char* type,treeNode* tNode)
 {
-        
+        /* function will return 1 if add successful, 0 otherwise (duplicate symbol) */
         // pass 0 to PushSymbols to signify not a proc
         /*node is aasignment*/
         if(!strcmp(tNode->token,"=")){
@@ -319,10 +319,16 @@ int isSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode)
 
 /* wrapper function to add procedures to symbol table */
 /* pass on to "push" with value "1" to identify it as a fucntion   */
-void pushProcSymbols(struct symbolNode** head_ref, treeNode* tNode)
+int pushProcSymbols(struct symbolNode** head_ref, treeNode* tNode)
 {
-    int isProc = 1;
-    pushSymbolsToTable(&head, tNode->left->right->token, tNode->left->left->token, "function",1);
+    if (!isSimilarSymbols(head_ref, tNode->left->right)){
+        int isProc = 1;
+        pushSymbolsToTable(&head, tNode->left->right->token, tNode->left->left->token, "function",1);
+        return 1;
+    }
+    else
+        return 0;
+    
     
 }
 
