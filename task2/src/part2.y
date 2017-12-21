@@ -372,13 +372,9 @@ int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolN
     // compare callParams and declaredParams trees //
     // callParams: node has token value and no childs ["X"]
     // declaredParams: node has empty parent [""] and two children ["int"] ["X"]
-// bugs:
-// 1) incorrect token location for both sides
-// 2) forgot to use lookup symbol :P
+
     if (callParams == NULL || declaredParams == NULL)
         return 0;
-    
-    //if the symbol is an id, and is already in symbolTable - get the type of the symbol and compare with the callParams
     
     // base case: callParams and declaredParams both point to a single node, 'not equal to a COMMA node'
     if (strcmp(callParams->token, ",") && strcmp(declaredParams->token, ","))
@@ -512,6 +508,7 @@ struct symbolNode* temp = *head_ref;
 }
 
 int isIdentifier(char* token){
+//| numbers | booleans | csnull | strings|chars | procCall ;
     if (!strcmp(token, "true"))
         return 1;
     else if (!strcmp(token, "false"))
@@ -521,7 +518,7 @@ int isIdentifier(char* token){
     else if (isNumeric(token))
         return 1;
     return 0;
-              //| numbers | booleans | csnull | strings|chars | procCall ;
+              
 }
 
 int isNumeric(char* token){
