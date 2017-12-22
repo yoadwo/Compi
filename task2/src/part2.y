@@ -149,7 +149,7 @@ numbers: INTEGER_NEG {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,N
 csnull: CSNULL  {$$ = mktreeNode (yytext, mktreeNode("csnull", NULL,NULL,NULL), NULL, NULL); } ;
 booleans: BOOLTRUE {$$ = mktreeNode (yytext, mktreeNode("boolean", NULL,NULL,NULL), NULL, NULL); } 
             | BOOLFALSE {$$ = mktreeNode (yytext, mktreeNode("boolean", NULL,NULL,NULL), NULL, NULL); } ;
-strings: STRING_CONST {$$ = mktreeNode (yytext, mktreeNode("charptr", NULL,NULL,NULL), NULL, NULL); } ;
+strings: STRING_CONST {$$ = mktreeNode (yytext, mktreeNode("charp", NULL,NULL,NULL), NULL, NULL); } ;
 chars: CHAR_CONST {$$ = mktreeNode (yytext, mktreeNode("char", NULL,NULL,NULL), NULL, NULL); }; 
 procCall: id LEFTPAREN args RIGHTPAREN 
                     { 
@@ -169,7 +169,11 @@ argsDeclare: consts COMMA  argsDeclare  {$$ = mktreeNode (",", $1, NULL, $3); }
         | consts ;
 
               /*_________________________________________________________________________________________________________*/
-derefID: DEREFERENCE id  {char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); $$ = mktreeNode (s,NULL, NULL, NULL); } ;
+derefID: DEREFERENCE id  {if (strcmp(symbolLookup(&head,$2->token)->type, "chrptr") || strcmp(symbolLookup(&head,$2->token)->type, "intptr")) 
+                                                { yyerror("non pointer variable cannot be dereferenced"); YYERROR;} 
+                                                char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); 
+                                                $$ = mktreeNode (s,NULL, NULL, NULL); 
+                                                } ;
 
 newline:  
         declarations newline   {$$ = mktreeNode ("", $1, NULL,$2); }
@@ -232,8 +236,8 @@ varType: BOOL        {$$ = mktreeNode ("boolean", NULL, NULL, NULL); }
             | CHAR          {$$ = mktreeNode ("char", NULL, NULL, NULL); }
             | INT              {$$ = mktreeNode ("integer", NULL, NULL, NULL); }
             //| STRING       {$$ = mktreeNode ("string", NULL, NULL, NULL); }
-            | INTPTR        {$$ = mktreeNode ("intptr", NULL, NULL, NULL); }
-            | CHARPTR    {$$ = mktreeNode ("charptr", NULL, NULL, NULL); };
+            | INTPTR        {$$ = mktreeNode ("intp", NULL, NULL, NULL); }
+            | CHARPTR    {$$ = mktreeNode ("charp", NULL, NULL, NULL); };
 void: VOID        {$$ = mktreeNode ("void", NULL, NULL, NULL); };
             
             

@@ -11,8 +11,8 @@
 "char" return CHAR;
 "integer" return INT;
 "string" return STRING;
-"intptr" return INTPTR;
-"charptr" return CHARPTR;
+"intp" return INTPTR;
+"charp" return CHARPTR;
 "void" return VOID;
 "if" return IF;
 "else" return ELSE;
