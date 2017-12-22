@@ -233,7 +233,7 @@ str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings
 varType: BOOL        {$$ = mktreeNode ("boolean", NULL, NULL, NULL); }
             | CHAR          {$$ = mktreeNode ("char", NULL, NULL, NULL); }
             | INT              {$$ = mktreeNode ("integer", NULL, NULL, NULL); }
-            | STRING       {$$ = mktreeNode ("string", NULL, NULL, NULL); }
+            //| STRING       {$$ = mktreeNode ("string", NULL, NULL, NULL); }
             | INTPTR        {$$ = mktreeNode ("intptr", NULL, NULL, NULL); }
             | CHARPTR    {$$ = mktreeNode ("charptr", NULL, NULL, NULL); };
 void: VOID        {$$ = mktreeNode ("void", NULL, NULL, NULL); };
@@ -255,8 +255,8 @@ variablesDeclare: id COMMA variablesDeclare    {$$ = mktreeNode ("", $1, NULL, $
 variable_declare_statements: 
                             varType variablesDeclare  { if (!pushSymbols(&head, $1->token,$2)){ yyerror("duplicate identifier found"); YYERROR;};
                                                                                                                         $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
-                          | varType StringDeclare       { if (!pushSymbols(&head, $1->token,$2)){ yyerror("duplicate identifier found"); YYERROR;};
-                                                                                                                        $$ = mktreeNode ("DECLARE", $1, NULL, $2); };
+                          | STRING StringDeclare       { if (!pushSymbols(&head, "string",$2)){ yyerror("duplicate identifier found"); YYERROR;};
+                                                                                                                        $$ = mktreeNode ("DECLARE", mktreeNode ("string", NULL, NULL, NULL), NULL, $2); };
   
   
 %%
