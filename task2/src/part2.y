@@ -138,7 +138,7 @@ consts: id {
                         YYERROR;
                     };
                 }
-                    | numbers | booleans | csnull | strings|chars | procCall ;
+                    | numbers | booleans | csnull |/* strings |*/ chars | procCall ;
 id:   ID            { $$ = mktreeNode (yytext,NULL, NULL, NULL); }  ;
 // haha
 numbers: INTEGER_NEG {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,NULL), NULL, mktreeNode("neg",NULL,NULL,NULL)); } 
@@ -149,7 +149,7 @@ numbers: INTEGER_NEG {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,N
 csnull: CSNULL  {$$ = mktreeNode (yytext, mktreeNode("csnull", NULL,NULL,NULL), NULL, NULL); } ;
 booleans: BOOLTRUE {$$ = mktreeNode (yytext, mktreeNode("boolean", NULL,NULL,NULL), NULL, NULL); } 
             | BOOLFALSE {$$ = mktreeNode (yytext, mktreeNode("boolean", NULL,NULL,NULL), NULL, NULL); } ;
-strings: STRING_CONST {$$ = mktreeNode (yytext, mktreeNode("string", NULL,NULL,NULL), NULL, NULL); } ;
+strings: STRING_CONST {$$ = mktreeNode (yytext, mktreeNode("charptr", NULL,NULL,NULL), NULL, NULL); } ;
 chars: CHAR_CONST {$$ = mktreeNode (yytext, mktreeNode("char", NULL,NULL,NULL), NULL, NULL); }; 
 procCall: id LEFTPAREN args RIGHTPAREN 
                     { 
@@ -226,8 +226,6 @@ cond: LEFTPAREN expr rightParen {$$ = mktreeNode ("(COND", $2, NULL, $3); };
 ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mktreeNode ("=", $1, NULL, $3); } 
             | derefID ASSIGNMENT expr  {$$ = mktreeNode ("=", $1, NULL, $3); } ;
 str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings  {$$ = mktreeNode ("=", $1, NULL, $6); };
-
-                            
                               
 
 varType: BOOL        {$$ = mktreeNode ("boolean", NULL, NULL, NULL); }
@@ -241,6 +239,12 @@ void: VOID        {$$ = mktreeNode ("void", NULL, NULL, NULL); };
             
             /*____________________________________DECLARATIONS_______________________________________*/
             
+variable_declare_statements: 
+                            varType variablesDeclare  { if (!pushSymbols(&head, $1->token,$2)){ yyerror("duplicate identifier found"); YYERROR;};
+                                                                                                                        $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
+                          | STRING StringDeclare       { if (!pushSymbols(&head, "string",$2)){ yyerror("duplicate identifier found"); YYERROR;};
+                                                                                                                        $$ = mktreeNode ("DECLARE", mktreeNode ("string", NULL, NULL, NULL), NULL, $2); };
+            
 StringDeclare:id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare {$$ = mktreeNode ("STRING", $1, NULL, $6); }
               | str_ASSIGNMENT_statement{/*$$ = mktreeNode ("STRING", $1, NULL,NULL); */}
               |str_ASSIGNMENT_statement COMMA StringDeclare {$$ = mktreeNode ("STRING", $1,$3, NULL); }
@@ -252,11 +256,7 @@ variablesDeclare: id COMMA variablesDeclare    {$$ = mktreeNode ("", $1, NULL, $
             | ASSIGNMENT_statement 
             | id;
   
-variable_declare_statements: 
-                            varType variablesDeclare  { if (!pushSymbols(&head, $1->token,$2)){ yyerror("duplicate identifier found"); YYERROR;};
-                                                                                                                        $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
-                          | STRING StringDeclare       { if (!pushSymbols(&head, "string",$2)){ yyerror("duplicate identifier found"); YYERROR;};
-                                                                                                                        $$ = mktreeNode ("DECLARE", mktreeNode ("string", NULL, NULL, NULL), NULL, $2); };
+
   
   
 %%
