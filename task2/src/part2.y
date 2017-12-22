@@ -169,7 +169,8 @@ argsDeclare: consts COMMA  argsDeclare  {$$ = mktreeNode (",", $1, NULL, $3); }
         | consts ;
 
               /*_________________________________________________________________________________________________________*/
-derefID: DEREFERENCE id  {if (strcmp(symbolLookup(&head,$2->token)->type, "chrptr") || strcmp(symbolLookup(&head,$2->token)->type, "intptr")) 
+derefID: DEREFERENCE id  { symbolNode *sym = symbolLookup(&head,$2->token);
+                                                if (strcmp(sym->type, "charp") && strcmp(sym->type, "intp")) 
                                                 { yyerror("non pointer variable cannot be dereferenced"); YYERROR;} 
                                                 char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); 
                                                 $$ = mktreeNode (s,NULL, NULL, NULL); 
@@ -246,8 +247,8 @@ void: VOID        {$$ = mktreeNode ("void", NULL, NULL, NULL); };
 variable_declare_statements: 
                             varType variablesDeclare  { if (!pushSymbols(&head, $1->token,$2)){ yyerror("duplicate identifier found"); YYERROR;};
                                                                                                                         $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
-                          | STRING StringDeclare       { if (!pushSymbols(&head, "string",$2)){ yyerror("duplicate identifier found"); YYERROR;};
-                                                                                                                        $$ = mktreeNode ("DECLARE", mktreeNode ("string", NULL, NULL, NULL), NULL, $2); };
+                          | STRING StringDeclare       { if (!pushSymbols(&head, "charp",$2)){ yyerror("duplicate identifier found"); YYERROR;};
+                                                                                                                        $$ = mktreeNode ("DECLARE", mktreeNode ("charp", NULL, NULL, NULL), NULL, $2); };
             
 StringDeclare:id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare {$$ = mktreeNode ("STRING", $1, NULL, $6); }
               | str_ASSIGNMENT_statement{/*$$ = mktreeNode ("STRING", $1, NULL,NULL); */}
