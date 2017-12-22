@@ -103,7 +103,7 @@ expr:     expr PLUS expr    {$$ = mktreeNode ("+", $1, NULL, $3); }
         | expr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
         | expr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
         | NOT expr {$$ = mktreeNode ("NOT", NULL, NULL, $2); }
-        | ADDRESS id  {$$ = mktreeNode ("&", $2, NULL,NULL ); }
+        | address 
         | derefID 
         | Pexpr
         | consts  ;
@@ -151,6 +151,19 @@ booleans: BOOLTRUE {$$ = mktreeNode (yytext, mktreeNode("boolean", NULL,NULL,NUL
             | BOOLFALSE {$$ = mktreeNode (yytext, mktreeNode("boolean", NULL,NULL,NULL), NULL, NULL); } ;
 strings: STRING_CONST {$$ = mktreeNode (yytext, mktreeNode("charp", NULL,NULL,NULL), NULL, NULL); } ;
 chars: CHAR_CONST {$$ = mktreeNode (yytext, mktreeNode("char", NULL,NULL,NULL), NULL, NULL); }; 
+
+address : ADDRESS id            { symbolNode *sym = symbolLookup(&head,$2->token);
+                                                if (strcmp(sym->type, "char") && strcmp(sym->type, "integer")) 
+                                                        { yyerror("pointer-type variables cannot be referenced"); YYERROR;} 
+                                                char* t = $2->token; char *s = malloc(strlen(t)+strlen("&")+1); strcat (s,"&"); strcat(s,t); 
+                                                $$ = mktreeNode (s,NULL, NULL, NULL); };
+derefID: DEREFERENCE id  { symbolNode *sym = symbolLookup(&head,$2->token);
+                                                if (strcmp(sym->type, "charp") && strcmp(sym->type, "intp")) 
+                                                        { yyerror("non-pointer-type variables cannot be dereferenced"); YYERROR;} 
+                                                char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); 
+                                                $$ = mktreeNode (s,NULL, NULL, NULL); 
+                                                } ;
+
 procCall: id LEFTPAREN args RIGHTPAREN 
                     { 
                     if (!isSimilarSymbols(&head, $1) ) 
@@ -168,13 +181,8 @@ args: /* no params  */
 argsDeclare: consts COMMA  argsDeclare  {$$ = mktreeNode (",", $1, NULL, $3); }   
         | consts ;
 
-              /*_________________________________________________________________________________________________________*/
-derefID: DEREFERENCE id  { symbolNode *sym = symbolLookup(&head,$2->token);
-                                                if (strcmp(sym->type, "charp") && strcmp(sym->type, "intp")) 
-                                                { yyerror("non pointer variable cannot be dereferenced"); YYERROR;} 
-                                                char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); 
-                                                $$ = mktreeNode (s,NULL, NULL, NULL); 
-                                                } ;
+              /*_______________________________________________________BLOCK_BODY_STRUCTURE_________________________________________*/
+
 
 newline:  
         declarations newline   {$$ = mktreeNode ("", $1, NULL,$2); }
@@ -199,10 +207,10 @@ statement: /* | IN.OUT_statements*/
             | ASSIGNMENT_statement SEMICOLON { if (!isSimilarSymbols(&head, $1->left)) { yyerror("unknown variable is being assigned to"); YYERROR;};};
             
         
-
 statements_type: statement
                  |block_statements;
                     
+            /*_______________________________________CONDITIONAL_STATEMENTS___________________________________*/                    
 IF_statements: IF cond statements_type {$$ = mktreeNode ("IF", $2,$3,NULL); } %prec LOWER_THAN_ELSE
              | IF cond statements_type else{$$ = mktreeNode ("IF", $2,$3, $4); };
                
