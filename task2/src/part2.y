@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <ctype.h>
 typedef struct treeNode{
     char *token;
     struct treeNode *left;
@@ -30,8 +30,13 @@ typedef struct scopeNode{
 symbolNode* head = NULL;
 scopeNode* topStack = NULL;
 int ScopeNum=0;
+
+
+void printInfo(treeNode *head);
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
+int iSCompileErrors(scopeNode *root);
+int checkDuplicateProcs(root);
 void pushStatements(treeNode* tNode);
 void pushScopeStatements(treeNode* tNode);
 void pushSymbols( char* type,treeNode* tNode);
@@ -40,7 +45,8 @@ void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new
 void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNode);
 void printSymbolTable(struct scopeNode *node);
 void printScopes(struct scopeNode *node);
-int searchSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode);
+symbolNode* symbolLookup (struct symbolNode** head_ref, char* token);
+int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolNode** head_ref);
 #define YYSTYPE struct treeNode *
 %}
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID,QUOTES,NADA
@@ -58,20 +64,16 @@ int searchSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode);
 %left MULTI DIVISION
 %start s
 %%
-s:      global {pushStatements($1);printf ("ok\n");  printSymbolTable(topStack);printf("\n"); printScopes(topStack);        printf("\n"); printtree ($1,0); };
+s:      global {pushStatements($1); printInfo($1); if (iSCompileErrors(topStack)) YYERROR;   };
 global:  procedures procMain  {$$ = mktreeNode ("global", $1,NULL,$2); }
             |procMain  {$$ = mktreeNode ("global", $1,NULL,NULL); }     ;
        
        
        /*________________________________________________PROCEDURES________________________________________________*/
-procedures: procedures proc   {$$ = mktreeNode ("", $1,NULL, NULL); /*pushProcSymbols(&topStack, $2);*/}
-                | proc    {$$ = mktreeNode ("", $1, NULL,NULL); /* pushProcSymbols(&topStack, $1);*/};
-                
-/*proc:  procValue  { if (!pushProcSymbols(&head, $1)) { yyerror("duplicate identifier found"); YYERROR;};}
-            | procVoid { if (!pushProcSymbols(&head, $1)) { yyerror("duplicate identifier found"); YYERROR;};};
-*/                
-proc:  procValue 
-            | procVoid ; 
+procedures: procedures proc   {$$ = mktreeNode ("", $1,NULL, NULL); }
+                | proc    {$$ = mktreeNode ("", $1, NULL,NULL);};
+                  
+proc:  procValue  | procVoid ; 
 procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements { $$ = mktreeNode ("main", $5,NULL, NULL); };
 procVoid: procID LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mktreeNode ("procedure", $1, $3, $5);};
 procValue: procID LEFTPAREN params RIGHTPAREN  block_return_value_statements {$$ = mktreeNode ("procedure", $1, $3, $5); };
@@ -146,29 +148,20 @@ consts: id | numbers | booleans | csnull | strings|chars | procCall ;
 
 id:   ID            {$$ = mktreeNode (yytext, NULL, NULL, NULL); }  ;
 
-numbers: INTEGER_NEG {$$ = mktreeNode (yytext, NULL, NULL, NULL); } 
-            | INTEGER_POS  { $$ = mktreeNode (yytext, NULL, NULL, NULL); }
-            | HEX_CONST { $$ = mktreeNode (yytext, NULL, NULL, NULL); }
-            | OCTAL_CONST { $$ = mktreeNode (yytext, NULL, NULL, NULL); }
-            | BINARY_CONST { $$ = mktreeNode (yytext, NULL, NULL, NULL); };
-/* numbers: INTEGER_NEG {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,NULL), NULL, mktreeNode("neg",NULL,NULL,NULL)); } 
+ numbers: INTEGER_NEG {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,NULL), NULL, mktreeNode("neg",NULL,NULL,NULL)); } 
             | INTEGER_POS  {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,NULL), NULL, mktreeNode("pos",NULL,NULL,NULL)); } 
             | HEX_CONST {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,NULL), NULL, mktreeNode("hex",NULL,NULL,NULL)); } 
             | OCTAL_CONST {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,NULL), NULL, mktreeNode("oct",NULL,NULL,NULL)); } 
-            | BINARY_CONST {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,NULL), NULL, mktreeNode("bin",NULL,NULL,NULL)); } ; */
+            | BINARY_CONST {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,NULL), NULL, mktreeNode("bin",NULL,NULL,NULL)); } ; 
 
 csnull: CSNULL  { $$ = mktreeNode (yytext, NULL, NULL, NULL); };
-/*csnull: CSNULL  {$$ = mktreeNode (yytext, mktreeNode("csnull", NULL,NULL,NULL), NULL, NULL); } ;*/
 
-booleans: BOOLTRUE { $$ = mktreeNode (yytext, NULL, NULL, NULL); }
-            | BOOLFALSE { $$ = mktreeNode (yytext, NULL, NULL, NULL); };
-/*booleans: BOOLTRUE {$$ = mktreeNode (yytext, mktreeNode("boolean", NULL,NULL,NULL), NULL, NULL); } */
+booleans: BOOLTRUE { $$ = mktreeNode (yytext, mktreeNode("boolean", NULL,NULL,NULL), NULL, NULL); }
+            | BOOLFALSE { $$ = mktreeNode (yytext, mktreeNode("boolean", NULL,NULL,NULL), NULL, NULL); };
 
-strings: STRING_CONST { $$ = mktreeNode (yytext, NULL, NULL, NULL); };
-/*strings: STRING_CONST {$$ = mktreeNode (yytext, mktreeNode("charp", NULL,NULL,NULL), NULL, NULL); } ; */
+strings: STRING_CONST {$$ = mktreeNode (yytext, mktreeNode("charp", NULL,NULL,NULL), NULL, NULL); } ;
 
-chars: CHAR_CONST { $$ = mktreeNode (yytext, NULL, NULL, NULL); };
-/*chars: CHAR_CONST {$$ = mktreeNode (yytext, mktreeNode("char", NULL,NULL,NULL), NULL, NULL); }; */
+chars: CHAR_CONST {$$ = mktreeNode (yytext, mktreeNode("char", NULL,NULL,NULL), NULL, NULL); };
 
 procCall: id LEFTPAREN args RIGHTPAREN { $$ = mktreeNode ("func call", $1, NULL, $3); };
 
@@ -189,6 +182,12 @@ args: /* no params  */
 argsDeclare: consts COMMA  argsDeclare  {$$ = mktreeNode ("", $1, NULL, $3); }   
         | consts ;
 
+address : ADDRESS id            { symbolNode *sym = symbolLookup(&head,$2->token);
+                                                if (strcmp(sym->type, "char") && strcmp(sym->type, "integer")) 
+                                                        { yyerror("pointer-type variables cannot be referenced"); YYERROR;} 
+                                                char* t = $2->token; char *s = malloc(strlen(t)+strlen("&")+1); strcat (s,"&"); strcat(s,t); 
+                                                $$ = mktreeNode (s,NULL, NULL, NULL); };        
+        
               /*_________________________________________________________________________________________________________*/
 derefID: DEREFERENCE id  {char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); $$ = mktreeNode (s,NULL, NULL, NULL); } ;
 /*derefID: DEREFERENCE id  { symbolNode *sym = symbolLookup(&head,$2->token);
@@ -299,6 +298,15 @@ int main(){
     return yyparse();
 }
 
+void printInfo(treeNode *root){
+    printf ("ok\n"); 
+    printSymbolTable(topStack);
+    printf("\n"); 
+    printScopes(topStack);       
+    printf("\n");
+    printtree (root,0);
+}
+
 treeNode *mktreeNode    (char *token, treeNode *left, treeNode* middle, treeNode *right){
     treeNode *newtreeNode = (treeNode*)malloc (sizeof(treeNode));
     char    *newstr = (char*)malloc (sizeof(token)+1);
@@ -328,6 +336,14 @@ int yyerror(char* s){
     printf ("%s: at line %d found token [%s]\n",  s,counter, yytext);
     return 0;
 }
+
+int iSCompileErrors(scopeNode *root){\
+    int pass = 1;
+    pass = pass && checkDuplicateProcs(root);
+    checkDuplicateSymbols(root);
+    return 0;
+}
+
 void pushStatements(treeNode* tNode){
 
 if(tNode==NULL)
@@ -509,6 +525,8 @@ return;
 // }
 if(!strcmp(tNode->token,"DECLARE")){
  pushSymbols(tNode->left->token,tNode->right);
+ yyerror("stuck test");
+ //YYERROR;
  return;
 }
  
@@ -667,45 +685,6 @@ int isSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode)
     return res;
 }
 
-int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolNode** head_ref)
-{
-    // compare callParams and declaredParams trees //
-    // callParams: node has token value and no childs ["X"]
-    // declaredParams: node has empty parent [""] and two children ["int"] ["X"]
-
-    if (callParams == NULL || declaredParams == NULL)
-        return 0;
-    
-    // base case: callParams and declaredParams both point to a single node, 'not equal to a COMMA node'
-    if (strcmp(callParams->token, ",") && strcmp(declaredParams->token, ","))
-    {
-        
-        symbolNode *paramter = symbolLookup(&head, callParams->token);
-        // if current called Paramter is not null. then it is a  variable, look it up on symbol table(s)
-        if (paramter !=NULL)
-            {
-                if (!strcmp(paramter->type, declaredParams->left->token))
-                    return 1;
-                else
-                    return 0;
-            }
-        // if current paramter is null, it must be a const (otherwise will be declared unkown before entering function)
-        else if (paramter == NULL){
-            if (!strcmp ( callParams->left->token, declaredParams->left->token ) )
-                return 1;
-            else
-                return 0;
-        }
-            
-    }
-    // base case: callParams and declaredParams are unbalanced (unmatched)
-    else if (   (!strcmp(callParams->token, ",") && strcmp(declaredParams->token, ",") ) 
-                    ||
-                    ((strcmp(callParams->token, ",") && !strcmp(declaredParams->token, ",")) ) )
-        return 0;
-    else
-        return isParamsMatch(callParams->left, declaredParams->left, &head) && isParamsMatch(callParams->right, declaredParams->right, &head);
-}
 
 symbolNode* symbolLookup (struct symbolNode** head_ref, char* token){
     /* function returns the node of the symbol  if symbol already declared, otherwise NULL */
