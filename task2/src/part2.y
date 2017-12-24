@@ -35,7 +35,7 @@ int ScopeNum=0;
 void printInfo(treeNode *head);
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
-int iSCompileErrors(scopeNode *root);
+int isCompileErrors(scopeNode *root);
 int isSimilarSymbols(struct symbolNode* root);
 int checkDuplicateSymbols(scopeNode* root);
 void pushStatements(treeNode* tNode);
@@ -65,7 +65,7 @@ int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolN
 %left MULTI DIVISION
 %start s
 %%
-s:      global {pushStatements($1); printInfo($1); if (iSCompileErrors(topStack)) YYERROR;   };
+s:      global {pushStatements($1); printInfo($1); if (isCompileErrors(topStack)) YYERROR;   };
 global:  procedures procMain  {$$ = mktreeNode ("global", $1,NULL,$2); }
             |procMain  {$$ = mktreeNode ("global", $1,NULL,NULL); }     ;
        
@@ -301,10 +301,14 @@ int main(){
 
 void printInfo(treeNode *root){
     printf ("ok\n"); 
+    
+    printf("print symbol table:\n");
     printSymbolTable(topStack);
     printf("\n"); 
+    printf("print scopes:\n");
     printScopes(topStack);       
-    printf("\n");
+    printf("\n"); 
+
     printtree (root,0);
 }
 
@@ -338,23 +342,22 @@ int yyerror(char* s){
     return 0;
 }
 
-int iSCompileErrors(scopeNode *root){\
+int isCompileErrors(scopeNode *root){
     int pass = 1;
-    
     pass = pass && checkDuplicateSymbols(root);
     
-    return 0;
+    return pass;
 }
 
 int checkDuplicateSymbols(scopeNode* root){
  
- struct scopeNode * temp=root;
- while(temp!=NULL){
- if(isSimilarSymbols(root->symbolTable)==0)
- return 0;
+    struct scopeNode * temp=root;
+    while(temp!=NULL){
+        if(isSimilarSymbols(root->symbolTable)==0)
+            return 0;
         temp=temp->next;
- }
- return 1;
+    }
+    return 1;
 }
 
 
@@ -484,10 +487,11 @@ void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNo
       ScopeNum++;
         printf ("adding scope: %s\n",scopeName);
 	struct scopeNode* new_scope = (struct scopeNode*) malloc(sizeof(struct scopeNode));
-	
+        
 	new_scope->scopeName = (char*)(malloc (sizeof(scopeName) + 1));
 	strncpy(new_scope->scopeName, scopeName, sizeof(scopeName)+1);
-	new_scope->scopeNum=ScopeNum;
+	
+        new_scope->scopeNum=ScopeNum;
 		
 	new_scope->next = (*head_ref);
 	(*head_ref) = new_scope;
@@ -496,48 +500,47 @@ void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNo
 }
 
 void pushScopeStatements(treeNode* tNode){
-
-
-if(tNode==NULL)
-return;
-
- if(!strcmp(tNode->token,"ELSE")){
-  return;
- }
- if(!strcmp(tNode->token,"while")){
-     return;
-  }
-  if(!strcmp(tNode->token,"IF")){
-  return;
- }
-/* if(!strcmp(tNode->token,"BLOCK")){
-   pushStatements(tNode->left);
-   
-   }*/
- if(!strcmp(tNode->token,"do-while")){ 
-    return;
- }
- if(!strcmp(tNode->token,"for")){
- return;
- }
-if(!strcmp(tNode->token,"procedure")){
-pushProcSymbols(tNode->left);
-return;
-}
-// if(!strcmp(tNode->token,"main")){
-// return;
-// }
-if(!strcmp(tNode->token,"DECLARE")){
- pushSymbols(tNode->left->token,tNode->right);
- yyerror("stuck test");
- //YYERROR;
- return;
-}
- 
-pushScopeStatements(tNode->left);
-pushScopeStatements(tNode->middle);
-pushScopeStatements(tNode->right);
-
+    
+    
+    if(tNode==NULL)
+        return;
+    
+    if(!strcmp(tNode->token,"ELSE")){
+        return;
+    }
+    if(!strcmp(tNode->token,"while")){
+        return;
+    }
+    if(!strcmp(tNode->token,"IF")){
+        return;
+    }
+    /* if(!strcmp(tNode->token,"BLOCK")){
+     *   pushStatements(tNode->left);
+     *   
+    }*/
+    if(!strcmp(tNode->token,"do-while")){ 
+        return;
+    }
+    if(!strcmp(tNode->token,"for")){
+        return;
+    }
+    if(!strcmp(tNode->token,"procedure")){
+        pushProcSymbols(tNode->left);
+        return;
+    }
+    // if(!strcmp(tNode->token,"main")){
+    // return;
+    // }
+    if(!strcmp(tNode->token,"DECLARE")){
+        pushSymbols(tNode->left->token,tNode->right);
+        //YYERROR;
+        return;
+    }
+    
+    pushScopeStatements(tNode->left);
+    pushScopeStatements(tNode->middle);
+    pushScopeStatements(tNode->right);
+    
 }
 
 
@@ -586,26 +589,28 @@ struct symbolNode* temp = *head_ref;
 // the given node
 void printSymbolTable(struct scopeNode *node)
 {  
-   struct scopeNode *node1=node;
-   while(node1 != NULL)
+   struct scopeNode *currentScope = node;
+   struct symbolNode *currentSymbol;
+   while(currentScope != NULL)
            {
-        while (node1->symbolTable != NULL)
+               currentSymbol = currentScope->symbolTable;
+        while (currentSymbol != NULL)
                 {
-                printf("id:{%s}, type:{%s}, value{%s},scope{%d} \n", node1->symbolTable->id, node1->symbolTable->type, node1->symbolTable->data,node1->symbolTable->scopeID);
-                node1->symbolTable = node1->symbolTable->next;
+                    printf("id:{%s}, type:{%s}, value{%s},scope{%d} \n", currentSymbol->id, currentSymbol->type, currentSymbol->data,currentSymbol->scopeID);
+                    currentSymbol = currentSymbol->next;
                 }
-         node1=node1->next;       
+         currentScope=currentScope->next;       
             }
 }
 
 void printScopes(struct scopeNode *node){
 
-    struct scopeNode *node1=node;
-    while (node1 != NULL)	{
-		printf("scope id:{%s} scopeNum:{%d}\n", node1->scopeName,node1->scopeNum);
-		node1 = node1->next;
+    struct scopeNode *current=node;
+    while (current != NULL)	{
+		printf("scope id:{%s} scopeNum:{%d}\n", current->scopeName,current->scopeNum);
+		current = current->next;
 	}
-	printf("num of scopes:{%d}",ScopeNum);
+    printf("num of scopes:{%d}\n",ScopeNum);
 	
 }
 
@@ -676,14 +681,14 @@ int isSimilarSymbols(struct symbolNode* root)
 {
     /* return 0 if given symbol already exists  */
     symbolNode* s1=root;
-    symbolNode* s2=root->next;
+    symbolNode* s2=root;
     
     
   while(s1!= NULL){
         while (s2 != NULL)
         {
-           
-            if (!strcmp(s1->id, s2->id)&&s1!=s2){
+           //check for same name, excluding self
+            if (!strcmp(s1->id, s2->id) && s1!=s2 ){
                 return 0;
                 }
                 
