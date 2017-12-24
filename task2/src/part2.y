@@ -11,7 +11,7 @@ typedef struct treeNode{
 } treeNode;
 
 typedef struct symbolNode{
-        int isProc; //0 if primitive symbol, 1 if is procedure
+    int isProc; //0 if primitive symbol, 1 if is procedure
 	char* id;
 	char* type;
 	char* data;
@@ -36,7 +36,8 @@ void printInfo(treeNode *head);
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
 int iSCompileErrors(scopeNode *root);
-int checkDuplicateProcs(root);
+int isSimilarSymbols(struct symbolNode* root);
+int checkDuplicateSymbols(scopeNode* root);
 void pushStatements(treeNode* tNode);
 void pushScopeStatements(treeNode* tNode);
 void pushSymbols( char* type,treeNode* tNode);
@@ -339,10 +340,26 @@ int yyerror(char* s){
 
 int iSCompileErrors(scopeNode *root){\
     int pass = 1;
-    pass = pass && checkDuplicateProcs(root);
-    checkDuplicateSymbols(root);
+    
+    pass = pass && checkDuplicateSymbols(root);
+    
     return 0;
 }
+
+int checkDuplicateSymbols(scopeNode* root){
+ 
+ struct scopeNode * temp=root;
+ while(temp!=NULL){
+ if(isSimilarSymbols(root->symbolTable)==0)
+ return 0;
+        temp=temp->next;
+ }
+ return 1;
+}
+
+
+
+
 
 void pushStatements(treeNode* tNode){
 
@@ -426,19 +443,6 @@ void pushSymbols( char* type,treeNode* tNode)
         
 }
 
-int searchSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode)
-{
-    int res = 0;
-    struct symbolNode* temp = *head_ref;
-    
-    while (temp != NULL)
-    {
-        if (strcmp(temp->id, tNode->token))
-            return 1;
-        temp = temp->next;
-    }
-    return res;
-}
 
 /* wrapper function to add procedures to symbol table */
 /* pass on to "push" with value "1" to identify it as a fucntion   */
@@ -668,21 +672,26 @@ int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolN
         return isParamsMatch(callParams->left, declaredParams->left, &head) && isParamsMatch(callParams->right, declaredParams->right, &head);
 }
 
-int isSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode)
+int isSimilarSymbols(struct symbolNode* root)
 {
-    /* return 1 if given symbol already exists  */
+    /* return 0 if given symbol already exists  */
+    symbolNode* s1=root;
+    symbolNode* s2=root->next;
     
-    int res = 0;
-    struct symbolNode* temp = *head_ref;
     
-    while (temp != NULL)
-    {
-        if (!strcmp(temp->id, tNode->token)){
-            return 1;
-            }
-        temp = temp->next;
+  while(s1!= NULL){
+        while (s2 != NULL)
+        {
+           
+            if (!strcmp(s1->id, s2->id)&&s1!=s2){
+                return 0;
+                }
+                
+            s2 =s2->next;
+        }
+        s1 =s1->next;
     }
-    return res;
+    return 1;
 }
 
 
