@@ -6,4 +6,5 @@ Language file is attached in part 1 folder
 Using a flex (lex) for token analysis, and bison (yacc) for determining grammar rules
 
 Part 1: Lexical Analysis
+
 Part 2: Semantical Analysis
