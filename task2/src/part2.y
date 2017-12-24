@@ -58,7 +58,7 @@ int searchSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode);
 %left MULTI DIVISION
 %start s
 %%
-s:      global {pushStatements($1);printf ("ok\n");  printSymbolTable(topStack);printf("\n"); printScopes(topStack); printf("\n"); printtree ($1,0); };
+s:      global {pushStatements($1);printf ("ok\n");  printSymbolTable(topStack);printf("\n"); printScopes(topStack);        printf("\n"); printtree ($1,0); };
 global:  procedures procMain  {$$ = mktreeNode ("global", $1,NULL,$2); }
             |procMain  {$$ = mktreeNode ("global", $1,NULL,NULL); }     ;
        
@@ -67,11 +67,14 @@ global:  procedures procMain  {$$ = mktreeNode ("global", $1,NULL,$2); }
 procedures: procedures proc   {$$ = mktreeNode ("", $1,NULL, NULL); /*pushProcSymbols(&topStack, $2);*/}
                 | proc    {$$ = mktreeNode ("", $1, NULL,NULL); /* pushProcSymbols(&topStack, $1);*/};
                 
+/*proc:  procValue  { if (!pushProcSymbols(&head, $1)) { yyerror("duplicate identifier found"); YYERROR;};}
+            | procVoid { if (!pushProcSymbols(&head, $1)) { yyerror("duplicate identifier found"); YYERROR;};};
+*/                
 proc:  procValue 
             | procVoid ; 
-procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements { $$ = mktreeNode ("main", $5,NULL, NULL);/*pushScopeToStack(&topStack, $$->token,$5);*/ };
-procVoid: procID LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mktreeNode ("procedure", $1, $3, $5);/*pushScopeToStack(&topStack,$$->token,$5);*/ };
-procValue: procID LEFTPAREN params RIGHTPAREN  block_return_value_statements {$$ = mktreeNode ("procedure", $1, $3, $5);/*pushScopeToStack(&topStack,$$->token,$5);*/ };
+procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements { $$ = mktreeNode ("main", $5,NULL, NULL); };
+procVoid: procID LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mktreeNode ("procedure", $1, $3, $5);};
+procValue: procID LEFTPAREN params RIGHTPAREN  block_return_value_statements {$$ = mktreeNode ("procedure", $1, $3, $5); };
 procID: varType id {$$ = mktreeNode ("procID", $1, NULL, $2); }
         | void id {$$ = mktreeNode ("procID", $1, NULL, $2); };
 
@@ -101,7 +104,7 @@ expr:     expr PLUS expr    {$$ = mktreeNode ("+", $1, NULL, $3); }
         | expr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
         | expr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
         | NOT expr {$$ = mktreeNode ("NOT", NULL, NULL, $2); }
-        | ADDRESS id  {$$ = mktreeNode ("&", $2, NULL,NULL ); }
+        | address 
         | derefID 
         | Pexpr
         | consts ;
@@ -129,7 +132,18 @@ rightbrace: RIGHTBRACE  {$$ = mktreeNode (")", NULL, NULL,NULL ); };
 
 
               /*_________________________________________________TYPES________________________________________________*/
+              
+/* consts: id {
+                    if (!isSimilarSymbols(&head, $1) ) 
+                    {
+                        yyerror("unknown variable is used"); 
+                        YYERROR;
+                    };
+                }
+                    | numbers | booleans | csnull | chars | procCall ; */ /*strings*/
 consts: id | numbers | booleans | csnull | strings|chars | procCall ;
+
+
 id:   ID            {$$ = mktreeNode (yytext, NULL, NULL, NULL); }  ;
 
 numbers: INTEGER_NEG {$$ = mktreeNode (yytext, NULL, NULL, NULL); } 
@@ -137,12 +151,38 @@ numbers: INTEGER_NEG {$$ = mktreeNode (yytext, NULL, NULL, NULL); }
             | HEX_CONST { $$ = mktreeNode (yytext, NULL, NULL, NULL); }
             | OCTAL_CONST { $$ = mktreeNode (yytext, NULL, NULL, NULL); }
             | BINARY_CONST { $$ = mktreeNode (yytext, NULL, NULL, NULL); };
+/* numbers: INTEGER_NEG {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,NULL), NULL, mktreeNode("neg",NULL,NULL,NULL)); } 
+            | INTEGER_POS  {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,NULL), NULL, mktreeNode("pos",NULL,NULL,NULL)); } 
+            | HEX_CONST {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,NULL), NULL, mktreeNode("hex",NULL,NULL,NULL)); } 
+            | OCTAL_CONST {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,NULL), NULL, mktreeNode("oct",NULL,NULL,NULL)); } 
+            | BINARY_CONST {$$ = mktreeNode (yytext, mktreeNode("integer", NULL,NULL,NULL), NULL, mktreeNode("bin",NULL,NULL,NULL)); } ; */
+
 csnull: CSNULL  { $$ = mktreeNode (yytext, NULL, NULL, NULL); };
+/*csnull: CSNULL  {$$ = mktreeNode (yytext, mktreeNode("csnull", NULL,NULL,NULL), NULL, NULL); } ;*/
+
 booleans: BOOLTRUE { $$ = mktreeNode (yytext, NULL, NULL, NULL); }
             | BOOLFALSE { $$ = mktreeNode (yytext, NULL, NULL, NULL); };
+/*booleans: BOOLTRUE {$$ = mktreeNode (yytext, mktreeNode("boolean", NULL,NULL,NULL), NULL, NULL); } */
+
 strings: STRING_CONST { $$ = mktreeNode (yytext, NULL, NULL, NULL); };
+/*strings: STRING_CONST {$$ = mktreeNode (yytext, mktreeNode("charp", NULL,NULL,NULL), NULL, NULL); } ; */
+
 chars: CHAR_CONST { $$ = mktreeNode (yytext, NULL, NULL, NULL); };
+/*chars: CHAR_CONST {$$ = mktreeNode (yytext, mktreeNode("char", NULL,NULL,NULL), NULL, NULL); }; */
+
 procCall: id LEFTPAREN args RIGHTPAREN { $$ = mktreeNode ("func call", $1, NULL, $3); };
+
+/*procCall: id LEFTPAREN args RIGHTPAREN 
+                    { 
+                    if (!isSimilarSymbols(&head, $1) ) 
+                    { 
+                        yyerror("applied function is undeclared"); YYERROR;
+                    };
+                    if (!isParamsMatch($3->left, symbolLookup(&head, $1->token)->params->left, &head)){
+                        yyerror("function params mismatch"); YYERROR;
+                    }
+                    $$ = mktreeNode ("func call", $1, NULL, $3);
+                    }; */
 
 args: /* no params  */
         | argsDeclare {$$ = mktreeNode ("args:", $1, NULL, NULL); };
@@ -151,6 +191,14 @@ argsDeclare: consts COMMA  argsDeclare  {$$ = mktreeNode ("", $1, NULL, $3); }
 
               /*_________________________________________________________________________________________________________*/
 derefID: DEREFERENCE id  {char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); $$ = mktreeNode (s,NULL, NULL, NULL); } ;
+/*derefID: DEREFERENCE id  { symbolNode *sym = symbolLookup(&head,$2->token);
+                                                if (strcmp(sym->type, "charp") && strcmp(sym->type, "intp")) 
+                                                        { yyerror("non-pointer-type variables cannot be dereferenced"); YYERROR;} 
+                                                char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); 
+                                                $$ = mktreeNode (s,NULL, NULL, NULL); 
+                                                } ;*/
+                                                
+/*_______________________________________________________BLOCK_BODY_STRUCTURE_________________________________________*/
 
 newline:  
         declarations newline   {$$ = mktreeNode ("", $1, NULL,$2); }
@@ -172,24 +220,31 @@ statement: /* | IN.OUT_statements*/
             | proc
             | procCall SEMICOLON
             | ASSIGNMENT_statement SEMICOLON;
-        
+/*statement: /* | IN.OUT_statements
+            IF_statements 
+            | LOOP_statements  
+            | proc
+            | procCall SEMICOLON
+            //change to updateSymbols (head, $1)
+            | ASSIGNMENT_statement SEMICOLON { if (!isSimilarSymbols(&head, $1->left)) { yyerror("unknown variable is being assigned to"); YYERROR;};};*/
 
 statements_type: statement
                  |block_statements;
-                    
-IF_statements: IF cond statements_type {$$ = mktreeNode ("IF", $2,$3,NULL);/*pushScopeToStack(&topStack, $$->token,$3);*/ } %prec LOWER_THAN_ELSE
-             | IF cond statements_type else{$$ = mktreeNode ("IF", $2,$3, $4);/*pushScopeToStack(&topStack, $$->token,$3);*/ };
+
+                 /*_______________________________________CONDITIONAL_STATEMENTS___________________________________*/ 
+IF_statements: IF cond statements_type {$$ = mktreeNode ("IF", $2,$3,NULL);} %prec LOWER_THAN_ELSE
+             | IF cond statements_type else{$$ = mktreeNode ("IF", $2,$3, $4);};
                
-else:    ELSE statements_type{$$ = mktreeNode ("ELSE", $2,NULL, NULL);/*pushScopeToStack(&topStack, $$->token,$2);*/ };
+else:    ELSE statements_type{$$ = mktreeNode ("ELSE", $2,NULL, NULL); };
 
 
             /*_______________________________________LOOP STATEMENTS___________________________________*/
 LOOP_statements: while | whileDO | for;
 //note: while\DO's right paren is their right grand-child
-while: WHILE cond statements_type {$$=mktreeNode("while", $2,NULL, $3);/*pushScopeToStack(&topStack, $$->token,$3);*/} ;
-whileDO: DO statements_type WHILE cond  {$$=mktreeNode("do-while", $2,NULL, $4);/*pushScopeToStack(&topStack, $$->token,$2);*/};
+while: WHILE cond statements_type {$$=mktreeNode("while", $2,NULL, $3);} ;
+whileDO: DO statements_type WHILE cond  {$$=mktreeNode("do-while", $2,NULL, $4);};
 //note: for right paren is its right child
-for:  FOR for_cond  rightParen statements_type{$$=mktreeNode("for", $2,$3, $4);/*pushScopeToStack(&topStack, $$->token,$4);*/};
+for:  FOR for_cond  rightParen statements_type{$$=mktreeNode("for", $2,$3, $4);};
                  
 for_cond: LEFTPAREN preCondition SEMICOLON postCondition SEMICOLON iteration {$$=mktreeNode("for conditions:", $2,$4, $6);};
 
@@ -206,13 +261,11 @@ ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mktreeNode ("=", $1, NULL, $3); 
             | derefID ASSIGNMENT expr  {$$ = mktreeNode ("=", $1, NULL, $3); } ;
 str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings  {$$ = mktreeNode ("=", $1, NULL, $6); };
 
-                            
-                              
 
 varType: BOOL        {$$ = mktreeNode ("boolean", NULL, NULL, NULL); }
             | CHAR          {$$ = mktreeNode ("char", NULL, NULL, NULL); }
             | INT              {$$ = mktreeNode ("integer", NULL, NULL, NULL); }
-            | STRING       {$$ = mktreeNode ("string", NULL, NULL, NULL); }
+           // | STRING       {$$ = mktreeNode ("string", NULL, NULL, NULL); }
             | INTPTR        {$$ = mktreeNode ("intptr", NULL, NULL, NULL); }
             | CHARPTR    {$$ = mktreeNode ("charptr", NULL, NULL, NULL); };
 void: VOID        {$$ = mktreeNode ("void", NULL, NULL, NULL); };
@@ -233,7 +286,11 @@ variablesDeclare: id COMMA variablesDeclare    {$$ = mktreeNode ("", $1, NULL, $
   
 variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {/*pushSymbols( $1->token,$2);*/ $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
                               |varType StringDeclare {/*pushSymbols("String",$2);*/ $$ = mktreeNode ("DECLARE", $1, NULL, $2); };
-  
+/*variable_declare_statements: 
+                            varType variablesDeclare  { if (!pushSymbols(&head, $1->token,$2)){ yyerror("duplicate identifier found"); YYERROR;};
+                                                                                                                        $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
+                          | STRING StringDeclare       { if (!pushSymbols(&head, "charp",$2)){ yyerror("duplicate identifier found"); YYERROR;};
+                                                                                                                        $$ = mktreeNode ("DECLARE", mktreeNode ("charp", NULL, NULL, NULL), NULL, $2); };*/
   
 %%
 
@@ -271,11 +328,6 @@ int yyerror(char* s){
     printf ("%s: at line %d found token [%s]\n",  s,counter, yytext);
     return 0;
 }
-
-
-
-
-
 void pushStatements(treeNode* tNode){
 
 if(tNode==NULL)
@@ -533,4 +585,138 @@ void printScopes(struct scopeNode *node){
 	}
 	printf("num of scopes:{%d}",ScopeNum);
 	
+}
+
+int isNumeric(char* token){
+    int len = strlen(token), i;
+    for (i = 0; i<len; i++){
+        if ( !isdigit(token[i]))
+            return 0;
+    }
+    return 1;
+}
+
+int isIdentifier(char* token){
+//| numbers | booleans | csnull | strings|chars | procCall ;
+    if (!strcmp(token, "true"))
+        return 1;
+    else if (!strcmp(token, "false"))
+        return 1;
+    else if (!strcmp(token, "null"))
+        return 1;
+    else if (isNumeric(token))
+        return 1;
+    return 0;
+              
+}
+
+int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolNode** head_ref)
+{
+    // compare callParams and declaredParams trees //
+    // callParams: node has token value and no childs ["X"]
+    // declaredParams: node has empty parent [""] and two children ["int"] ["X"]
+
+    if (callParams == NULL || declaredParams == NULL)
+        return 0;
+    
+    // base case: callParams and declaredParams both point to a single node, 'not equal to a COMMA node'
+    if (strcmp(callParams->token, ",") && strcmp(declaredParams->token, ","))
+    {
+        
+        symbolNode *paramter = symbolLookup(&head, callParams->token);
+        // if current called Paramter is not null. then it is a  variable, look it up on symbol table(s)
+        if (paramter !=NULL)
+            {
+                if (!strcmp(paramter->type, declaredParams->left->token))
+                    return 1;
+                else
+                    return 0;
+            }
+        // if current paramter is null, it must be a const (otherwise will be declared unkown before entering function)
+        else if (paramter == NULL){
+            if (!strcmp ( callParams->left->token, declaredParams->left->token ) )
+                return 1;
+            else
+                return 0;
+        }
+            
+    }
+    // base case: callParams and declaredParams are unbalanced (unmatched)
+    else if (   (!strcmp(callParams->token, ",") && strcmp(declaredParams->token, ",") ) 
+                    ||
+                    ((strcmp(callParams->token, ",") && !strcmp(declaredParams->token, ",")) ) )
+        return 0;
+    else
+        return isParamsMatch(callParams->left, declaredParams->left, &head) && isParamsMatch(callParams->right, declaredParams->right, &head);
+}
+
+int isSimilarSymbols(struct symbolNode** head_ref, treeNode* tNode)
+{
+    /* return 1 if given symbol already exists  */
+    
+    int res = 0;
+    struct symbolNode* temp = *head_ref;
+    
+    while (temp != NULL)
+    {
+        if (!strcmp(temp->id, tNode->token)){
+            return 1;
+            }
+        temp = temp->next;
+    }
+    return res;
+}
+
+int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolNode** head_ref)
+{
+    // compare callParams and declaredParams trees //
+    // callParams: node has token value and no childs ["X"]
+    // declaredParams: node has empty parent [""] and two children ["int"] ["X"]
+
+    if (callParams == NULL || declaredParams == NULL)
+        return 0;
+    
+    // base case: callParams and declaredParams both point to a single node, 'not equal to a COMMA node'
+    if (strcmp(callParams->token, ",") && strcmp(declaredParams->token, ","))
+    {
+        
+        symbolNode *paramter = symbolLookup(&head, callParams->token);
+        // if current called Paramter is not null. then it is a  variable, look it up on symbol table(s)
+        if (paramter !=NULL)
+            {
+                if (!strcmp(paramter->type, declaredParams->left->token))
+                    return 1;
+                else
+                    return 0;
+            }
+        // if current paramter is null, it must be a const (otherwise will be declared unkown before entering function)
+        else if (paramter == NULL){
+            if (!strcmp ( callParams->left->token, declaredParams->left->token ) )
+                return 1;
+            else
+                return 0;
+        }
+            
+    }
+    // base case: callParams and declaredParams are unbalanced (unmatched)
+    else if (   (!strcmp(callParams->token, ",") && strcmp(declaredParams->token, ",") ) 
+                    ||
+                    ((strcmp(callParams->token, ",") && !strcmp(declaredParams->token, ",")) ) )
+        return 0;
+    else
+        return isParamsMatch(callParams->left, declaredParams->left, &head) && isParamsMatch(callParams->right, declaredParams->right, &head);
+}
+
+symbolNode* symbolLookup (struct symbolNode** head_ref, char* token){
+    /* function returns the node of the symbol  if symbol already declared, otherwise NULL */
+    struct symbolNode* temp = *head_ref;
+    
+    while (temp != NULL)
+    {
+        if (!strcmp(temp->id, token)){
+            return temp;
+            }
+        temp = temp->next;
+    }
+    return NULL;
 }
