@@ -1,5 +1,5 @@
 void main(){
-    void f1(integer x){return;}
+    void f1(integer x, integer y, integer z){return;}
     void f2(integer y){return;}
     if (3 > 2){
         integer a1;
