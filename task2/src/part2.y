@@ -49,6 +49,8 @@ void printSymbolTable(struct scopeNode *node);
 void printScopes(struct scopeNode *node);
 symbolNode* symbolLookup (struct symbolNode** head_ref, char* token);
 int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolNode** head_ref);
+int checkDuplicateSymbols(scopeNode *root);
+int checkDuplicateProcs(scopeNode *root);
 #define YYSTYPE struct treeNode *
 %}
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID,QUOTES,NADA
@@ -173,7 +175,7 @@ procCall: id LEFTPAREN args RIGHTPAREN
                     { 
                         yyerror("applied function is undeclared"); YYERROR;
                     };*//*
-                    if (!isParamsMatch($3->left, symbolLookup(&head, $1->token)->params->left, &head)){
+                    if (!3($3->left, symbolLookup(&head, $1->token)->params->left, &head)){
                         yyerror("function params mismatch"); YYERROR;
                     }*/
                     $$ = mktreeNode ("func call", $1, NULL, $3);
@@ -401,7 +403,7 @@ pushScopeToStack(&topStack, "for",tNode->right);
 //return;
 }
 if(!strcmp(tNode->token,"procedure")){
-//pushProcSymbols(tNode1->left);
+//pushProcSymbols(tNode);
 pushScopeToStack(&topStack,"procedure",tNode->right);
 
 //return;
@@ -447,13 +449,12 @@ void pushSymbols( char* type,treeNode* tNode)
 
 /* wrapper function to add procedures to symbol table */
 /* pass on to "push" with value "1" to identify it as a fucntion   */
-void pushProcSymbols( treeNode* tNode)
+void pushProcSymbols(treeNode* tNode)
 {
    /* symbolNode* head = (*head_ref)->symbolTable;*/
     //params is tNode->middle;
     int isProc = 1;
-    pushSymbolsToTable(&topStack, tNode->right->token, tNode->left->token, "function",1, tNode->middle);
-    
+    pushSymbolsToTable(&topStack, tNode->left->right->token, tNode->left->left->token, "function",1, tNode->middle);
 }
 
 /* 
@@ -469,9 +470,10 @@ void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new
 	new_node->id = (char*)(malloc (sizeof(id) + 1));
 	strncpy(new_node->id, id, sizeof(id)+1);
 	
-	if (new_data != NULL){
-	new_node->data = (char*)(malloc (sizeof(new_data) + 1));
-	strncpy(new_node->data, new_data, sizeof(new_data)+1);
+	if (new_data != NULL)
+	{
+            new_node->data = (char*)(malloc (sizeof(new_data) + 1));
+            strncpy(new_node->data, new_data, sizeof(new_data)+1);
 	}
 	new_node->type = (char*)(malloc (sizeof(type) + 1));
 	strncpy(new_node->type, type, sizeof(type)+1);
@@ -480,10 +482,14 @@ void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new
 	
 	//new_node->params = params;
 	// cause seg fault, params is empty even in functions(?)
-	if (isProc){
+        if (params != NULL)
+        {
             new_node->params = (treeNode*) (malloc(sizeof(treeNode)) );
             memcpy(new_node->params, params, sizeof(treeNode) );
-	}
+        }
+        else
+            new_node->params = NULL;
+            
 	new_node->next =(*node)->symbolTable;
 	(*node)->symbolTable = new_node;
 }
@@ -532,7 +538,7 @@ void pushScopeStatements(treeNode* tNode){
         return;
     }
     if(!strcmp(tNode->token,"procedure")){
-        pushProcSymbols(tNode->left);
+        pushProcSymbols(tNode);
         return;
     }
     // if(!strcmp(tNode->token,"main")){
