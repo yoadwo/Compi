@@ -16,6 +16,7 @@ typedef struct symbolNode{
 	char* type;
 	char* data;
 	int scopeID;
+	struct treeNode *params;
 	struct symbolNode *next;
 } symbolNode;
 
@@ -36,13 +37,13 @@ void printInfo(treeNode *head);
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
 int isCompileErrors(scopeNode *root);
-int isSimilarSymbols(struct symbolNode* root);
+int isSimilarSymbols(char* scopeName, struct symbolNode* root);
 int checkDuplicateSymbols(scopeNode* root);
 void pushStatements(treeNode* tNode);
 void pushScopeStatements(treeNode* tNode);
 void pushSymbols( char* type,treeNode* tNode);
 void pushProcSymbols( treeNode* tNode);
-void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new_data, int isProc);
+void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new_data, int isProc, treeNode *params);
 void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNode);
 void printSymbolTable(struct scopeNode *node);
 void printScopes(struct scopeNode *node);
@@ -65,7 +66,7 @@ int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolN
 %left MULTI DIVISION
 %start s
 %%
-s:      global {pushStatements($1); printInfo($1); if (isCompileErrors(topStack)) YYERROR;   };
+s:      global {pushStatements($1); if (!isCompileErrors(topStack)) {YYERROR;}    printInfo($1); };
 global:  procedures procMain  {$$ = mktreeNode ("global", $1,NULL,$2); }
             |procMain  {$$ = mktreeNode ("global", $1,NULL,NULL); }     ;
        
@@ -164,19 +165,19 @@ strings: STRING_CONST {$$ = mktreeNode (yytext, mktreeNode("charp", NULL,NULL,NU
 
 chars: CHAR_CONST {$$ = mktreeNode (yytext, mktreeNode("char", NULL,NULL,NULL), NULL, NULL); };
 
-procCall: id LEFTPAREN args RIGHTPAREN { $$ = mktreeNode ("func call", $1, NULL, $3); };
+/*procCall: id LEFTPAREN args RIGHTPAREN { $$ = mktreeNode ("func call", $1, NULL, $3); };*/
 
-/*procCall: id LEFTPAREN args RIGHTPAREN 
+procCall: id LEFTPAREN args RIGHTPAREN 
                     { 
-                    if (!isSimilarSymbols(&head, $1) ) 
+                 /*   if (!isSimilarSymbols(&head, $1) ) 
                     { 
                         yyerror("applied function is undeclared"); YYERROR;
-                    };
+                    };*//*
                     if (!isParamsMatch($3->left, symbolLookup(&head, $1->token)->params->left, &head)){
                         yyerror("function params mismatch"); YYERROR;
-                    }
+                    }*/
                     $$ = mktreeNode ("func call", $1, NULL, $3);
-                    }; */
+                    }; 
 
 args: /* no params  */
         | argsDeclare {$$ = mktreeNode ("args:", $1, NULL, NULL); };
@@ -343,6 +344,7 @@ int yyerror(char* s){
 }
 
 int isCompileErrors(scopeNode *root){
+    // return 1 if all checks pass, otherwise 0;
     int pass = 1;
     pass = pass && checkDuplicateSymbols(root);
     
@@ -350,10 +352,10 @@ int isCompileErrors(scopeNode *root){
 }
 
 int checkDuplicateSymbols(scopeNode* root){
- 
+
     struct scopeNode * temp=root;
     while(temp!=NULL){
-        if(isSimilarSymbols(root->symbolTable)==0)
+        if(isSimilarSymbols(temp->scopeName, temp->symbolTable)==0)
             return 0;
         temp=temp->next;
     }
@@ -361,11 +363,7 @@ int checkDuplicateSymbols(scopeNode* root){
 }
 
 
-
-
-
 void pushStatements(treeNode* tNode){
-
 if(tNode==NULL)
 return;
 
@@ -433,12 +431,12 @@ void pushSymbols( char* type,treeNode* tNode)
         /*node is aasignment*/
         if(!strcmp(tNode->token,"=")){
 
-        pushSymbolsToTable( &topStack,tNode->left->token,type,tNode->right->token, 0);
+        pushSymbolsToTable( &topStack,tNode->left->token,type,tNode->right->token, 0, NULL);
             return;
         }
     /* node is an ID */
         if (strcmp(tNode->token,"=") && strcmp(tNode->token,"")){
-            pushSymbolsToTable(&topStack,tNode->token,type,NULL, 0);
+            pushSymbolsToTable(&topStack,tNode->token,type,NULL, 0, NULL);
             return;
             }
         pushSymbols( type,tNode->left);
@@ -452,9 +450,9 @@ void pushSymbols( char* type,treeNode* tNode)
 void pushProcSymbols( treeNode* tNode)
 {
    /* symbolNode* head = (*head_ref)->symbolTable;*/
-
+    //params is tNode->middle;
     int isProc = 1;
-    pushSymbolsToTable(&topStack, tNode->right->token, tNode->left->token, "function",1);
+    pushSymbolsToTable(&topStack, tNode->right->token, tNode->left->token, "function",1, tNode->middle);
     
 }
 
@@ -462,21 +460,30 @@ void pushProcSymbols( treeNode* tNode)
 PUSH SYMBOLS TO SYMBOL LIST (TABLE)
 Given a reference (pointer to pointer) to the head of a list
 and an int, inserts a new node on the front of the list. */
-void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new_data, int isProc)
+void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new_data, int isProc, treeNode *params)
 {
 	struct symbolNode* new_node = (struct symbolNode*) malloc(sizeof(struct symbolNode));
 	
 	new_node->isProc = isProc;
+	
 	new_node->id = (char*)(malloc (sizeof(id) + 1));
 	strncpy(new_node->id, id, sizeof(id)+1);
+	
 	if (new_data != NULL){
 	new_node->data = (char*)(malloc (sizeof(new_data) + 1));
 	strncpy(new_node->data, new_data, sizeof(new_data)+1);
 	}
 	new_node->type = (char*)(malloc (sizeof(type) + 1));
 	strncpy(new_node->type, type, sizeof(type)+1);
+	
 	new_node->scopeID=(*node)->scopeNum;
 	
+	//new_node->params = params;
+	// cause seg fault, params is empty even in functions(?)
+	if (isProc){
+            new_node->params = (treeNode*) (malloc(sizeof(treeNode)) );
+            memcpy(new_node->params, params, sizeof(treeNode) );
+	}
 	new_node->next =(*node)->symbolTable;
 	(*node)->symbolTable = new_node;
 }
@@ -596,7 +603,10 @@ void printSymbolTable(struct scopeNode *node)
                currentSymbol = currentScope->symbolTable;
         while (currentSymbol != NULL)
                 {
-                    printf("id:{%s}, type:{%s}, value{%s},scope{%d} \n", currentSymbol->id, currentSymbol->type, currentSymbol->data,currentSymbol->scopeID);
+                    printf("id:{%s}, type:{%s}, value{%s},scope{%d}", currentSymbol->id, currentSymbol->type, currentSymbol->data,currentSymbol->scopeID);
+                    if ( currentSymbol->isProc)
+                        printf ("--funcion--");
+                    printf("\n");
                     currentSymbol = currentSymbol->next;
                 }
          currentScope=currentScope->next;       
@@ -677,7 +687,7 @@ int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolN
         return isParamsMatch(callParams->left, declaredParams->left, &head) && isParamsMatch(callParams->right, declaredParams->right, &head);
 }
 
-int isSimilarSymbols(struct symbolNode* root)
+int isSimilarSymbols(char* scopeName, struct symbolNode* root)
 {
     /* return 0 if given symbol already exists  */
     symbolNode* s1=root;
@@ -689,6 +699,10 @@ int isSimilarSymbols(struct symbolNode* root)
         {
            //check for same name, excluding self
             if (!strcmp(s1->id, s2->id) && s1!=s2 ){
+                if (s1->isProc)
+                    printf ("scope [%s]: re-declaration of procedure (%s)\n", scopeName, s1->id);
+                else
+                    printf ("scope [%s]: re-declaration of variable (%s)\n", scopeName, s1->id);
                 return 0;
                 }
                 
