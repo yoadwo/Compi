@@ -49,9 +49,10 @@ void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNo
 void printSymbolTable(struct scopeNode *node);
 void printScopes(struct scopeNode *node);
 symbolNode* symbolLookup (struct symbolNode** head_ref, char* token);
-int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbolNode** head_ref*/);
+int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolNode* currentSymTab);
 int checkDuplicateSymbols(scopeNode *root);
 int checkDuplicateProcs(scopeNode *root);
+symbolNode *funcTreeToParamsList(symbolNode **head_ref, treeNode *tNode);
 int compareCallDeclare(scopeNode *head_ref,  char *token, treeNode *callParams);
 #define YYSTYPE struct treeNode *
 %}
@@ -149,7 +150,7 @@ rightbrace: RIGHTBRACE  {$$ = mktreeNode (")", NULL, NULL,NULL ); };
                     };
                 }
                     | numbers | booleans | csnull | chars | procCall ; */ /*strings*/
-consts: id | numbers | booleans | csnull | strings|chars | procCall ;
+consts: id | numbers | booleans | csnull | strings |chars | procCall ;
 
 
 id:   ID            {$$ = mktreeNode (yytext, NULL, NULL, NULL); }  ;
@@ -267,7 +268,7 @@ str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings
 varType: BOOL        {$$ = mktreeNode ("boolean", NULL, NULL, NULL); }
             | CHAR          {$$ = mktreeNode ("char", NULL, NULL, NULL); }
             | INT              {$$ = mktreeNode ("integer", NULL, NULL, NULL); }
-           | STRING       {$$ = mktreeNode ("string", NULL, NULL, NULL); }
+            | STRING       {$$ = mktreeNode ("string", NULL, NULL, NULL); }
             | INTPTR        {$$ = mktreeNode ("intptr", NULL, NULL, NULL); }
             | CHARPTR    {$$ = mktreeNode ("charptr", NULL, NULL, NULL); };
 void: VOID        {$$ = mktreeNode ("void", NULL, NULL, NULL); };
@@ -364,18 +365,26 @@ int checkDuplicateSymbols(scopeNode* root){
     return 1;
 }
 
+symbolNode *funcTreeToParamsList(symbolNode **head_ref, treeNode *tNode){
+        
+    return NULL;
+}
 
 /* check ALL scopes, each symbol table in scope, if called params match some functions params */ 
 /* function return 1 if some function with matching signature exists, 0 otherwise */
 int compareCallDeclare(scopeNode *head_ref,  char *token, treeNode *callParams){
+    // root iterates all scopes
+    // current iterates symbols in current scope (root)
     scopeNode *root = head_ref;
-    symbolNode *current;
+    symbolNode *currentSymTab;
     while (root != NULL){
-        current = root->symbolTable;
-        if (current != NULL){
-            symbolNode *funcSymbol = symbolLookup(&current, token);
-            if (isParamsMatch(callParams, funcSymbol->params))
-                return 1;
+        currentSymTab = root->symbolTable;
+        if (currentSymTab != NULL){
+        // search for proc in current scope
+            symbolNode *funcSymbol = symbolLookup(&currentSymTab, token);
+            if (funcSymbol !=NULL)
+                if (isParamsMatch(callParams, funcSymbol->params, currentSymTab))
+                    return 1;
         }
         root = root->next; 
     }
@@ -426,6 +435,10 @@ void pushStatements(treeNode* tNode){
         //return;
     }
     if (!strcmp(tNode->token, "func call")){
+        //params list = create list of call params()
+        symbolNode  *callParams;
+        funcTreeToParamsList(&callParams, tNode->right);
+        //compareCallDeclare(topStack, tNode->left->token, list);
         compareCallDeclare(topStack, tNode->left->token, tNode->right);
             
     }
@@ -667,7 +680,7 @@ int isIdentifier(char* token){
               
 }
 
-int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbolNode** head_ref*/)
+int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolNode* currentSymTab)
 {
     // compare callParams and declaredParams trees //
     // callParams: node has token value and no childs ["X"]
@@ -680,17 +693,17 @@ int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbo
     if (strcmp(callParams->token, ",") && strcmp(declaredParams->token, ","))
     {
         
-        symbolNode *paramter = symbolLookup(&head, callParams->token);
+        symbolNode *parameter = symbolLookup(&currentSymTab, callParams->token);
         // if current called Paramter is not null. then it is a  variable, look it up on symbol table(s)
-        if (paramter !=NULL)
+        if (parameter !=NULL)
             {
-                if (!strcmp(paramter->type, declaredParams->left->token))
+                if (!strcmp(parameter->type, declaredParams->left->token))
                     return 1;
                 else
                     return 0;
             }
         // if current paramter is null, it must be a const (otherwise will be declared unkown before entering function)
-        else if (paramter == NULL){
+        else if (parameter == NULL){
             if (!strcmp ( callParams->left->token, declaredParams->left->token ) )
                 return 1;
             else
@@ -704,7 +717,7 @@ int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbo
                     ((strcmp(callParams->token, ",") && !strcmp(declaredParams->token, ",")) ) )
         return 0;
     else
-        return isParamsMatch(callParams->left, declaredParams->left/*, &head*/) && isParamsMatch(callParams->right, declaredParams->right/*, &head*/);
+        return isParamsMatch(callParams->left, declaredParams->left, currentSymTab) && isParamsMatch(callParams->right, declaredParams->right, currentSymTab);
 }
 
 int isSimilarSymbols(char* scopeName, struct symbolNode* root)
