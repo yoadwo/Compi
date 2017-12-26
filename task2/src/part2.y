@@ -31,7 +31,8 @@ symbolNode* head = NULL;
 scopeNode* topStack = NULL;
 int ScopeNum=0;
 
-
+scopeNode* scopeLookup (struct scopeNode** head_ref, char* token);
+bool checkEvaluation(treeNode* tNode);
 void printInfo(treeNode *head);
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
@@ -265,7 +266,7 @@ str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings
 varType: BOOL        {$$ = mktreeNode ("boolean", NULL, NULL, NULL); }
             | CHAR          {$$ = mktreeNode ("char", NULL, NULL, NULL); }
             | INT              {$$ = mktreeNode ("integer", NULL, NULL, NULL); }
-           // | STRING       {$$ = mktreeNode ("string", NULL, NULL, NULL); }
+           | STRING       {$$ = mktreeNode ("string", NULL, NULL, NULL); }
             | INTPTR        {$$ = mktreeNode ("intptr", NULL, NULL, NULL); }
             | CHARPTR    {$$ = mktreeNode ("charptr", NULL, NULL, NULL); };
 void: VOID        {$$ = mktreeNode ("void", NULL, NULL, NULL); };
@@ -420,6 +421,25 @@ pushStatements(tNode->middle);
 pushStatements(tNode->right);
 
 }
+
+bool checkEvaluation(treeNode* tNode){
+
+if(tNode==NULL)
+return;
+
+
+
+checkEvaluation( tNode->left);
+checkEvaluation( tNode->middle);
+checkEvaluation(tNode->right);
+
+}
+
+
+
+
+
+
 // A complete working C program to delete a node in a linked list
 // at a given position
 
@@ -694,6 +714,21 @@ int isSimilarSymbols(struct symbolNode* root)
     return 1;
 }
 
+
+scopeNode* scopeLookup (struct scopeNode** head_ref, char* token){
+    /* function returns the node of the symbol  if symbol already declared, otherwise NULL */
+    struct scopeNode* temp = *head_ref;
+    struct symbolNode result;
+    while (temp != NULL)
+    {
+        result=symbolLookup(temp->symbolTable,token);
+        if(result!=NULL)
+            return result;
+       
+        temp = temp->next;
+    }
+    return NULL;
+}
 
 symbolNode* symbolLookup (struct symbolNode** head_ref, char* token){
     /* function returns the node of the symbol  if symbol already declared, otherwise NULL */

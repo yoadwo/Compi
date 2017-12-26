@@ -5,7 +5,7 @@ void main(){
          }
 	void foo2(){
           while(x==6){
-             char p='s';
+             string p[8]="strin";
              char v='l';
              if(x==7){}
                     }
