@@ -1,13 +1,8 @@
 void main(){
-    void f1(integer x, integer y, integer z){return;}
-    void f2(integer y){return;}
-    if (3 > 2){
-        integer a1;
-        if (4>2){
-            integer b2;
-            f1(a1);
-        }
-    }
-
+    integer p, y;
+    charp c1,c2;
+    intp i1,i2;
+    void f1(integer x, integer y){return;}
+    f1(c1, p);
     return;
 }
