@@ -32,7 +32,7 @@ symbolNode* head = NULL;
 scopeNode* topStack = NULL;
 int ScopeNum=0;
 
-symbolNode* scopeLookup (struct scopeNode** head_ref, char* token);
+symbolNode* scopeLookup (char* token);
 //bool checkEvaluation(treeNode* tNode);
 void printInfo(treeNode *head);
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
@@ -49,11 +49,11 @@ void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNo
 void printSymbolTable(struct scopeNode *node);
 void printScopes(struct scopeNode *node);
 symbolNode* symbolLookup (struct symbolNode** head_ref, char* token);
-int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolNode* currentSymTab);
+int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbolNode* currentSymTab*/);
 int checkDuplicateSymbols(scopeNode *root);
 int checkDuplicateProcs(scopeNode *root);
 symbolNode *funcTreeToParamsList(symbolNode **head_ref, treeNode *tNode);
-int compareCallDeclare(scopeNode *head_ref,  char *token, treeNode *callParams);
+int compareCallDeclare( char *token, treeNode *callParams);
 #define YYSTYPE struct treeNode *
 %}
 %token BOOL, CHAR, INT, STRING, INTPTR, CHARPTR, ID, VOID,QUOTES,NADA
@@ -356,11 +356,11 @@ int isCompileErrors(scopeNode *root){
 
 /* check if two symbols were declared in same scope */
 int checkDuplicateSymbols(scopeNode* root){
-    struct scopeNode * temp=root;
-    while(temp!=NULL){
-        if(isSimilarSymbols(temp->scopeName, temp->symbolTable)==0)
+    struct scopeNode * currentScope=root;
+    while(currentScope!=NULL){
+        if(isSimilarSymbols(currentScope->scopeName, currentScope->symbolTable)==0)
             return 0;
-        temp=temp->next;
+        currentScope=currentScope->next;
     }
     return 1;
 }
@@ -372,21 +372,21 @@ symbolNode *funcTreeToParamsList(symbolNode **head_ref, treeNode *tNode){
 
 /* check ALL scopes, each symbol table in scope, if called params match some functions params */ 
 /* function return 1 if some function with matching signature exists, 0 otherwise */
-int compareCallDeclare(scopeNode *head_ref,  char *token, treeNode *callParams){
-    // root iterates all scopes
+int compareCallDeclare(char *token, treeNode *callParams){
+    // currentScope iterates all scopes
     // current iterates symbols in current scope (root)
-    scopeNode *root = head_ref;
+    scopeNode *currentScope = topStack;
     symbolNode *currentSymTab;
-    while (root != NULL){
-        currentSymTab = root->symbolTable;
+    while (currentScope != NULL){
+        currentSymTab = currentScope->symbolTable;
         if (currentSymTab != NULL){
         // search for proc in current scope
             symbolNode *funcSymbol = symbolLookup(&currentSymTab, token);
             if (funcSymbol !=NULL)
-                if (isParamsMatch(callParams, funcSymbol->params, currentSymTab))
+                if (isParamsMatch(callParams, funcSymbol->params/*, currentSymTab*/))
                     return 1;
         }
-        root = root->next; 
+        currentScope = currentScope->next; 
     }
     printf ("no procedure was defined with arguements matching called function (%s)\n", token);
     return 0;
@@ -436,10 +436,10 @@ void pushStatements(treeNode* tNode){
     }
     if (!strcmp(tNode->token, "func call")){
         //params list = create list of call params()
-        symbolNode  *callParams;
-        funcTreeToParamsList(&callParams, tNode->right);
+        //symbolNode  *callParams;
+        //funcTreeToParamsList(&callParams, tNode->right);
         //compareCallDeclare(topStack, tNode->left->token, list);
-        compareCallDeclare(topStack, tNode->left->token, tNode->right);
+        compareCallDeclare( tNode->left->token, tNode->right);
             
     }
     // if(!strcmp(tNode->token,"DECLARE")){
@@ -680,12 +680,19 @@ int isIdentifier(char* token){
               
 }
 
-int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolNode* currentSymTab)
+int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbolNode* currentSymTab*/)
 {
     // compare callParams and declaredParams trees //
     // callParams: node has token value and no childs ["X"]
     // declaredParams: node has empty parent [""] and two children ["int"] ["X"]
-
+    
+    if (!strcmp(callParams->token, "args:"))
+        callParams = callParams->left;
+    
+    if (!strcmp(declaredParams->token, "params:"))
+        declaredParams = declaredParams->left;
+    
+    
     if (callParams == NULL || declaredParams == NULL)
         return 0;
     
@@ -693,7 +700,8 @@ int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolN
     if (strcmp(callParams->token, ",") && strcmp(declaredParams->token, ","))
     {
         
-        symbolNode *parameter = symbolLookup(&currentSymTab, callParams->token);
+        //symbolNode *parameter = symbolLookup(&currentSymTab, callParams->token);
+        symbolNode *parameter = scopeLookup(callParams->token);
         // if current called Paramter is not null. then it is a  variable, look it up on symbol table(s)
         if (parameter !=NULL)
             {
@@ -717,7 +725,7 @@ int isParamsMatch(treeNode* callParams, treeNode* declaredParams, struct symbolN
                     ((strcmp(callParams->token, ",") && !strcmp(declaredParams->token, ",")) ) )
         return 0;
     else
-        return isParamsMatch(callParams->left, declaredParams->left, currentSymTab) && isParamsMatch(callParams->right, declaredParams->right, currentSymTab);
+        return isParamsMatch(callParams->left, declaredParams->left/*, currentSymTab*/) && isParamsMatch(callParams->right, declaredParams->right/*, currentSymTab*/);
 }
 
 int isSimilarSymbols(char* scopeName, struct symbolNode* root)
@@ -747,17 +755,18 @@ int isSimilarSymbols(char* scopeName, struct symbolNode* root)
 }
 
 
-symbolNode* scopeLookup (struct scopeNode** head_ref, char* token){
-    /* function returns the node of the symbol  if symbol already declared, otherwise NULL */
-    struct scopeNode* temp = *head_ref;
+symbolNode* scopeLookup (char* token){
+    /* function returns the symbol  if  already declared, otherwise NULL */
+    /* inputs: head_ref, the scope from which to start looking, and token = id of symbol */
+    struct scopeNode* currentScope = topStack;
     struct symbolNode* result;
-    while (temp != NULL)
+    while (currentScope != NULL)
     {
-        result=symbolLookup(&temp->symbolTable,token);
+        result=symbolLookup(&currentScope->symbolTable,token);
         if(result!=NULL)
             return result;
        
-        temp = temp->next;
+        currentScope = currentScope->next;
     }
     return NULL;
 }
