@@ -90,7 +90,7 @@ procID: varType id {$$ = mktreeNode ("procID", $1, NULL, $2); }
       /*________________________________________________PARAMS DECLARE______________________________________________*/
 params: /* no params  */
         | paramsDeclare {$$ = mktreeNode ("params:", $1, NULL, NULL); };
-paramsDeclare: param COMMA  paramsDeclare  {$$ = mktreeNode ("", $1, NULL, $3); }   
+paramsDeclare: param COMMA  paramsDeclare  {$$ = mktreeNode (",", $1, NULL, $3); }   
         | param ;
 /* to change tree design\print, toggle between following: 1) [type id] 2) [][type][id] */
 /*param: varType id {char *s = " "; s=  strcat ($1->token,s);  $$ = mktreeNode (strcat($1->token,$2->token), NULL, NULL, NULL); }   ;*/
@@ -181,7 +181,7 @@ procCall: id LEFTPAREN args RIGHTPAREN
 
 args: /* no params  */
         | argsDeclare {$$ = mktreeNode ("args:", $1, NULL, NULL); };
-argsDeclare: consts COMMA  argsDeclare  {$$ = mktreeNode ("", $1, NULL, $3); }   
+argsDeclare: consts COMMA  argsDeclare  {$$ = mktreeNode (",", $1, NULL, $3); }   
         | consts ;
 
 address : ADDRESS id            { symbolNode *sym = symbolLookup(&head,$2->token);
