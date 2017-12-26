@@ -32,8 +32,8 @@ symbolNode* head = NULL;
 scopeNode* topStack = NULL;
 int ScopeNum=0;
 
-scopeNode* scopeLookup (struct scopeNode** head_ref, char* token);
-bool checkEvaluation(treeNode* tNode);
+symbolNode* scopeLookup (struct scopeNode** head_ref, char* token);
+//bool checkEvaluation(treeNode* tNode);
 void printInfo(treeNode *head);
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
@@ -734,13 +734,13 @@ int isSimilarSymbols(char* scopeName, struct symbolNode* root)
 }
 
 
-scopeNode* scopeLookup (struct scopeNode** head_ref, char* token){
+symbolNode* scopeLookup (struct scopeNode** head_ref, char* token){
     /* function returns the node of the symbol  if symbol already declared, otherwise NULL */
     struct scopeNode* temp = *head_ref;
-    struct symbolNode result;
+    struct symbolNode* result;
     while (temp != NULL)
     {
-        result=symbolLookup(temp->symbolTable,token);
+        result=symbolLookup(&temp->symbolTable,token);
         if(result!=NULL)
             return result;
        
