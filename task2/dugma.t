@@ -1,30 +1,8 @@
 void main(){
- integer x;
-  if(x==8){
-     integer misha=9;
-         }
-	void foo2(){
-          while(x==6){
-             string p[8]="strin";
-             char v='l';
-             if(x==7){}
-                    }
-         void foo1(){ 
-            
-            integer c=6;
-            integer g=5;
-               integer foo3(){return;}
-            while(x==6){
-                char t='l';
-                while(x==9){
-                   misha=10;
-                         }
-                     }
-              return;
-                   }
-              
-              return;
-               }  
-	
-        return;
+    integer p, y;
+    charp c1,c2;
+    intp i1,i2;
+    void f1(integer x, integer y){return;}
+    f1(c1, p);
+    return;
 }
