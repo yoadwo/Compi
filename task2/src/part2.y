@@ -461,15 +461,9 @@ void pushStatements(treeNode* tNode){
         pushScopeToStack(&topStack, "main",tNode->left->left);
         //return;
     }
-    if (!strcmp(tNode->token, "func call")){
-        compareCallDeclare( tNode->left->token, tNode->right);
-    }
-    
     if (!strcmp(tNode->token, "STATEMENT")){
         isDeclared(tNode);
     }
-    
-    
     // if(!strcmp(tNode->token,"DECLARE")){
     //  pushSymbols(tNode1->left->token,tNode1->right);
     //  return;
@@ -611,6 +605,58 @@ void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNo
 	pushScopeStatements(tNode);
 }
 
+void pushScopeStatements(treeNode* tNode){
+    
+    
+    if(tNode==NULL)
+        return;
+    
+    if(!strcmp(tNode->token,"ELSE")){
+        return;
+    }
+    if(!strcmp(tNode->token,"while")){
+        return;
+    }
+    if(!strcmp(tNode->token,"IF")){
+        return;
+    }
+    /* if(!strcmp(tNode->token,"BLOCK")){
+     *   pushStatements(tNode->left);
+     *   
+    }*/
+    if(!strcmp(tNode->token,"do-while")){ 
+        return;
+    }
+    if(!strcmp(tNode->token,"for")){
+        return;
+    }
+    if(!strcmp(tNode->token,"procedure")){
+        pushProcSymbols(tNode);
+        return;
+    }
+    // if(!strcmp(tNode->token,"main")){
+    // return;
+    // }
+    if(!strcmp(tNode->token,"DECLARE")){
+        pushSymbols(tNode->left->token,tNode->right);
+        //YYERROR;
+        return;
+    }
+    
+     if (!strcmp(tNode->token, "func call")){
+        //params list = create list of call params()
+        //symbolNode  *callParams;
+        //funcTreeToParamsList(&callParams, tNode->right);
+        //compareCallDeclare(topStack, tNode->left->token, list);
+        compareCallDeclare( tNode->left->token, tNode->right);
+            
+    }
+    
+    pushScopeStatements(tNode->left);
+    pushScopeStatements(tNode->middle);
+    pushScopeStatements(tNode->right);
+    
+}
 
 
 
