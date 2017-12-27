@@ -627,7 +627,14 @@ void pushScopeStatements(treeNode* tNode){
     }
     
      if (!strcmp(tNode->token, "STATEMENT")){
-        isDeclared(tNode);
+        if (!strcmp(tNode->left->token, "IF"))
+            isDeclared(tNode->left->left->left);
+        else if (!strcmp(tNode->left->token, "="))
+            isDeclared(tNode->left);
+        else if ((!strcmp(tNode->left->token, "FOR")))
+            isDeclared(tNode->left->left);
+        else if(!strcmp(tNode->left->token, "WHILE"))
+            isDeclared(tNode->left->left->left);
     }
     
     pushScopeStatements(tNode->left);
