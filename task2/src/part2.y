@@ -832,7 +832,7 @@ symbolNode* scopeLookup (char* token){
         if(result!=NULL)
             return result;
           if(currentLevel==1)
-          return NULL;
+            return NULL;
           
             
     
