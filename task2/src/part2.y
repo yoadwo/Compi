@@ -824,8 +824,12 @@ symbolNode* scopeLookup (char* token){
         result=symbolLookup(&currentScope->symbolTable,token);
         if(result!=NULL)
             return result;
+          if(currentLevel==1)
+          return NULL;
+          
+            
     
-        while (currentScope->ScopeLevel > 1 &&  currentScope->ScopeLevel >= currentLevel);
+        while (currentScope->ScopeLevel > 1 &&  currentScope->ScopeLevel >= currentLevel)
             currentScope = currentScope->next;
     }
     return NULL;
