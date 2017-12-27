@@ -23,6 +23,7 @@ typedef struct symbolNode{
 typedef struct scopeNode{
 	char* scopeName;
 	int scopeNum;
+	int ScopeLevel;
 	symbolNode *symbolTable;
 	struct scopeNode *next;
 } scopeNode;
@@ -40,12 +41,12 @@ void printtree (treeNode *tree, int tab);
 int isCompileErrors(scopeNode *root);
 int isSimilarSymbols(char* scopeName, struct symbolNode* root);
 int checkDuplicateSymbols(scopeNode* root);
-void pushStatements(treeNode* tNode);
+void pushStatements(treeNode* tNode,int scopeLevel);
 void pushScopeStatements(treeNode* tNode);
 void pushSymbols( char* type,treeNode* tNode);
 void pushProcSymbols( treeNode* tNode);
 void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new_data, int isProc, treeNode *params);
-void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNode);
+void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNode,int scopeLevel);
 void printSymbolTable(struct scopeNode *node);
 void printScopes(struct scopeNode *node);
 symbolNode* symbolLookup (struct symbolNode** head_ref, char* token);
@@ -72,7 +73,7 @@ int compareCallDeclare( char *token, treeNode *callParams);
 %left MULTI DIVISION
 %start s
 %%
-s:      global {pushStatements($1); if (!isCompileErrors(topStack)) {YYERROR;}    printInfo($1); };
+s:      global {pushStatements($1,1); if (!isCompileErrors(topStack)) {YYERROR;}    printInfo($1); };
 global:  procedures procMain  {$$ = mktreeNode ("global", $1,NULL,$2); }
             |procMain  {$$ = mktreeNode ("global", $1,NULL,NULL); }     ;
        
@@ -308,10 +309,10 @@ void printInfo(treeNode *root){
     
     printf("print symbol table:\n");
     printSymbolTable(topStack);
-    /*printf("\n"); 
+    printf("\n"); 
     printf("print scopes:\n");
     printScopes(topStack);
-    */
+    
     printf("\n"); 
 
     printtree (root,0);
@@ -428,48 +429,56 @@ int compareCallDeclare(char *token, treeNode *callParams){
 }
 
 
-
-
-void pushStatements(treeNode* tNode){
+void pushStatements(treeNode* tNode,int scopeLevel){
     if(tNode==NULL)
         return;
-
+    //int scopeID=0;
     // struct scopeNode* currentStack;
     // currentStack= (struct scopeNode*) malloc(sizeof(struct scopeNode));
     // memcpy(&currentStack,&topStack,sizeof(topStack));
 
-
+    if(!strcmp(tNode->token,"ELSE")){
+        scopeLevel++;
+        pushScopeToStack(&topStack, "ELSE",tNode->left,scopeLevel);
+        //return;
+    }
     if(!strcmp(tNode->token,"while")){
-        pushScopeToStack(&topStack,"while",tNode->right);
+        scopeLevel++;
+        pushScopeToStack(&topStack,"while",tNode->right,scopeLevel);
         //  return;
     }
     if(!strcmp(tNode->token,"IF")){
-        pushScopeToStack(&topStack, "IF",tNode->middle);
+        scopeLevel++;
+        pushScopeToStack(&topStack, "IF",tNode->middle,scopeLevel);
         //return;
     }
     if(!strcmp(tNode->token,"ELSE")){
-        pushScopeToStack(&topStack, "ELSE",tNode->left);
+        pushScopeToStack(&topStack, "ELSE",tNode->left,scopeLevel);
         //return;
     }
     
     if(!strcmp(tNode->token,"BLOCK")){
-        pushStatements(tNode->left);
+        pushStatements(tNode->left,scopeLevel);
     }
     if(!strcmp(tNode->token,"do-while")){
-        pushScopeToStack(&topStack, "do-while",tNode->left);
+        scopeLevel++;
+        pushScopeToStack(&topStack, "do-while",tNode->left,scopeLevel);
         // return;
     }
     if(!strcmp(tNode->token,"for")){
-        pushScopeToStack(&topStack, "for",tNode->right);
+        scopeLevel++;
+        pushScopeToStack(&topStack, "for",tNode->right,scopeLevel);
         //return;
     }
     if(!strcmp(tNode->token,"procedure")){
         //pushProcSymbols(tNode);
-        pushScopeToStack(&topStack,"procedure",tNode->right);
+        scopeLevel++;
+        pushScopeToStack(&topStack,"procedure",tNode->right,scopeLevel);
         //return;
     }
     if(!strcmp(tNode->token,"main")){
-        pushScopeToStack(&topStack, "main",tNode->left->left);
+        scopeLevel++;
+        pushScopeToStack(&topStack, "main",tNode->left->left,scopeLevel);
         //return;
     }
    
@@ -478,9 +487,10 @@ void pushStatements(treeNode* tNode){
     //  return;
     // }
     
-    pushStatements(tNode->left);
-    pushStatements(tNode->middle);
-    pushStatements(tNode->right);
+    pushStatements(tNode->left,scopeLevel);
+    pushStatements(tNode->middle,scopeLevel);
+    pushStatements(tNode->right,scopeLevel);
+   
 
     }
 
@@ -555,10 +565,10 @@ void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new
 	(*node)->symbolTable = new_node;
 }
   
-void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNode)
+void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNode,int scopeLevel)
 {     /*declare shouldn't get here*/  
       if(strcmp(scopeName,"DECLARE")){
-      ScopeNum++;
+     ScopeNum++;
         //printf ("adding scope: %s\n",scopeName);
 	struct scopeNode* new_scope = (struct scopeNode*) malloc(sizeof(struct scopeNode));
         
@@ -566,6 +576,7 @@ void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNo
 	strncpy(new_scope->scopeName, scopeName, sizeof(scopeName)+1);
 	
         new_scope->scopeNum=ScopeNum;
+        new_scope->ScopeLevel=scopeLevel-1;
 		
 	new_scope->next = (*head_ref);
 	(*head_ref) = new_scope;
@@ -689,7 +700,7 @@ void printScopes(struct scopeNode *node){
 
     struct scopeNode *current=node;
     while (current != NULL)	{
-		printf("scope id:{%s} scopeNum:{%d}\n", current->scopeName,current->scopeNum);
+		printf("scope id:{%s} scopeNum:{%d} ScopeLevel:{%d}\n", current->scopeName,current->scopeNum,current->ScopeLevel);
 		current = current->next;
 	}
     printf("num of scopes:{%d}\n",ScopeNum);
@@ -804,13 +815,16 @@ symbolNode* scopeLookup (char* token){
     /* inputs: head_ref, the scope from which to start looking, and token = id of symbol */
     struct scopeNode* currentScope = topStack;
     struct symbolNode* result;
+    int currentLevel;
     while (currentScope != NULL)
-    {
+    {  
+       currentLevel=currentScope->ScopeLevel;
         result=symbolLookup(&currentScope->symbolTable,token);
         if(result!=NULL)
             return result;
-       
-        currentScope = currentScope->next;
+    
+        while (currentScope->ScopeLevel >= currentLevel);
+            currentScope = currentScope->next;
     }
     return NULL;
 }
