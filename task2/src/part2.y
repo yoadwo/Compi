@@ -357,10 +357,16 @@ int isCompileErrors(scopeNode *root){
 }
 
 int isDeclared(treeNode *tNode){
+    // bad cases: "procedure", '('
+    if (!strcmp(tNode->token, ")"))
+        return 1;
+    if (!strcmp(tNode->token, "procedure"))
+        return 1;
+    
+        
     //base 1: node has no children -> node is identifier, do scope lookup
     if (tNode->left == NULL && tNode->middle == NULL  && tNode->right == NULL ){
         // ')' can also be seen as a leaf
-        if (strcmp(tNode->token, ")")){
                 symbolNode *symbol =  scopeLookup(tNode->token);
                 if (symbol == NULL){
                     printf ("undefined variable [%s]\n", tNode->token); //add scope
@@ -368,9 +374,6 @@ int isDeclared(treeNode *tNode){
                     }
                 else
                     return 1;
-            }
-            else // seen ')', doesnt affect result
-                return 1;
         }
                 
     //base 2: node is const
@@ -378,11 +381,11 @@ int isDeclared(treeNode *tNode){
         return 1;
     // else - recursive call
     int result = 1;
-    if (tNode->left != NULL)
-        result = isDeclared(tNode->left) && result;
-    if (tNode->middle != NULL)
-        result =  isDeclared(tNode->middle) && result;
-    if (tNode->right != NULL)
+    if (tNode->left != NULL  && strcmp(tNode->left->token, "STATEMENT"))
+        result = isDeclared(tNode->left ) && result;
+    if (tNode->middle != NULL && strcmp(tNode->middle->token, "STATEMENT"))
+        result =  isDeclared(tNode->middle ) && result;
+    if (tNode->right != NULL && strcmp(tNode->right->token, "STATEMENT"))
         result =  isDeclared(tNode->right) && result;
     //result = isDeclared(tNode->right) && result;
     return result;
@@ -624,7 +627,6 @@ void pushScopeStatements(treeNode* tNode){
     }
     
      if (!strcmp(tNode->token, "STATEMENT")){
-     printf("calling isDecalred\n");
         isDeclared(tNode);
     }
     
@@ -823,7 +825,7 @@ symbolNode* scopeLookup (char* token){
         if(result!=NULL)
             return result;
     
-        while (currentScope->ScopeLevel >= currentLevel);
+        while (currentScope->ScopeLevel > 1 &&  currentScope->ScopeLevel >= currentLevel);
             currentScope = currentScope->next;
     }
     return NULL;
