@@ -49,6 +49,7 @@ void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNo
 void printSymbolTable(struct scopeNode *node);
 void printScopes(struct scopeNode *node);
 symbolNode* symbolLookup (struct symbolNode** head_ref, char* token);
+int isConst(treeNode* tNode);
 int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbolNode* currentSymTab*/);
 int checkDuplicateSymbols(scopeNode *root);
 int checkDuplicateProcs(scopeNode *root);
@@ -142,14 +143,14 @@ rightbrace: RIGHTBRACE  {$$ = mktreeNode (")", NULL, NULL,NULL ); };
 
               /*_________________________________________________TYPES________________________________________________*/
               
-/* consts: id {
-                    if (!isSimilarSymbols(&head, $1) ) 
+/*consts: id { symbolNode *s = scopeLookup($1->token);
+                    if (s == NULL ) 
                     {
                         yyerror("unknown variable is used"); 
                         YYERROR;
                     };
                 }
-                    | numbers | booleans | csnull | chars | procCall ; */ /*strings*/
+                    | numbers | booleans | csnull | chars | procCall | strings ; */
 consts: id | numbers | booleans | csnull | strings |chars | procCall ;
 
 
@@ -215,7 +216,7 @@ declarations:
             
             /*_________________________________________________________STATEMENTS___________________________________________________*/
 statements: statement statements {$$ = mktreeNode ("STATEMENT", $1, NULL,$2); }
-            | statement ;
+            | statement {$$ = mktreeNode ("STATEMENT", $1, NULL,NULL); };
 
 statement: /* | IN.OUT_statements*/
             IF_statements 
@@ -304,10 +305,10 @@ int main(){
 
 void printInfo(treeNode *root){
     printf ("ok\n"); 
-    /*
+    
     printf("print symbol table:\n");
     printSymbolTable(topStack);
-    printf("\n"); 
+    /*printf("\n"); 
     printf("print scopes:\n");
     printScopes(topStack);
     */
@@ -354,6 +355,28 @@ int isCompileErrors(scopeNode *root){
     return pass;
 }
 
+int isDeclared(treeNode *tNode){
+    //base 1: node has no children -> node is identifier, do scope lookup
+    if (tNode->left == NULL )
+        if (tNode->middle == NULL )
+            if (tNode->right == NULL ){
+                symbolNode *symbol =  scopeLookup(tNode->token);
+                if (symbol == NULL){
+                    printf ("undefined variable [%s]\n", tNode->token); //add scope
+                    return 0;
+                    }
+                else
+                    return 1;
+            }
+                
+    //base 2: node is const
+    if (isConst(tNode))
+        return 1;
+    // else - recursive call
+    return isDeclared(tNode->left) && isDeclared(tNode->middle) && isDeclared(tNode->right);
+    
+}
+
 /* check if two symbols were declared in same scope */
 int checkDuplicateSymbols(scopeNode* root){
     struct scopeNode * currentScope=root;
@@ -394,6 +417,8 @@ int compareCallDeclare(char *token, treeNode *callParams){
 }
 
 
+
+
 void pushStatements(treeNode* tNode){
     if(tNode==NULL)
         return;
@@ -402,10 +427,7 @@ void pushStatements(treeNode* tNode){
     // currentStack= (struct scopeNode*) malloc(sizeof(struct scopeNode));
     // memcpy(&currentStack,&topStack,sizeof(topStack));
 
-    if(!strcmp(tNode->token,"ELSE")){
-        pushScopeToStack(&topStack, "ELSE",tNode->left);
-        //return;
-    }
+
     if(!strcmp(tNode->token,"while")){
         pushScopeToStack(&topStack,"while",tNode->right);
         //  return;
@@ -414,6 +436,11 @@ void pushStatements(treeNode* tNode){
         pushScopeToStack(&topStack, "IF",tNode->middle);
         //return;
     }
+    if(!strcmp(tNode->token,"ELSE")){
+        pushScopeToStack(&topStack, "ELSE",tNode->left);
+        //return;
+    }
+    
     if(!strcmp(tNode->token,"BLOCK")){
         pushStatements(tNode->left);
     }
@@ -435,13 +462,14 @@ void pushStatements(treeNode* tNode){
         //return;
     }
     if (!strcmp(tNode->token, "func call")){
-        //params list = create list of call params()
-        //symbolNode  *callParams;
-        //funcTreeToParamsList(&callParams, tNode->right);
-        //compareCallDeclare(topStack, tNode->left->token, list);
         compareCallDeclare( tNode->left->token, tNode->right);
-            
     }
+    
+    if (!strcmp(tNode->token, "STATEMENT")){
+        isDeclared(tNode);
+    }
+    
+    
     // if(!strcmp(tNode->token,"DECLARE")){
     //  pushSymbols(tNode1->left->token,tNode1->right);
     //  return;
@@ -452,6 +480,48 @@ void pushStatements(treeNode* tNode){
     pushStatements(tNode->right);
 
     }
+    
+void pushScopeStatements(treeNode* tNode){
+    
+    
+    if(tNode==NULL)
+        return;
+    
+    if(!strcmp(tNode->token,"ELSE")){
+        return;
+    }
+    if(!strcmp(tNode->token,"while")){
+        return;
+    }
+    if(!strcmp(tNode->token,"IF")){
+        return;
+    }
+
+    if(!strcmp(tNode->token,"do-while")){ 
+        return;
+    }
+    if(!strcmp(tNode->token,"for")){
+        return;
+    }
+    if(!strcmp(tNode->token,"procedure")){
+        pushProcSymbols(tNode);
+        return;
+    }
+    // if(!strcmp(tNode->token,"main")){
+    // return;
+    // }
+    if(!strcmp(tNode->token,"DECLARE")){
+        pushSymbols(tNode->left->token,tNode->right);
+        return;
+    }
+
+    
+    
+    pushScopeStatements(tNode->left);
+    pushScopeStatements(tNode->middle);
+    pushScopeStatements(tNode->right);
+    
+}
 // A complete working C program to delete a node in a linked list
 // at a given position
 
@@ -541,49 +611,7 @@ void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNo
 	pushScopeStatements(tNode);
 }
 
-void pushScopeStatements(treeNode* tNode){
-    
-    
-    if(tNode==NULL)
-        return;
-    
-    if(!strcmp(tNode->token,"ELSE")){
-        return;
-    }
-    if(!strcmp(tNode->token,"while")){
-        return;
-    }
-    if(!strcmp(tNode->token,"IF")){
-        return;
-    }
-    /* if(!strcmp(tNode->token,"BLOCK")){
-     *   pushStatements(tNode->left);
-     *   
-    }*/
-    if(!strcmp(tNode->token,"do-while")){ 
-        return;
-    }
-    if(!strcmp(tNode->token,"for")){
-        return;
-    }
-    if(!strcmp(tNode->token,"procedure")){
-        pushProcSymbols(tNode);
-        return;
-    }
-    // if(!strcmp(tNode->token,"main")){
-    // return;
-    // }
-    if(!strcmp(tNode->token,"DECLARE")){
-        pushSymbols(tNode->left->token,tNode->right);
-        //YYERROR;
-        return;
-    }
-    
-    pushScopeStatements(tNode->left);
-    pushScopeStatements(tNode->middle);
-    pushScopeStatements(tNode->right);
-    
-}
+
 
 
 /* Given a reference (pointer to pointer) to the head of a list
@@ -666,15 +694,20 @@ int isNumeric(char* token){
     return 1;
 }
 
-int isIdentifier(char* token){
-//| numbers | booleans | csnull | strings|chars | procCall ;
-    if (!strcmp(token, "true"))
+int isConst(treeNode* tNode){
+// booleans | csnull |  numbers | strings | chars |  ;
+// procCall / id
+    if (!strcmp(tNode->left->token, "boolean"))
         return 1;
-    else if (!strcmp(token, "false"))
+    else if (!strcmp(tNode->token, "null"))
         return 1;
-    else if (!strcmp(token, "null"))
+    else if (!strcmp(tNode->left->token, "integer"))
         return 1;
-    else if (isNumeric(token))
+    else if (!strcmp(tNode->left->token, "charp"))
+        return 1;
+    else if (!strcmp(tNode->left->token, "char"))
+        return 1;
+    else if (isNumeric(tNode->token))
         return 1;
     return 0;
               
