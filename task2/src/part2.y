@@ -309,7 +309,7 @@ void printInfo(treeNode *root){
     
     printf("print symbol table:\n");
     printSymbolTable(topStack);
-    /*printf("\n"); 
+    printf("\n"); 
     printf("print scopes:\n");
     printScopes(topStack);
     
@@ -442,7 +442,7 @@ void pushStatements(treeNode* tNode,int scopeLevel){
         //return;
     }
     if(!strcmp(tNode->token,"ELSE")){
-        pushScopeToStack(&topStack, "ELSE",tNode->left);
+        pushScopeToStack(&topStack, "ELSE",tNode->left,scopeLevel);
         //return;
     }
     
@@ -804,15 +804,15 @@ symbolNode* scopeLookup (char* token){
     struct scopeNode* currentScope = topStack;
     struct symbolNode* result;
     int currentLevel;
-    while (temp != NULL)
+    while (currentScope != NULL)
     {  
-       currentLevel=temp->ScopeLevel;
-        result=symbolLookup(&temp->symbolTable,token);
+       currentLevel=currentScope->ScopeLevel;
+        result=symbolLookup(&currentScope->symbolTable,token);
         if(result!=NULL)
             return result;
     
-        while (temp->ScopeLevel >= currentLevel);
-            temp = temp->next;
+        while (currentScope->ScopeLevel >= currentLevel);
+            currentScope = currentScope->next;
     }
     return NULL;
 }
