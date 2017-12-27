@@ -774,8 +774,12 @@ int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbo
                 else
                     return 0;
             }
-        // if current paramter is null, it must be a const (otherwise will be declared unkown before entering function)
+        // if current paramter is null, it was either undeclared or a  const (otherwise will be declared unkown before entering function
         else if (parameter == NULL){
+            // current callParam was undeclared, return 0
+            if (callParams->left == NULL && callParams->right == NULL)
+                return 0;
+            // then it is a const
             if (!strcmp ( callParams->left->token, declaredParams->left->token ) )
                 return 1;
             else
