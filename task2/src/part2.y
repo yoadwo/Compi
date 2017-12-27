@@ -474,48 +474,7 @@ void pushStatements(treeNode* tNode){
     pushStatements(tNode->right);
 
     }
-    
-void pushScopeStatements(treeNode* tNode){
-    
-    
-    if(tNode==NULL)
-        return;
-    
-    if(!strcmp(tNode->token,"ELSE")){
-        return;
-    }
-    if(!strcmp(tNode->token,"while")){
-        return;
-    }
-    if(!strcmp(tNode->token,"IF")){
-        return;
-    }
 
-    if(!strcmp(tNode->token,"do-while")){ 
-        return;
-    }
-    if(!strcmp(tNode->token,"for")){
-        return;
-    }
-    if(!strcmp(tNode->token,"procedure")){
-        pushProcSymbols(tNode);
-        return;
-    }
-    // if(!strcmp(tNode->token,"main")){
-    // return;
-    // }
-    if(!strcmp(tNode->token,"DECLARE")){
-        pushSymbols(tNode->left->token,tNode->right);
-        return;
-    }
-
-    
-    
-    pushScopeStatements(tNode->left);
-    pushScopeStatements(tNode->middle);
-    pushScopeStatements(tNode->right);
-    
-}
 // A complete working C program to delete a node in a linked list
 // at a given position
 
@@ -620,10 +579,7 @@ void pushScopeStatements(treeNode* tNode){
     if(!strcmp(tNode->token,"IF")){
         return;
     }
-    /* if(!strcmp(tNode->token,"BLOCK")){
-     *   pushStatements(tNode->left);
-     *   
-    }*/
+
     if(!strcmp(tNode->token,"do-while")){ 
         return;
     }
@@ -644,10 +600,7 @@ void pushScopeStatements(treeNode* tNode){
     }
     
      if (!strcmp(tNode->token, "func call")){
-        //params list = create list of call params()
-        //symbolNode  *callParams;
-        //funcTreeToParamsList(&callParams, tNode->right);
-        //compareCallDeclare(topStack, tNode->left->token, list);
+        
         compareCallDeclare( tNode->left->token, tNode->right);
             
     }
