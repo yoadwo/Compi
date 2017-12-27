@@ -434,14 +434,7 @@ void pushStatements(treeNode* tNode){
         pushScopeToStack(&topStack, "main",tNode->left->left);
         //return;
     }
-    if (!strcmp(tNode->token, "func call")){
-        //params list = create list of call params()
-        //symbolNode  *callParams;
-        //funcTreeToParamsList(&callParams, tNode->right);
-        //compareCallDeclare(topStack, tNode->left->token, list);
-        compareCallDeclare( tNode->left->token, tNode->right);
-            
-    }
+   
     // if(!strcmp(tNode->token,"DECLARE")){
     //  pushSymbols(tNode1->left->token,tNode1->right);
     //  return;
@@ -577,6 +570,15 @@ void pushScopeStatements(treeNode* tNode){
         pushSymbols(tNode->left->token,tNode->right);
         //YYERROR;
         return;
+    }
+    
+     if (!strcmp(tNode->token, "func call")){
+        //params list = create list of call params()
+        //symbolNode  *callParams;
+        //funcTreeToParamsList(&callParams, tNode->right);
+        //compareCallDeclare(topStack, tNode->left->token, list);
+        compareCallDeclare( tNode->left->token, tNode->right);
+            
     }
     
     pushScopeStatements(tNode->left);
