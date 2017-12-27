@@ -28,11 +28,20 @@ typedef struct scopeNode{
 	struct scopeNode *next;
 } scopeNode;
 
+typedef struct astNode{
+        char* key;
+        struct astNode *left;
+        struct astNode *right;
+} astNode;
+
 
 symbolNode* head = NULL;
 scopeNode* topStack = NULL;
+astNode* ast = NULL;
 int ScopeNum=0;
 
+void startSematics(treeNode *root);
+astNode* BuildASTNode(treeNode *root);
 symbolNode* scopeLookup (char* token);
 //bool checkEvaluation(treeNode* tNode);
 void printInfo(treeNode *head);
@@ -73,7 +82,7 @@ int compareCallDeclare( char *token, treeNode *callParams);
 %left MULTI DIVISION
 %start s
 %%
-s:      global {pushStatements($1,1); if (!isCompileErrors(topStack)) {YYERROR;}    printInfo($1); };
+s:      global {    if (!isCompileErrors(topStack)){YYERROR;}; startSematics($1); };
 global:  procedures procMain  {$$ = mktreeNode ("global", $1,NULL,$2); }
             |procMain  {$$ = mktreeNode ("global", $1,NULL,NULL); }     ;
        
@@ -302,6 +311,16 @@ variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {/*pushSymbo
 #include "lex.yy.c"
 int main(){
     return yyparse();
+}
+
+void startSematics(treeNode *root){
+    pushStatements(root, 1);
+    printInfo(root);
+    ast = BuildASTNode(root);
+}
+
+astNode* BuildASTNode(treeNode *root){
+    
 }
 
 void printInfo(treeNode *root){
