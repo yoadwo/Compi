@@ -357,9 +357,9 @@ int isCompileErrors(scopeNode *root){
 
 int isDeclared(treeNode *tNode){
     //base 1: node has no children -> node is identifier, do scope lookup
-    if (tNode->left == NULL )
-        if (tNode->middle == NULL )
-            if (tNode->right == NULL ){
+    if (tNode->left == NULL && tNode->middle == NULL  && tNode->right == NULL ){
+        // ')' can also be seen as a leaf
+        if (strcmp(tNode->token, ")")){
                 symbolNode *symbol =  scopeLookup(tNode->token);
                 if (symbol == NULL){
                     printf ("undefined variable [%s]\n", tNode->token); //add scope
@@ -368,12 +368,23 @@ int isDeclared(treeNode *tNode){
                 else
                     return 1;
             }
+            else // seen ')', doesnt affect result
+                return 1;
+        }
                 
     //base 2: node is const
     if (isConst(tNode))
         return 1;
     // else - recursive call
-    return isDeclared(tNode->left) && isDeclared(tNode->middle) && isDeclared(tNode->right);
+    int result = 1;
+    if (tNode->left != NULL)
+        result = isDeclared(tNode->left) && result;
+    if (tNode->middle != NULL)
+        result =  isDeclared(tNode->middle) && result;
+    if (tNode->right != NULL)
+        result =  isDeclared(tNode->right) && result;
+    //result = isDeclared(tNode->right) && result;
+    return result;
     
 }
 
@@ -461,9 +472,7 @@ void pushStatements(treeNode* tNode){
         pushScopeToStack(&topStack, "main",tNode->left->left);
         //return;
     }
-    if (!strcmp(tNode->token, "STATEMENT")){
-        isDeclared(tNode);
-    }
+   
     // if(!strcmp(tNode->token,"DECLARE")){
     //  pushSymbols(tNode1->left->token,tNode1->right);
     //  return;
@@ -600,9 +609,12 @@ void pushScopeStatements(treeNode* tNode){
     }
     
      if (!strcmp(tNode->token, "func call")){
-        
-        compareCallDeclare( tNode->left->token, tNode->right);
-            
+        compareCallDeclare( tNode->left->token, tNode->right);      
+    }
+    
+     if (!strcmp(tNode->token, "STATEMENT")){
+     printf("calling isDecalred\n");
+        isDeclared(tNode);
     }
     
     pushScopeStatements(tNode->left);
