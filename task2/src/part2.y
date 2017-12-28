@@ -28,20 +28,12 @@ typedef struct scopeNode{
 	struct scopeNode *next;
 } scopeNode;
 
-typedef struct astNode{
-        char* key;
-        struct astNode *left;
-        struct astNode *right;
-} astNode;
-
 
 symbolNode* head = NULL;
 scopeNode* topStack = NULL;
-astNode* ast = NULL;
 int SCOPE_NUM=0;
 
 void startSematics(treeNode *root);
-astNode* BuildASTNode(treeNode *root);
 symbolNode* scopeLookup (char* token);
 char* checkEvaluation(treeNode* tNode);
 void printInfo(treeNode *head);
@@ -136,17 +128,18 @@ expr:     expr PLUS expr    {$$ = mktreeNode ("+", $1, NULL, $3); }
         /*______________________________________________________BLOCKS_____________________________________________________*/
 Pexpr:  LEFTPAREN expr rightParen {$$ = mktreeNode ("(", $2, NULL, $3); };
 rightParen: RIGHTPAREN {$$ = mktreeNode (")", NULL, NULL, NULL); };
-block_return_value_statements: LEFTBRACE newline RETURN expr SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, $4, $6); }
-            | LEFTBRACE RETURN expr SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $3, NULL, $5); };
+block_return_value_statements: LEFTBRACE newline return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, $3, $5); }
+            | LEFTBRACE return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, $2, $4); };
 block_return_void_statements :   emptyBlock 
-            | LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $5); }
-            | LEFTBRACE newline rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $3); };
-            /*| LEFTBRACE RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, NULL, $4); };*/
+            | LEFTBRACE newline return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, $3, $5); }
+            | LEFTBRACE return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, $2, $4); };
 
 block_statements: emptyBlock
             | LEFTBRACE newline rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $3);};
             //| LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $4);};  //why is this working?? enables any block to end with RETURN
 
+return: RETURN expr {$$ = mktreeNode ("return", $2, NULL, NULL);}
+        | RETURN {$$ = mktreeNode ("return", NULL, NULL, NULL);};
             
 emptyBlock: LEFTBRACE rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, NULL);}
             | LEFTBRACE RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, NULL, $4); };
@@ -331,12 +324,6 @@ void startSematics(treeNode *root){
     // check for duplicate symbols, calls for non existing symbols and type checking
     if (!isCompileErrors(topStack,root))
         printf ("build failed, check compile errors\n");
-        
-    ast = BuildASTNode(root);
-}
-
-astNode* BuildASTNode(treeNode *root){
-    
 }
 
 
@@ -363,11 +350,11 @@ int isCompileErrors(scopeNode *root,treeNode* tNode){
     int pass = 1;
     pass = pass && checkDuplicateSymbols(root);
     char* evalCheck;
-    evalCheck=checkEvaluation(tNode);
+    /*evalCheck=checkEvaluation(tNode);
     if(!strcmp(evalCheck,"expressionError"))
         pass=pass&&0;
     else
-        pass=pass&&1;
+        pass=pass&&1;*/
         
     return pass;
 }
