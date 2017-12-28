@@ -50,20 +50,23 @@ void printtree (treeNode *tree, int tab);
 int isCompileErrors(scopeNode *root);
 int isSimilarSymbols(char* scopeName, struct symbolNode* root);
 int checkDuplicateSymbols(scopeNode* root);
+int checkDuplicateProcs(scopeNode *root);
 void pushStatements(treeNode* tNode,int scopeLevel);
 void pushScopeStatements(treeNode* tNode);
 void pushSymbols( char* type,treeNode* tNode);
 void pushProcSymbols( treeNode* tNode);
+void pushSignatureParamsToTable(scopeNode **currentScope, treeNode *params);
 void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new_data, int isProc, treeNode *params);
-void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNode,int scopeLevel);
+void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode *params, treeNode* statements,int scopeLevel);
+
 void printSymbolTable(struct scopeNode *node);
 void printScopes(struct scopeNode *node);
+
 symbolNode* symbolLookup (struct symbolNode** head_ref, char* token);
 int isConst(treeNode* tNode);
 int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbolNode* currentSymTab*/);
-int checkDuplicateSymbols(scopeNode *root);
-int checkDuplicateProcs(scopeNode *root);
-symbolNode *funcTreeToParamsList(symbolNode **head_ref, treeNode *tNode);
+
+
 int compareCallDeclare( char *token, treeNode *callParams);
 #define YYSTYPE struct treeNode *
 %}
@@ -82,7 +85,7 @@ int compareCallDeclare( char *token, treeNode *callParams);
 %left MULTI DIVISION
 %start s
 %%
-s:      global {    if (!isCompileErrors(topStack)){YYERROR;}; startSematics($1); };
+s:      global {   startSematics($1);  };
 global:  procedures procMain  {$$ = mktreeNode ("global", $1,NULL,$2); }
             |procMain  {$$ = mktreeNode ("global", $1,NULL,NULL); }     ;
        
@@ -316,6 +319,9 @@ int main(){
 void startSematics(treeNode *root){
     pushStatements(root, 1);
     printInfo(root);
+    if (!isCompileErrors(topStack))
+        printf ("build failed, check compile errors\n");
+        
     ast = BuildASTNode(root);
 }
 
@@ -323,19 +329,7 @@ astNode* BuildASTNode(treeNode *root){
     
 }
 
-void printInfo(treeNode *root){
-    printf ("ok\n"); 
-    
-    printf("print symbol table:\n");
-    printSymbolTable(topStack);
-    printf("\n"); 
-    printf("print scopes:\n");
-    printScopes(topStack);
-    
-    printf("\n"); 
 
-    printtree (root,0);
-}
 
 treeNode *mktreeNode    (char *token, treeNode *left, treeNode* middle, treeNode *right){
     treeNode *newtreeNode = (treeNode*)malloc (sizeof(treeNode));
@@ -348,29 +342,11 @@ treeNode *mktreeNode    (char *token, treeNode *left, treeNode* middle, treeNode
     return newtreeNode;
 }
 
-void printtree (treeNode *tree, int tab){
-    int i; 
-    for (i = 0; i< tab; i++)
-        printf ("\t");
-    char* token = tree->token;
-/*     if (strlen(token) > 0) */
-        printf ("[%s]\n", token);
-    if (tree -> left)
-        printtree (tree-> left, tab + 1);
-    if (tree -> middle)
-        printtree (tree-> middle, tab + 1);     
-    if (tree -> right)
-        printtree (tree-> right, tab + 1); 
-}
-int yyerror(char* s){
-    printf ("%s: at line %d found token [%s]\n",  s,counter, yytext);
-    return 0;
-}
 
 int isCompileErrors(scopeNode *root){
     // return 1 if all checks pass, otherwise 0;
     int pass = 1;
-    pass = pass && checkDuplicateSymbols(root);
+    pass = checkDuplicateSymbols(root) && pass;
     
     return pass;
 }
@@ -422,10 +398,6 @@ int checkDuplicateSymbols(scopeNode* root){
     return 1;
 }
 
-symbolNode *funcTreeToParamsList(symbolNode **head_ref, treeNode *tNode){
-        
-    return NULL;
-}
 
 /* check ALL scopes, each symbol table in scope, if called params match some functions params */ 
 /* function return 1 if some function with matching signature exists, 0 otherwise */
@@ -450,7 +422,6 @@ int compareCallDeclare(char *token, treeNode *callParams){
     
 }
 
-
 void pushStatements(treeNode* tNode,int scopeLevel){
     if(tNode==NULL)
         return;
@@ -461,21 +432,21 @@ void pushStatements(treeNode* tNode,int scopeLevel){
 
     if(!strcmp(tNode->token,"ELSE")){
         scopeLevel++;
-        pushScopeToStack(&topStack, "ELSE",tNode->left,scopeLevel);
+        pushScopeToStack(&topStack, "ELSE",NULL, tNode->left,scopeLevel);
         //return;
     }
     if(!strcmp(tNode->token,"while")){
         scopeLevel++;
-        pushScopeToStack(&topStack,"while",tNode->right,scopeLevel);
+        pushScopeToStack(&topStack,"while",NULL, tNode->right,scopeLevel);
         //  return;
     }
     if(!strcmp(tNode->token,"IF")){
         scopeLevel++;
-        pushScopeToStack(&topStack, "IF",tNode->middle,scopeLevel);
+        pushScopeToStack(&topStack, "IF",NULL, tNode->middle,scopeLevel);
         //return;
     }
     if(!strcmp(tNode->token,"ELSE")){
-        pushScopeToStack(&topStack, "ELSE",tNode->left,scopeLevel);
+        pushScopeToStack(&topStack, "ELSE",NULL, tNode->left,scopeLevel);
         //return;
     }
     
@@ -484,23 +455,23 @@ void pushStatements(treeNode* tNode,int scopeLevel){
     }
     if(!strcmp(tNode->token,"do-while")){
         scopeLevel++;
-        pushScopeToStack(&topStack, "do-while",tNode->left,scopeLevel);
+        pushScopeToStack(&topStack, "do-while",NULL, tNode->left,scopeLevel);
         // return;
     }
     if(!strcmp(tNode->token,"for")){
         scopeLevel++;
-        pushScopeToStack(&topStack, "for",tNode->right,scopeLevel);
+        pushScopeToStack(&topStack, "for",NULL, tNode->right,scopeLevel);
         //return;
     }
     if(!strcmp(tNode->token,"procedure")){
         //pushProcSymbols(tNode);
         scopeLevel++;
-        pushScopeToStack(&topStack,"procedure",tNode->right,scopeLevel);
+        pushScopeToStack(&topStack,"procedure",tNode->middle, tNode->right,scopeLevel);
         //return;
     }
     if(!strcmp(tNode->token,"main")){
         scopeLevel++;
-        pushScopeToStack(&topStack, "main",tNode->left->left,scopeLevel);
+        pushScopeToStack(&topStack, "main",NULL, tNode->left->left,scopeLevel);
         //return;
     }
    
@@ -515,96 +486,6 @@ void pushStatements(treeNode* tNode,int scopeLevel){
    
 
     }
-
-// A complete working C program to delete a node in a linked list
-// at a given position
-
-void pushSymbols( char* type,treeNode* tNode)
-{
-    /*symbolNode* head = (*head_ref)->symbolTable;*/
-        // pass 0 to PushSymbols to signify not a proc
-        /*node is aasignment*/
-        if(!strcmp(tNode->token,"=")){
-
-        pushSymbolsToTable( &topStack,tNode->left->token,type,tNode->right->token, 0, NULL);
-            return;
-        }
-    /* node is an ID */
-        if (strcmp(tNode->token,"=") && strcmp(tNode->token,"")){
-            pushSymbolsToTable(&topStack,tNode->token,type,NULL, 0, NULL);
-            return;
-            }
-        pushSymbols( type,tNode->left);
-        pushSymbols( type, tNode->right);
-        
-}
-
-
-/* wrapper function to add procedures to symbol table */
-/* pass on to "push" with value "1" to identify it as a fucntion   */
-void pushProcSymbols(treeNode* tNode)
-{
-   /* symbolNode* head = (*head_ref)->symbolTable;*/
-    //params is tNode->middle;
-    int isProc = 1;
-    pushSymbolsToTable(&topStack, tNode->left->right->token, tNode->left->left->token, "function",1, tNode->middle);
-}
-
-/* 
-PUSH SYMBOLS TO SYMBOL LIST (TABLE)
-Given a reference (pointer to pointer) to the head of a list
-and an int, inserts a new node on the front of the list. */
-void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new_data, int isProc, treeNode *params)
-{
-	struct symbolNode* new_node = (struct symbolNode*) malloc(sizeof(struct symbolNode));
-	
-	new_node->isProc = isProc;
-	
-	new_node->id = (char*)(malloc (sizeof(id) + 1));
-	strncpy(new_node->id, id, sizeof(id)+1);
-	
-	if (new_data != NULL)
-	{
-            new_node->data = (char*)(malloc (sizeof(new_data) + 1));
-            strncpy(new_node->data, new_data, sizeof(new_data)+1);
-	}
-	new_node->type = (char*)(malloc (sizeof(type) + 1));
-	strncpy(new_node->type, type, sizeof(type)+1);
-	
-	new_node->scopeID=(*node)->scopeNum;
-	
-	//new_node->params = params;
-	// cause seg fault, params is empty even in functions(?)
-        if (params != NULL)
-        {
-            new_node->params = (treeNode*) (malloc(sizeof(treeNode)) );
-            memcpy(new_node->params, params, sizeof(treeNode) );
-        }
-        else
-            new_node->params = NULL;
-            
-	new_node->next =(*node)->symbolTable;
-	(*node)->symbolTable = new_node;
-}
-  
-void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* tNode,int scopeLevel)
-{     /*declare shouldn't get here*/  
-      if(strcmp(scopeName,"DECLARE")){
-     ScopeNum++;
-        //printf ("adding scope: %s\n",scopeName);
-	struct scopeNode* new_scope = (struct scopeNode*) malloc(sizeof(struct scopeNode));
-        
-	new_scope->scopeName = (char*)(malloc (sizeof(scopeName) + 1));
-	strncpy(new_scope->scopeName, scopeName, sizeof(scopeName)+1);
-	
-        new_scope->scopeNum=ScopeNum;
-        new_scope->ScopeLevel=scopeLevel-1;
-		
-	new_scope->next = (*head_ref);
-	(*head_ref) = new_scope;
-	}
-	pushScopeStatements(tNode);
-}
 
 void pushScopeStatements(treeNode* tNode){
     
@@ -661,8 +542,117 @@ void pushScopeStatements(treeNode* tNode){
     pushScopeStatements(tNode->right);
     
 }
+    
+    // A complete working C program to delete a node in a linked list
+// at a given position
 
+void pushSymbols( char* type,treeNode* tNode)
+{
+    /*symbolNode* head = (*head_ref)->symbolTable;*/
+        // pass 0 to PushSymbols to signify not a proc
+        /*node is aasignment*/
+        if(!strcmp(tNode->token,"=")){
 
+        pushSymbolsToTable( &topStack,tNode->left->token,type,tNode->right->token, 0, NULL);
+            return;
+        }
+    /* node is an ID */
+        if (strcmp(tNode->token,"=") && strcmp(tNode->token,"")){
+            pushSymbolsToTable(&topStack,tNode->token,type,NULL, 0, NULL);
+            return;
+            }
+        pushSymbols( type,tNode->left);
+        pushSymbols( type, tNode->right);
+        
+}
+
+/* wrapper function to add procedures to symbol table */
+/* pass on to "push" with value "1" to identify it as a fucntion   */
+void pushProcSymbols(treeNode* tNode)
+{
+   /* symbolNode* head = (*head_ref)->symbolTable;*/
+    //params is tNode->middle;
+    int isProc = 1;
+    pushSymbolsToTable(&topStack, tNode->left->right->token, tNode->left->left->token, "function",1, tNode->middle);
+}
+
+/* 
+PUSH SYMBOLS TO SYMBOL LIST (TABLE)
+Given a reference (pointer to pointer) to the head of a list
+and an int, inserts a new node on the front of the list. */
+void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new_data, int isProc, treeNode *params)
+{
+	struct symbolNode* new_node = (struct symbolNode*) malloc(sizeof(struct symbolNode));
+	
+	new_node->isProc = isProc;
+	
+	new_node->id = (char*)(malloc (sizeof(id) + 1));
+	strncpy(new_node->id, id, sizeof(id)+1);
+	
+	if (new_data != NULL)
+	{
+            new_node->data = (char*)(malloc (sizeof(new_data) + 1));
+            strncpy(new_node->data, new_data, sizeof(new_data)+1);
+	}
+	new_node->type = (char*)(malloc (sizeof(type) + 1));
+	strncpy(new_node->type, type, sizeof(type)+1);
+	
+	//scopeNum or scopeLevel?
+	new_node->scopeID=(*node)->scopeNum;
+	
+	//new_node->params = params;
+	// cause seg fault, params is empty even in functions(?)
+        if (params != NULL)
+        {
+            new_node->params = (treeNode*) (malloc(sizeof(treeNode)) );
+            memcpy(new_node->params, params, sizeof(treeNode) );
+        }
+        else
+            new_node->params = NULL;
+            
+	new_node->next =(*node)->symbolTable;
+	(*node)->symbolTable = new_node;
+}
+
+void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* params, treeNode* statements ,int scopeLevel)
+{     /*declare shouldn't get here*/  
+      if(strcmp(scopeName,"DECLARE")){
+     ScopeNum++;
+        //printf ("adding scope: %s\n",scopeName);
+	struct scopeNode* new_scope = (struct scopeNode*) malloc(sizeof(struct scopeNode));
+        
+	new_scope->scopeName = (char*)(malloc (sizeof(scopeName) + 1));
+	strncpy(new_scope->scopeName, scopeName, sizeof(scopeName)+1);
+	
+        new_scope->scopeNum=ScopeNum;
+        new_scope->ScopeLevel=scopeLevel-1;
+        
+        
+        if (params){
+            pushSignatureParamsToTable(&new_scope, params);
+        }
+            
+		
+	new_scope->next = (*head_ref);
+	(*head_ref) = new_scope;
+	}
+	pushScopeStatements(statements);
+}
+
+void pushSignatureParamsToTable(scopeNode **currentScope, treeNode *params){
+        // reached non existing leaf
+        if (!params){
+            return;
+        }
+//void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new_data, int isProc, treeNode *params)
+    /* node is an ID */
+        if (!strcmp(params->token,"")){
+            pushSymbolsToTable(currentScope,params->right->token,params->left->token,NULL, 0, NULL);
+            return;
+            }
+        pushSignatureParamsToTable(currentScope, params->left);
+        pushSignatureParamsToTable(currentScope, params->right);
+}
 
 /* Given a reference (pointer to pointer) to the head of a list
 and a position, deletes the node at the given position */
@@ -705,35 +695,6 @@ struct symbolNode* temp = *head_ref;
 	temp->next = next; // Unlink the deleted node from list
 }
 
-// This function prints contents of linked list starting from
-// the given node
-void printSymbolTable(struct scopeNode *node)
-{  
-   struct scopeNode *currentScope = node;
-   struct symbolNode *currentSymbol;
-   while(currentScope != NULL)
-           {
-               currentSymbol = currentScope->symbolTable;
-        while (currentSymbol != NULL)
-                {
-                    printf("id:{%s}, type:{%s}, value{%s},scope{%d}", currentSymbol->id, currentSymbol->type, currentSymbol->data,currentSymbol->scopeID);
-                    printf("\n");
-                    currentSymbol = currentSymbol->next;
-                }
-         currentScope=currentScope->next;       
-            }
-}
-
-void printScopes(struct scopeNode *node){
-
-    struct scopeNode *current=node;
-    while (current != NULL)	{
-		printf("scope id:{%s} scopeNum:{%d} ScopeLevel:{%d}\n", current->scopeName,current->scopeNum,current->ScopeLevel);
-		current = current->next;
-	}
-    printf("num of scopes:{%d}\n",ScopeNum);
-	
-}
 
 int isNumeric(char* token){
     int len = strlen(token), i;
@@ -819,10 +780,11 @@ int isSimilarSymbols(char* scopeName, struct symbolNode* root)
 {
     /* return 0 if given symbol already exists  */
     symbolNode* s1=root;
-    symbolNode* s2=root;
+    symbolNode* s2;
     
     
   while(s1!= NULL){
+        s2 = s1;
         while (s2 != NULL)
         {
            //check for same name, excluding self
@@ -877,4 +839,68 @@ symbolNode* symbolLookup (struct symbolNode** head_ref, char* token){
         temp = temp->next;
     }
     return NULL;
+}
+
+void printInfo(treeNode *root){
+    printf ("ok\n"); 
+    
+    printf("print symbol table:\n");
+    printSymbolTable(topStack);
+    printf("\n"); 
+    printf("print scopes:\n");
+    printScopes(topStack);
+    
+    printf("\n"); 
+
+    printtree (root,0);
+}
+
+// This function prints contents of linked list starting from
+// the given node
+void printSymbolTable(struct scopeNode *node)
+{  
+   struct scopeNode *currentScope = node;
+   struct symbolNode *currentSymbol;
+   while(currentScope != NULL)
+           {
+               currentSymbol = currentScope->symbolTable;
+        while (currentSymbol != NULL)
+                {
+                    printf("id:{%s}, type:{%s}, value{%s},scope{%d}", currentSymbol->id, currentSymbol->type, currentSymbol->data,currentSymbol->scopeID);
+                    printf("\n");
+                    currentSymbol = currentSymbol->next;
+                }
+         currentScope=currentScope->next;       
+            }
+}
+
+void printScopes(struct scopeNode *node){
+
+    struct scopeNode *current=node;
+    while (current != NULL)	{
+		printf("scope id:{%s} scopeNum:{%d} ScopeLevel:{%d}\n", current->scopeName,current->scopeNum,current->ScopeLevel);
+		current = current->next;
+	}
+    printf("num of scopes:{%d}\n",ScopeNum);
+	
+}
+
+void printtree (treeNode *tree, int tab){
+    int i; 
+    for (i = 0; i< tab; i++)
+        printf ("\t");
+    char* token = tree->token;
+/*     if (strlen(token) > 0) */
+        printf ("[%s]\n", token);
+    if (tree -> left)
+        printtree (tree-> left, tab + 1);
+    if (tree -> middle)
+        printtree (tree-> middle, tab + 1);     
+    if (tree -> right)
+        printtree (tree-> right, tab + 1); 
+}
+
+int yyerror(char* s){
+    printf ("%s: at line %d found token [%s]\n",  s,counter, yytext);
+    return 0;
 }
