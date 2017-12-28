@@ -96,10 +96,10 @@ procedures: procedures proc   {$$ = mktreeNode ("", $1,NULL, NULL); }
                   
 proc:  procValue  | procVoid ; 
 procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements { $$ = mktreeNode ("main", $5,NULL, NULL); };
-procVoid: procID LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mktreeNode ("procedure", $1, $3, $5);};
-procValue: procID LEFTPAREN params RIGHTPAREN  block_return_value_statements {$$ = mktreeNode ("procedure", $1, $3, $5); };
-procID: varType id {$$ = mktreeNode ("procID", $1, NULL, $2); }
-        | void id {$$ = mktreeNode ("procID", $1, NULL, $2); };
+procVoid: procIDVoid LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mktreeNode ("procedure", $1, $3, $5);};
+procValue: procIDValue LEFTPAREN params RIGHTPAREN  block_return_value_statements {$$ = mktreeNode ("procedure", $1, $3, $5); };
+procIDValue: varType id {$$ = mktreeNode ("procID", $1, NULL, $2); };
+procIDVoid: void id {$$ = mktreeNode ("procID", $1, NULL, $2); }
 
 
 
@@ -140,14 +140,16 @@ block_return_value_statements: LEFTBRACE newline RETURN expr SEMICOLON rightbrac
             | LEFTBRACE RETURN expr SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $3, NULL, $5); };
 block_return_void_statements :   emptyBlock 
             | LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $5); }
-            | LEFTBRACE RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, NULL, $4); };
+            | LEFTBRACE newline rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $3); };
+            /*| LEFTBRACE RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, NULL, $4); };*/
 
 block_statements: emptyBlock
             | LEFTBRACE newline rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $3);};
             //| LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $4);};  //why is this working?? enables any block to end with RETURN
 
             
-emptyBlock: LEFTBRACE rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, NULL);};
+emptyBlock: LEFTBRACE rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, NULL);}
+            | LEFTBRACE RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, NULL, $4); };
 rightbrace: RIGHTBRACE  {$$ = mktreeNode (")", NULL, NULL,NULL ); };
 
 
@@ -219,6 +221,7 @@ derefID: DEREFERENCE id  {char* t = $2->token; char *s = malloc(strlen(t)+strlen
 
 newline:  
         declarations newline   {$$ = mktreeNode ("", $1, NULL,$2); }
+                    | SEMICOLON
            | statements  
            | declarations ;
            
