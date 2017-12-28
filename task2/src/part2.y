@@ -403,7 +403,6 @@ int isDeclared(treeNode *tNode){
         result =  isDeclared(tNode->middle ) && result;
     if (tNode->right != NULL && strcmp(tNode->right->token, "STATEMENT"))
         result =  isDeclared(tNode->right) && result;
-    //result = isDeclared(tNode->right) && result;
     return result;
     
 }
@@ -451,24 +450,11 @@ int compareCallDeclare(char *token, treeNode *callParams){
 
 
 char* checkEvaluation(treeNode* tNode){
-
-
-
-    if(!strcmp(tNode->token,"integer")||!strcmp(tNode->token,"pos")||!strcmp(tNode->token,"neg")||!strcmp(tNode->token,"oct")||!strcmp(tNode->token,"bin")){
-        return tNode->token;
+    
+    if (isConst(tNode)){
+        return (tNode->left->token);
     }
-
-    else if(!strcmp(tNode->token,"char")){
-        return tNode->token;
-    }
-    else if(!strcmp(tNode->token,"charp")){
-        return tNode->token;
-
-    }
-    else if(!strcmp(tNode->token,"boolean")){
-        return tNode->token;
-
-    }
+    
     /*else if the node is variable (we will look for him in symbol table)*/
     else if(!isConst(tNode) && tNode->left == NULL && tNode->middle == NULL && tNode->right == NULL){
         char* varType;
@@ -491,7 +477,8 @@ char* checkEvaluation(treeNode* tNode){
             return "integer";
         
         else {
-            printf("expressionError: type mismatch in %s, type left: %s, type right:%s",tNode->token,left,right);
+            if (strcmp(right, "expressionError") || strcmp(right, "expressionError"))
+                printf("expressionError: type mismatch in %s, type left: %s, type right:%s\n",tNode->token,left,right);
             return "expressionError";
         }
     }
@@ -503,7 +490,8 @@ char* checkEvaluation(treeNode* tNode){
             return "boolean";
         
         else {
-            printf("expressionError: type mismatch in %s, type left: %s, type right:%s",tNode->token,left,right);
+            if (strcmp(right, "expressionError") || strcmp(right, "expressionError"))
+                printf("expressionError: type mismatch in %s, type left: %s, type right:%s\n",tNode->token,left,right);
             return "expressionError";
         }
     
@@ -517,7 +505,8 @@ char* checkEvaluation(treeNode* tNode){
             return "boolean";
         
         else {
-            printf("expressionError: type mismatch in %s, type left: %s, type right:%s",tNode->token,left,right);
+            if (strcmp(right, "expressionError") || strcmp(right, "expressionError"))
+                printf("expressionError: type mismatch in %s, type left: %s, type right:%s\n",tNode->token,left,right);
             return "expressionError";
         }
 
@@ -544,7 +533,36 @@ char* checkEvaluation(treeNode* tNode){
             
 
         else {
-            printf("expressionError: type mismatch in %s, type left: %s, type right:%s",tNode->token,left,right);
+            if (strcmp(right, "expressionError") || strcmp(right, "expressionError"))
+                printf("expressionError: type mismatch in %s, type left: %s, type right:%s\n",tNode->token,left,right);
+            return "expressionError";
+        }
+
+    }
+    
+    if(!strcmp(tNode->token,"=")){
+        char* left, *right;
+        left=checkEvaluation(tNode->left);
+        right=checkEvaluation(tNode->right);
+        if(!strcmp(left,"boolean")&&!strcmp(right,"boolean"))
+            return "boolean";
+            
+        else if(!strcmp(left,"integer")&&!strcmp(right,"integer"))
+            return "integer";
+            
+        else if(!strcmp(left,"intp")&&!strcmp(right,"intp"))
+            return "intp";  
+            
+        else if(!strcmp(left,"char")&&!strcmp(right,"char"))
+            return "char";
+            
+        else if(!strcmp(left,"charp")&&!strcmp(right,"charp"))
+            return "charp";     
+            
+
+        else {
+            if (strcmp(right, "expressionError") || strcmp(right, "expressionError"))
+                printf("expressionError: type mismatch in %s, type left: %s, type right:%s\n",tNode->token,left,right);
             return "expressionError";
         }
 
@@ -558,14 +576,20 @@ char* checkEvaluation(treeNode* tNode){
             return "boolean";
 
         else {
-            printf("expressionError: type mismatch in %s, type left: %s",tNode->token,left);
+            if (strcmp(left, "expressionError"))
+                printf("expressionError: type mismatch in %s, type left: %s\n",tNode->token,left);
             return "expressionError";
         }
     }
-
-    checkEvaluation(tNode->left);
-    checkEvaluation(tNode->middle);
-    checkEvaluation(tNode->right);
+    if (tNode->left != NULL){
+        checkEvaluation(tNode->left);
+    }
+    if (tNode->middle != NULL){
+        checkEvaluation(tNode->middle);
+    }
+    if (tNode->right != NULL){
+        checkEvaluation(tNode->right);
+    }
 }
 
 /*bool checkVarType(treeNode * tNode,char* type){
@@ -692,14 +716,31 @@ void pushScopeStatements(treeNode* tNode){
     }
     
      if (!strcmp(tNode->token, "STATEMENT")){
-        if (!strcmp(tNode->left->token, "IF"))
-            isDeclared(tNode->left->left->left);
-        else if (!strcmp(tNode->left->token, "="))
-            isDeclared(tNode->left);
-        else if ((!strcmp(tNode->left->token, "FOR")))
-            isDeclared(tNode->left->left);
-        else if(!strcmp(tNode->left->token, "WHILE"))
-            isDeclared(tNode->left->left->left);
+        int check;
+        if (!strcmp(tNode->left->token, "IF")){
+            check = isDeclared(tNode->left->left->left);
+            if (check){
+                checkEvaluation(tNode);
+            }
+        }
+        else if (!strcmp(tNode->left->token, "=")){
+            check = isDeclared(tNode->left);
+            if (check){
+                checkEvaluation(tNode);
+            }
+        }
+        else if ((!strcmp(tNode->left->token, "FOR"))){
+            check = isDeclared(tNode->left->left);
+            if (check){
+            checkEvaluation(tNode);
+            }
+        }
+        else if(!strcmp(tNode->left->token, "WHILE")){
+            check = isDeclared(tNode->left->left->left);
+            if (check){
+            checkEvaluation(tNode);
+            }
+        }
     }
     
     pushScopeStatements(tNode->left);
@@ -900,8 +941,10 @@ int isNumeric(char* token){
     check if a given token is in [ booleans | csnull |  numbers | strings | chars ]
 */
 int isConst(treeNode* tNode){
-
-    if (!strcmp(tNode->left->token, "boolean"))
+    /*check if id */
+    if (tNode->left == NULL)
+        return 0;
+    else if (!strcmp(tNode->left->token, "boolean"))
         return 1;
     else if (!strcmp(tNode->token, "null"))
         return 1;
