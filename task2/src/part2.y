@@ -326,7 +326,7 @@ void startSematics(treeNode *root){
     // print scopes, symbol tables and concrete syntax tree
     printInfo(root);
     // check for duplicate symbols, calls for non existing symbols and type checking
-    if (!isCompileErrors(topStack))
+    if (!isCompileErrors(topStack,root))
         printf ("build failed, check compile errors\n");
         
     ast = BuildASTNode(root);
@@ -352,7 +352,7 @@ treeNode *mktreeNode    (char *token, treeNode *left, treeNode* middle, treeNode
 /*  IS COMPILE ERRORS
     return 1 if all checks pass, otherwise 0;
     */
-int isCompileErrors(scopeNode *root){
+
     
     // perform all checks, accumulate results and return final test result
 int isCompileErrors(scopeNode *root,treeNode* tNode){
