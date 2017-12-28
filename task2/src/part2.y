@@ -91,7 +91,7 @@ procMain: VOID MAIN LEFTPAREN RIGHTPAREN block_return_void_statements { $$ = mkt
 procVoid: procIDVoid LEFTPAREN params RIGHTPAREN  block_return_void_statements {$$ = mktreeNode ("procedure", $1, $3, $5);};
 procValue: procIDValue LEFTPAREN params RIGHTPAREN  block_return_value_statements {$$ = mktreeNode ("procedure", $1, $3, $5); };
 procIDValue: varType id {$$ = mktreeNode ("procID", $1, NULL, $2); };
-procIDVoid: void id {$$ = mktreeNode ("procID", $1, NULL, $2); }
+procIDVoid: void id {$$ = mktreeNode ("procID", $1, NULL, $2); };
 
 
 
@@ -131,12 +131,8 @@ rightParen: RIGHTPAREN {$$ = mktreeNode (")", NULL, NULL, NULL); };
 block_return_value_statements: LEFTBRACE newline return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, $3, $5); }
             | LEFTBRACE return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, $2, $4); };
 block_return_void_statements :   emptyBlock 
-            | LEFTBRACE newline return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, $3, $5); }
-            | LEFTBRACE return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, $2, $4); };
+            | LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, $3, $4); };
 
-block_statements: emptyBlock
-            | LEFTBRACE newline rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $3);};
-            //| LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $4);};  //why is this working?? enables any block to end with RETURN
 
 return: RETURN expr {$$ = mktreeNode ("return", $2, NULL, NULL);}
         | RETURN {$$ = mktreeNode ("return", NULL, NULL, NULL);};
@@ -144,8 +140,6 @@ return: RETURN expr {$$ = mktreeNode ("return", $2, NULL, NULL);}
 emptyBlock: LEFTBRACE rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, NULL);}
             | LEFTBRACE RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, NULL, $4); };
 rightbrace: RIGHTBRACE  {$$ = mktreeNode (")", NULL, NULL,NULL ); };
-
-
 
 
 
@@ -244,6 +238,10 @@ statement: /* | IN.OUT_statements*/
 statements_type: statement
                  |block_statements;
 
+block_statements: emptyBlock
+            | LEFTBRACE newline rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $3);};
+            //| LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $4);};  //why is this working?? enables any block to end with RETURN
+            
                  /*_______________________________________CONDITIONAL_STATEMENTS___________________________________*/ 
 IF_statements: IF cond statements_type {$$ = mktreeNode ("IF", $2,$3,NULL);} %prec LOWER_THAN_ELSE
              | IF cond statements_type else{$$ = mktreeNode ("IF", $2,$3, $4);};
