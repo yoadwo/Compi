@@ -360,7 +360,7 @@ int isCompileErrors(scopeNode *root,treeNode* tNode){
     int pass = 1;
     pass = pass && checkDuplicateSymbols(root);
     char* evalCheck;
-    //evalCheck=checkEvaluation(tNode);
+    evalCheck=checkEvaluation(tNode);
     if(!strcmp(evalCheck,"expressionError"))
         pass=pass&&0;
     else
@@ -468,6 +468,36 @@ char* checkEvaluation(treeNode* tNode){
             return "null";
     }
 
+    
+    
+    if(!strcmp(tNode->token,"=")){
+        char* left,* right;
+        left=checkEvaluation(tNode->left);
+        right=checkEvaluation(tNode->right);
+        if(!strcmp(left,"boolean")&&!strcmp(right,"boolean"))
+            return "boolean";
+            
+        else if(!strcmp(left,"integer")&&!strcmp(right,"integer"))
+            return "integer";
+            
+        else if(!strcmp(left,"intp")&&!strcmp(right,"intp"))
+            return "intp";  
+            
+        else if(!strcmp(left,"char")&&!strcmp(right,"char"))
+            return "char";
+            
+        else if(!strcmp(left,"charp")&&!strcmp(right,"charp"))
+            return "charp"; 
+        else {
+            printf("expressionError: type mismatch in %s, type left: %s, type right:%s",tNode->token,left,right);
+            return "expressionError";
+        }
+            
+    }
+    
+    
+    
+    
 
     if(!strcmp(tNode->token,"+")||!strcmp(tNode->token,"-")||!strcmp(tNode->token,"*")||!strcmp(tNode->token,"/")){
         char* left, *right;
