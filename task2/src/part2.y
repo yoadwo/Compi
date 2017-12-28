@@ -23,7 +23,7 @@ typedef struct symbolNode{
 typedef struct scopeNode{
 	char* scopeName;
 	int scopeNum;
-	int ScopeLevel;
+	int scopeLevel;
 	symbolNode *symbolTable;
 	struct scopeNode *next;
 } scopeNode;
@@ -38,7 +38,7 @@ typedef struct astNode{
 symbolNode* head = NULL;
 scopeNode* topStack = NULL;
 astNode* ast = NULL;
-int ScopeNum=0;
+int SCOPE_NUM=0;
 
 void startSematics(treeNode *root);
 astNode* BuildASTNode(treeNode *root);
@@ -316,9 +316,16 @@ int main(){
     return yyparse();
 }
 
+/* START SEMANTICS:  
+    start top down creation and semantics check of tree created by grammar rules
+    */
 void startSematics(treeNode *root){
+    
+    // create a stack of scopes, each one has its own list of symbols (symbol table)
     pushStatements(root, 1);
+    // print scopes, symbol tables and concrete syntax tree
     printInfo(root);
+    // check for duplicate symbols, calls for non existing symbols and type checking
     if (!isCompileErrors(topStack))
         printf ("build failed, check compile errors\n");
         
@@ -342,15 +349,21 @@ treeNode *mktreeNode    (char *token, treeNode *left, treeNode* middle, treeNode
     return newtreeNode;
 }
 
-
+/*  IS COMPILE ERRORS
+    return 1 if all checks pass, otherwise 0;
+    */
 int isCompileErrors(scopeNode *root){
-    // return 1 if all checks pass, otherwise 0;
+    
+    // perform all checks, accumulate results and return final test result
     int pass = 1;
     pass = checkDuplicateSymbols(root) && pass;
     
     return pass;
 }
 
+/* IS DECLARED
+    functions checks if used symbol was indeed declared earlier
+    */
 int isDeclared(treeNode *tNode){
     // bad cases: "procedure", '('
     if (!strcmp(tNode->token, ")"))
@@ -387,23 +400,29 @@ int isDeclared(treeNode *tNode){
     
 }
 
-/* check if two symbols were declared in same scope */
+/*  CHECK DUPLICATE SYMBOLS
+    check if two symbols were declared in same scope 
+*/
 int checkDuplicateSymbols(scopeNode* root){
     struct scopeNode * currentScope=root;
+    // iterate all scopes
     while(currentScope!=NULL){
-        if(isSimilarSymbols(currentScope->scopeName, currentScope->symbolTable)==0)
+        //only check if within one scope, some symbol exists twices
+        if(!isSimilarSymbols(currentScope->scopeName, currentScope->symbolTable))
             return 0;
         currentScope=currentScope->next;
     }
+    // if all scopes pass, return 1
     return 1;
 }
 
-
-/* check ALL scopes, each symbol table in scope, if called params match some functions params */ 
-/* function return 1 if some function with matching signature exists, 0 otherwise */
+/*  COMPARE CALL DECLARE
+    check ALL scopes, each symbol table in scope, if there exists any function's' params that match the called function's' params  
+    function return 1 if some function with matching signature exists, 0 otherwise 
+*/ 
 int compareCallDeclare(char *token, treeNode *callParams){
-    // currentScope iterates all scopes
-    // current iterates symbols in current scope (root)
+    // var currentScope iterates all scopes
+    // var currentSymtab iterates symbols in current scope (root)
     scopeNode *currentScope = topStack;
     symbolNode *currentSymTab;
     while (currentScope != NULL){
@@ -422,6 +441,10 @@ int compareCallDeclare(char *token, treeNode *callParams){
     
 }
 
+/* PUSH STATEMENTS
+    iterates all statements. statements that should open a new scope also call "push scope to stack"
+    else, recursive call to all statements children
+*/
 void pushStatements(treeNode* tNode,int scopeLevel){
     if(tNode==NULL)
         return;
@@ -429,7 +452,11 @@ void pushStatements(treeNode* tNode,int scopeLevel){
     // struct scopeNode* currentStack;
     // currentStack= (struct scopeNode*) malloc(sizeof(struct scopeNode));
     // memcpy(&currentStack,&topStack,sizeof(topStack));
-
+    if(!strcmp(tNode->token,"IF")){
+        scopeLevel++;
+        pushScopeToStack(&topStack, "IF",NULL, tNode->middle,scopeLevel);
+        //return;
+    }
     if(!strcmp(tNode->token,"ELSE")){
         scopeLevel++;
         pushScopeToStack(&topStack, "ELSE",NULL, tNode->left,scopeLevel);
@@ -440,24 +467,15 @@ void pushStatements(treeNode* tNode,int scopeLevel){
         pushScopeToStack(&topStack,"while",NULL, tNode->right,scopeLevel);
         //  return;
     }
-    if(!strcmp(tNode->token,"IF")){
-        scopeLevel++;
-        pushScopeToStack(&topStack, "IF",NULL, tNode->middle,scopeLevel);
-        //return;
-    }
-    if(!strcmp(tNode->token,"ELSE")){
-        pushScopeToStack(&topStack, "ELSE",NULL, tNode->left,scopeLevel);
-        //return;
-    }
-    
-    if(!strcmp(tNode->token,"BLOCK")){
-        pushStatements(tNode->left,scopeLevel);
-    }
     if(!strcmp(tNode->token,"do-while")){
         scopeLevel++;
         pushScopeToStack(&topStack, "do-while",NULL, tNode->left,scopeLevel);
         // return;
     }
+    if(!strcmp(tNode->token,"BLOCK")){
+        pushStatements(tNode->left,scopeLevel);
+    }
+    
     if(!strcmp(tNode->token,"for")){
         scopeLevel++;
         pushScopeToStack(&topStack, "for",NULL, tNode->right,scopeLevel);
@@ -487,12 +505,18 @@ void pushStatements(treeNode* tNode,int scopeLevel){
 
     }
 
+/*  PUSH SCOPE STATEMENTES
+    
+    
+*/
 void pushScopeStatements(treeNode* tNode){
-    
-    
     if(tNode==NULL)
         return;
     
+    /*
+    for any of the following statements, we do not want to explore them recursively
+    so we return upon seeing them
+    */
     if(!strcmp(tNode->token,"ELSE")){
         return;
     }
@@ -543,9 +567,10 @@ void pushScopeStatements(treeNode* tNode){
     
 }
     
-    // A complete working C program to delete a node in a linked list
-// at a given position
-
+/*  PUSH SYMBOLS
+    following a DECLARE node (<type> <id1>, <id2>...) push all symbols under same type
+    base cases are  1) seeing an id with a value, 2) without value
+*/
 void pushSymbols( char* type,treeNode* tNode)
 {
     /*symbolNode* head = (*head_ref)->symbolTable;*/
@@ -566,29 +591,35 @@ void pushSymbols( char* type,treeNode* tNode)
         
 }
 
-/* wrapper function to add procedures to symbol table */
+/* PUSH PROCEDURE SYMBOLS 
+    wrapper function to add procedures to symbol table */
 /* pass on to "push" with value "1" to identify it as a fucntion   */
 void pushProcSymbols(treeNode* tNode)
 {
    /* symbolNode* head = (*head_ref)->symbolTable;*/
     //params is tNode->middle;
     int isProc = 1;
-    pushSymbolsToTable(&topStack, tNode->left->right->token, tNode->left->left->token, "function",1, tNode->middle);
+                                        //scope,    , id,                                       , type,                                 data,                       params
+    pushSymbolsToTable(&topStack, tNode->left->right->token, tNode->left->left->token, "function",isProc, tNode->middle);
 }
 
 /* 
 PUSH SYMBOLS TO SYMBOL LIST (TABLE)
 Given a reference (pointer to pointer) to the head of a list
-and an int, inserts a new node on the front of the list. */
+and an int, inserts a new node on the front of the list. 
+*/
 void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new_data, int isProc, treeNode *params)
 {
+        //malloc a new block
 	struct symbolNode* new_node = (struct symbolNode*) malloc(sizeof(struct symbolNode));
 	
 	new_node->isProc = isProc;
 	
+	//malloc string in block
 	new_node->id = (char*)(malloc (sizeof(id) + 1));
 	strncpy(new_node->id, id, sizeof(id)+1);
 	
+	//malloc data in block
 	if (new_data != NULL)
 	{
             new_node->data = (char*)(malloc (sizeof(new_data) + 1));
@@ -610,35 +641,49 @@ void pushSymbolsToTable(struct scopeNode** node, char* id, char* type, char* new
         else
             new_node->params = NULL;
             
+        //make new block the new head, and previous head now points to it
 	new_node->next =(*node)->symbolTable;
 	(*node)->symbolTable = new_node;
 }
+/*  PUSH SCOPE TO STACK
+    given a scope name and paramters, append it to the scopes stack
+    each scope has a scope level, which matches its "father" scope
 
+*/
 void pushScopeToStack(struct scopeNode** head_ref, char* scopeName,treeNode* params, treeNode* statements ,int scopeLevel)
 {     /*declare shouldn't get here*/  
       if(strcmp(scopeName,"DECLARE")){
-     ScopeNum++;
-        //printf ("adding scope: %s\n",scopeName);
-	struct scopeNode* new_scope = (struct scopeNode*) malloc(sizeof(struct scopeNode));
         
-	new_scope->scopeName = (char*)(malloc (sizeof(scopeName) + 1));
-	strncpy(new_scope->scopeName, scopeName, sizeof(scopeName)+1);
+            // malloc new block
+            struct scopeNode* new_scope = (struct scopeNode*) malloc(sizeof(struct scopeNode));
+        
+            //malloc new id
+            new_scope->scopeName = (char*)(malloc (sizeof(scopeName) + 1));
+            strncpy(new_scope->scopeName, scopeName, sizeof(scopeName)+1);
 	
-        new_scope->scopeNum=ScopeNum;
-        new_scope->ScopeLevel=scopeLevel-1;
+            // update total number of scope
+            SCOPE_NUM++;
+            // bind scope number and level
+            new_scope->scopeNum=SCOPE_NUM;
+            new_scope->scopeLevel=scopeLevel-1;
         
-        
-        if (params){
-            pushSignatureParamsToTable(&new_scope, params);
-        }
+            // if functions had any parameters, push them to its symbol table
+            if (params){
+                pushSignatureParamsToTable(&new_scope, params);
+            }
             
-		
-	new_scope->next = (*head_ref);
-	(*head_ref) = new_scope;
-	}
+            // make new block the new head, and previous head now points to it
+            new_scope->next = (*head_ref);
+            (*head_ref) = new_scope;
+            }
+	
 	pushScopeStatements(statements);
 }
 
+/* PUSH SIGNATURE PARAMS TO TABLE
+    push paramters of procedure to its symbol table
+    works recursively, base case is found "" and its children are name and type
+*/
 void pushSignatureParamsToTable(scopeNode **currentScope, treeNode *params){
         // reached non existing leaf
         if (!params){
@@ -654,8 +699,10 @@ void pushSignatureParamsToTable(scopeNode **currentScope, treeNode *params){
         pushSignatureParamsToTable(currentScope, params->right);
 }
 
-/* Given a reference (pointer to pointer) to the head of a list
-and a position, deletes the node at the given position */
+/*  DELETE SYMBOL NODE
+Given a reference (pointer to pointer) to the head of a list
+and a position, deletes the node at the given position 
+*/
 void deletesymbolNode(struct symbolNode **head_ref, int position)
 {
 // If linked list is empty
@@ -695,9 +742,12 @@ struct symbolNode* temp = *head_ref;
 	temp->next = next; // Unlink the deleted node from list
 }
 
-
+/*  IS NUMERIC
+    return 1 if token is a number, 0 otherwise (any of its digits is not in [0-9])
+*/
 int isNumeric(char* token){
     int len = strlen(token), i;
+    //check if every char in the string is a digit
     for (i = 0; i<len; i++){
         if ( !isdigit(token[i]))
             return 0;
@@ -705,9 +755,11 @@ int isNumeric(char* token){
     return 1;
 }
 
+/*  IS CONST
+    check if a given token is in [ booleans | csnull |  numbers | strings | chars ]
+*/
 int isConst(treeNode* tNode){
-// booleans | csnull |  numbers | strings | chars |  ;
-// procCall / id
+
     if (!strcmp(tNode->left->token, "boolean"))
         return 1;
     else if (!strcmp(tNode->token, "null"))
@@ -718,25 +770,28 @@ int isConst(treeNode* tNode){
         return 1;
     else if (!strcmp(tNode->left->token, "char"))
         return 1;
+    //possibly unnecessary due to left token holding type data
     else if (isNumeric(tNode->token))
         return 1;
     return 0;
               
 }
 
+/* IS PARAMS MATCH
+    compare callParams and declaredParams trees 
+    callParams: node has token value and no childs ["X"]
+    declaredParams: node has empty parent [""] and two children ["int"] ["X"]
+*/
 int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbolNode* currentSymTab*/)
 {
-    // compare callParams and declaredParams trees //
-    // callParams: node has token value and no childs ["X"]
-    // declaredParams: node has empty parent [""] and two children ["int"] ["X"]
-    
+    //token begins as "args", skip it
     if (!strcmp(callParams->token, "args:"))
         callParams = callParams->left;
-    
+    //token begins as "params", skip it
     if (!strcmp(declaredParams->token, "params:"))
         declaredParams = declaredParams->left;
     
-    
+    // fail if empty node
     if (callParams == NULL || declaredParams == NULL)
         return 0;
     
@@ -776,13 +831,16 @@ int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbo
         return isParamsMatch(callParams->left, declaredParams->left/*, currentSymTab*/) && isParamsMatch(callParams->right, declaredParams->right/*, currentSymTab*/);
 }
 
+/* IS SIMILAR SYMBOLS
+    return 0 if given symbol already exists twice in given scope
+*/
 int isSimilarSymbols(char* scopeName, struct symbolNode* root)
 {
-    /* return 0 if given symbol already exists  */
+    
     symbolNode* s1=root;
     symbolNode* s2;
     
-    
+    // for symbol s1 against any other symbol s2
   while(s1!= NULL){
         s2 = s1;
         while (s2 != NULL)
@@ -803,32 +861,41 @@ int isSimilarSymbols(char* scopeName, struct symbolNode* root)
     return 1;
 }
 
-
+/*  SCOPE LOOKUP
+ function returns the symbol  if  already declared, otherwise NULL 
+ inputs: head_ref, the scope from which to start looking, and token = id of symbol 
+*/
 symbolNode* scopeLookup (char* token){
-    /* function returns the symbol  if  already declared, otherwise NULL */
-    /* inputs: head_ref, the scope from which to start looking, and token = id of symbol */
+    // var currentScope iterates all scopes
+    // var currentLevel only iterates scopes that are bound to father scope
     struct scopeNode* currentScope = topStack;
     struct symbolNode* result;
     int currentLevel;
     while (currentScope != NULL)
     {  
-       currentLevel=currentScope->ScopeLevel;
+       currentLevel=currentScope->scopeLevel;
         result=symbolLookup(&currentScope->symbolTable,token);
+        // found some symbol
+        // result may be null - because does not exist in current scope
+        // however it may still exist in other scopes, so we do not fail lookup yet
         if(result!=NULL)
             return result;
+        // if reached top level, variable was not found
           if(currentLevel==1)
             return NULL;
           
-            
-    
-        while (currentScope->ScopeLevel > 1 &&  currentScope->ScopeLevel >= currentLevel)
+        while (currentScope->scopeLevel > 1 &&  currentScope->scopeLevel >= currentLevel)
             currentScope = currentScope->next;
     }
     return NULL;
 }
 
+/*  SYMBOL LOOKUP
+     function returns the node of the symbol  if symbol declared, otherwise NULL 
+     only check within one scope (not specified as argument, but head_ref is head of symtab in it)
+*/
 symbolNode* symbolLookup (struct symbolNode** head_ref, char* token){
-    /* function returns the node of the symbol  if symbol already declared, otherwise NULL */
+    
     struct symbolNode* temp = *head_ref;
     
     while (temp != NULL)
@@ -878,10 +945,10 @@ void printScopes(struct scopeNode *node){
 
     struct scopeNode *current=node;
     while (current != NULL)	{
-		printf("scope id:{%s} scopeNum:{%d} ScopeLevel:{%d}\n", current->scopeName,current->scopeNum,current->ScopeLevel);
+		printf("scope id:{%s} scopeNum:{%d} scopeLevel:{%d}\n", current->scopeName,current->scopeNum,current->scopeLevel);
 		current = current->next;
 	}
-    printf("num of scopes:{%d}\n",ScopeNum);
+    printf("num of scopes:{%d}\n",SCOPE_NUM);
 	
 }
 
