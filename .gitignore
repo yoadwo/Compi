@@ -15,6 +15,6 @@ task2/dugma\.t
 
 task2/part2
 
-task2/makefile
-
 task2/src/\.part2\.y\.kate-swp
+
+*.kate-swp
