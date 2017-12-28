@@ -321,6 +321,8 @@ void startSematics(treeNode *root){
     // check for duplicate symbols, calls for non existing symbols and type checking
     if (!isCompileErrors(topStack,root))
         printf ("build failed, check compile errors\n");
+    //printInfo(root);
+    
 }
 
 
@@ -346,13 +348,15 @@ int isCompileErrors(scopeNode *root,treeNode* tNode){
     // return 1 if all checks pass, otherwise 0;
     int pass = 1;
     pass = pass && checkDuplicateSymbols(root);
+    /*
     char* evalCheck;
-    /*evalCheck=checkEvaluation(tNode);
+    evalCheck=checkEvaluation(tNode);
+    
     if(!strcmp(evalCheck,"expressionError"))
         pass=pass && 0;
     else
-        pass=pass&&1;*/
-        
+        pass=pass&&1;
+    */
     return pass;
 }
 
@@ -481,9 +485,6 @@ char* checkEvaluation(treeNode* tNode){
         }
             
     }
-    
-    
-    
     
 
     if(!strcmp(tNode->token,"+")||!strcmp(tNode->token,"-")||!strcmp(tNode->token,"*")||!strcmp(tNode->token,"/")){
