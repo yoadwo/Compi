@@ -324,11 +324,10 @@ void startSematics(treeNode *root){
     // create a stack of scopes, each one has its own list of symbols (symbol table)
     pushStatements(root, 1);
     // print scopes, symbol tables and concrete syntax tree
-    printInfo(root);
     // check for duplicate symbols, calls for non existing symbols and type checking
     if (!isCompileErrors(topStack,root))
         printf ("build failed, check compile errors\n");
-        
+    //printInfo(root);    
     ast = BuildASTNode(root);
 }
 
@@ -362,9 +361,9 @@ int isCompileErrors(scopeNode *root,treeNode* tNode){
     char* evalCheck;
     //evalCheck=checkEvaluation(tNode);
     if(!strcmp(evalCheck,"expressionError"))
-        pass=pass&&0;
+        pass=pass && 0;
     else
-        pass=pass&&1;
+        pass=pass && 1;
         
     return pass;
 }
@@ -925,16 +924,17 @@ int isConst(treeNode* tNode){
 */
 int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbolNode* currentSymTab*/)
 {
+
+    // fail if empty node
+    if (callParams == NULL || declaredParams == NULL)
+        return 0;
+    
     //token begins as "args", skip it
     if (!strcmp(callParams->token, "args:"))
         callParams = callParams->left;
     //token begins as "params", skip it
     if (!strcmp(declaredParams->token, "params:"))
         declaredParams = declaredParams->left;
-    
-    // fail if empty node
-    if (callParams == NULL || declaredParams == NULL)
-        return 0;
     
     // base case: callParams and declaredParams both point to a single node, 'not equal to a COMMA node'
     if (strcmp(callParams->token, ",") && strcmp(declaredParams->token, ","))
