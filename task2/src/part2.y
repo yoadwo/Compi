@@ -43,11 +43,11 @@ int SCOPE_NUM=0;
 void startSematics(treeNode *root);
 astNode* BuildASTNode(treeNode *root);
 symbolNode* scopeLookup (char* token);
-//bool checkEvaluation(treeNode* tNode);
+char* checkEvaluation(treeNode* tNode);
 void printInfo(treeNode *head);
 treeNode *mktreeNode (char *token, treeNode *left, treeNode* middle, treeNode *right);
 void printtree (treeNode *tree, int tab);
-int isCompileErrors(scopeNode *root);
+int isCompileErrors(scopeNode *root,treeNode* tNode);
 int isSimilarSymbols(char* scopeName, struct symbolNode* root);
 int checkDuplicateSymbols(scopeNode* root);
 int checkDuplicateProcs(scopeNode *root);
@@ -126,7 +126,7 @@ expr:     expr PLUS expr    {$$ = mktreeNode ("+", $1, NULL, $3); }
         | expr NOTEQUAL expr { $$ = mktreeNode ("!=", $1, NULL, $3); }
         | expr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
         | expr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
-        | NOT expr {$$ = mktreeNode ("NOT", NULL, NULL, $2); }
+        | NOT expr {$$ = mktreeNode ("NOT", $2, NULL, NULL); }
         | address 
         | derefID 
         | Pexpr
@@ -283,8 +283,8 @@ varType: BOOL        {$$ = mktreeNode ("boolean", NULL, NULL, NULL); }
             | CHAR          {$$ = mktreeNode ("char", NULL, NULL, NULL); }
             | INT              {$$ = mktreeNode ("integer", NULL, NULL, NULL); }
             | STRING       {$$ = mktreeNode ("string", NULL, NULL, NULL); }
-            | INTPTR        {$$ = mktreeNode ("intptr", NULL, NULL, NULL); }
-            | CHARPTR    {$$ = mktreeNode ("charptr", NULL, NULL, NULL); };
+            | INTPTR        {$$ = mktreeNode ("intp", NULL, NULL, NULL); }
+            | CHARPTR    {$$ = mktreeNode ("charp", NULL, NULL, NULL); };
 void: VOID        {$$ = mktreeNode ("void", NULL, NULL, NULL); };
             
             
@@ -326,7 +326,7 @@ void startSematics(treeNode *root){
     // print scopes, symbol tables and concrete syntax tree
     printInfo(root);
     // check for duplicate symbols, calls for non existing symbols and type checking
-    if (!isCompileErrors(topStack))
+    if (!isCompileErrors(topStack,root))
         printf ("build failed, check compile errors\n");
         
     ast = BuildASTNode(root);
@@ -352,12 +352,20 @@ treeNode *mktreeNode    (char *token, treeNode *left, treeNode* middle, treeNode
 /*  IS COMPILE ERRORS
     return 1 if all checks pass, otherwise 0;
     */
-int isCompileErrors(scopeNode *root){
+
     
     // perform all checks, accumulate results and return final test result
+int isCompileErrors(scopeNode *root,treeNode* tNode){
+    // return 1 if all checks pass, otherwise 0;
     int pass = 1;
-    pass = checkDuplicateSymbols(root) && pass;
-    
+    pass = pass && checkDuplicateSymbols(root);
+    char* evalCheck;
+    //evalCheck=checkEvaluation(tNode);
+    if(!strcmp(evalCheck,"expressionError"))
+        pass=pass&&0;
+    else
+        pass=pass&&1;
+        
     return pass;
 }
 
@@ -441,6 +449,138 @@ int compareCallDeclare(char *token, treeNode *callParams){
     
 }
 
+
+char* checkEvaluation(treeNode* tNode){
+
+
+
+    if(!strcmp(tNode->token,"integer")||!strcmp(tNode->token,"pos")||!strcmp(tNode->token,"neg")||!strcmp(tNode->token,"oct")||!strcmp(tNode->token,"bin")){
+        return tNode->token;
+    }
+
+    else if(!strcmp(tNode->token,"char")){
+        return tNode->token;
+    }
+    else if(!strcmp(tNode->token,"charp")){
+        return tNode->token;
+
+    }
+    else if(!strcmp(tNode->token,"boolean")){
+        return tNode->token;
+
+    }
+    /*else if the node is variable (we will look for him in symbol table)*/
+    else if(!isConst(tNode) && tNode->left == NULL && tNode->middle == NULL && tNode->right == NULL){
+        char* varType;
+        symbolNode* node;
+        node=scopeLookup(tNode->token);
+        if(node!=NULL){
+            varType=node->type;
+            return varType;
+        }
+        else
+            return "null";
+    }
+
+
+    if(!strcmp(tNode->token,"+")||!strcmp(tNode->token,"-")||!strcmp(tNode->token,"*")||!strcmp(tNode->token,"/")){
+        char* left, *right;
+        left=checkEvaluation(tNode->left);
+        right=checkEvaluation(tNode->right);
+        if(!strcmp(left,"integer")&&!strcmp(right,"integer"))
+            return "integer";
+        
+        else {
+            printf("expressionError: type mismatch in %s, type left: %s, type right:%s",tNode->token,left,right);
+            return "expressionError";
+        }
+    }
+    if(!strcmp(tNode->token,">")||!strcmp(tNode->token,"<")||!strcmp(tNode->token,">=")||!strcmp(tNode->token,"<=")){
+        char* left, *right;
+        left=checkEvaluation(tNode->left);
+        right=checkEvaluation(tNode->right);
+        if(!strcmp(left,"integer")&&!strcmp(right,"integer"))
+            return "boolean";
+        
+        else {
+            printf("expressionError: type mismatch in %s, type left: %s, type right:%s",tNode->token,left,right);
+            return "expressionError";
+        }
+    
+    }
+
+    if(!strcmp(tNode->token,"&&")||!strcmp(tNode->token,"||")){
+        char* left, *right;
+        left=checkEvaluation(tNode->left);
+        right=checkEvaluation(tNode->right);
+        if(!strcmp(left,"boolean")&&!strcmp(right,"boolean"))
+            return "boolean";
+        
+        else {
+            printf("expressionError: type mismatch in %s, type left: %s, type right:%s",tNode->token,left,right);
+            return "expressionError";
+        }
+
+    }
+
+    if(!strcmp(tNode->token,"==")||!strcmp(tNode->token,"!=")){
+        char* left, *right;
+        left=checkEvaluation(tNode->left);
+        right=checkEvaluation(tNode->right);
+        if(!strcmp(left,"boolean")&&!strcmp(right,"boolean"))
+            return "boolean";
+            
+        else if(!strcmp(left,"integer")&&!strcmp(right,"integer"))
+            return "boolean";
+            
+        else if(!strcmp(left,"intp")&&!strcmp(right,"intp"))
+            return "boolean";  
+            
+        else if(!strcmp(left,"char")&&!strcmp(right,"char"))
+            return "boolean";
+            
+        else if(!strcmp(left,"charp")&&!strcmp(right,"charp"))
+            return "boolean";     
+            
+
+        else {
+            printf("expressionError: type mismatch in %s, type left: %s, type right:%s",tNode->token,left,right);
+            return "expressionError";
+        }
+
+    }
+
+    if(!strcmp(tNode->token,"NOT")){
+
+        char*  left;
+        left=checkEvaluation(tNode->left);
+        if(!strcmp(left,"boolean"))
+            return "boolean";
+
+        else {
+            printf("expressionError: type mismatch in %s, type left: %s",tNode->token,left);
+            return "expressionError";
+        }
+    }
+
+    checkEvaluation(tNode->left);
+    checkEvaluation(tNode->middle);
+    checkEvaluation(tNode->right);
+}
+
+/*bool checkVarType(treeNode * tNode,char* type){
+
+if(!strcmp(tNode->token,"+")||!strcmp(tNode->token,"-")||!strcmp(tNode->token,"*")||!strcmp(tNode->token,"/")){
+
+    if(!strcmp(tNode->left->left->token,type))
+
+}
+
+}*/
+
+
+
+
 /* PUSH STATEMENTS
     iterates all statements. statements that should open a new scope also call "push scope to stack"
     else, recursive call to all statements children
@@ -472,6 +612,7 @@ void pushStatements(treeNode* tNode,int scopeLevel){
         pushScopeToStack(&topStack, "do-while",NULL, tNode->left,scopeLevel);
         // return;
     }
+    
     if(!strcmp(tNode->token,"BLOCK")){
         pushStatements(tNode->left,scopeLevel);
     }
