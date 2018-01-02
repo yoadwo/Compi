@@ -595,6 +595,13 @@ char* checkEvaluation(treeNode* tNode){
             return "expressionError";
         }
     }
+    
+    if (!strcmp(tNode->token,"(")){
+        char* left;
+        left = checkEvaluation(tNode->left);
+        return left;
+    }
+    
     if (tNode->left != NULL){
         checkEvaluation(tNode->left);
     }
@@ -719,6 +726,7 @@ void pushScopeStatements(treeNode* tNode){
     // if(!strcmp(tNode->token,"main")){
     // return;
     // }
+    
     if(!strcmp(tNode->token,"DECLARE")){
         pushSymbols(tNode->left->token,tNode->right);
         //YYERROR;
