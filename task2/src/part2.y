@@ -219,21 +219,17 @@ declarations:
             
             /*_________________________________________________________STATEMENTS___________________________________________________*/
 statements: statement statements {$$ = mktreeNode ("STATEMENT", $1, NULL,$2); }
-            | statement {$$ = mktreeNode ("STATEMENT", $1, NULL,NULL); };
+            | statement {$$ = mktreeNode ("STATEMENT", $1, NULL,NULL); }
+            | block_statements statements  {$$ = mktreeNode ("NESTED", $1, NULL,NULL);}
+            | block_statements {$$ = mktreeNode ("NESTED", $1, NULL,NULL);};
 
-statement: /* | IN.OUT_statements*/
-            IF_statements 
+statement: 
+             IF_statements 
             | LOOP_statements  
             | proc
             | procCall SEMICOLON
             | ASSIGNMENT_statement SEMICOLON;
-/*statement: /* | IN.OUT_statements
-            IF_statements 
-            | LOOP_statements  
-            | proc
-            | procCall SEMICOLON
-            //change to updateSymbols (head, $1)
-            | ASSIGNMENT_statement SEMICOLON { if (!isSimilarSymbols(&head, $1->left)) { yyerror("unknown variable is being assigned to"); YYERROR;};};*/
+
 
 statements_type: statement
                  |block_statements;
@@ -321,7 +317,7 @@ void startSematics(treeNode *root){
     // check for duplicate symbols, calls for non existing symbols and type checking
     if (!isCompileErrors(topStack,root))
         printf ("build failed, check compile errors\n");
-    //printInfo(root);
+    printInfo(root);
     
 }
 
@@ -480,7 +476,7 @@ char* checkEvaluation(treeNode* tNode){
         else if(!strcmp(left,"charp")&&!strcmp(right,"charp"))
             return "charp"; 
         else {
-            printf("expressionError: type mismatch in %s, type left: %s, type right:%s",tNode->token,left,right);
+            printf("expressionError: type mismatch in %s, type left: %s, type right:%s\n",tNode->token,left,right);
             return "expressionError";
         }
             
@@ -1113,13 +1109,13 @@ symbolNode* symbolLookup (struct symbolNode** head_ref, char* token){
 
 void printInfo(treeNode *root){
     printf ("ok\n"); 
-    
+    /*
     printf("print symbol table:\n");
     printSymbolTable(topStack);
     printf("\n"); 
     printf("print scopes:\n");
     printScopes(topStack);
-    
+    */
     printf("\n"); 
 
     printtree (root,0);
