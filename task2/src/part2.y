@@ -67,7 +67,7 @@ int compareCallDeclare( char *token, treeNode *callParams);
 %token IF, ELSE, WHILE, FOR ,DO
 %token MAIN,  RETURN
 %token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST 
-%token ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSUOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT, QUOTES
+%token ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT, QUOTES
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
@@ -130,6 +130,14 @@ operator:     operator PLUS operator    {$$ = mktreeNode ("+", $1, NULL, $3); }
         | operator MINUS operator {$$ = mktreeNode ("-", $1, NULL, $3); }
         | operator MULTI operator {$$ = mktreeNode ("*", $1, NULL, $3); }
         | operator DIVISION operator  {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | Pexpr PLUS Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | Pexpr MINUS Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | Pexpr MULTI Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }       
+        | Pexpr DIVISION Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | Pexpr PLUS operator {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | Pexpr MINUS operator {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | Pexpr MULTI operator {$$ = mktreeNode ("/", $1, NULL, $3); }       
+        | Pexpr DIVISION operator {$$ = mktreeNode ("/", $1, NULL, $3); }
         | address 
         | derefID 
         //| Pexpr
@@ -145,13 +153,10 @@ compBoolExpr:   operator
 
 
 expr:  Pexpr  
-        | Pexpr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
-        | Pexpr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
-        | NOT Pexpr {$$ = mktreeNode ("NOT", $1, NULL, NULL); }
-        | compBoolExpr
-        | compBoolExpr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
-        | compBoolExpr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
-        | NOT compBoolExpr {$$ = mktreeNode ("NOT", $2, NULL, NULL); };
+        | expr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
+        | expr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
+        | NOT expr {$$ = mktreeNode ("NOT", $1, NULL, NULL); }
+        | compBoolExpr;
         
         
         /*______________________________________________________BLOCKS_____________________________________________________*/
@@ -183,8 +188,9 @@ rightbrace: RIGHTBRACE  {$$ = mktreeNode (")", NULL, NULL,NULL ); };
                     };
                 }
                     | numbers | booleans | csnull | chars | procCall | strings ; */
-consts: id | numbers | booleans | csnull | strings |chars | procCall ;
+consts: id | numbers | booleans | csnull | strings |chars | procCall | absolute ;
 
+absolute: ABSOLUTE id ABSOLUTE {$$ = mktreeNode ("ABS",mktreeNode("integer", NULL,NULL,NULL),$2,mktreeNode("pos",NULL,NULL,NULL));};
 
 id:   ID            {$$ = mktreeNode (yytext, NULL, NULL, NULL); }  ;
 
@@ -408,8 +414,18 @@ int isDeclared(treeNode *tNode){
                 else
                     return 1;
         }
-                
-    //base 2: node is const
+    //base 2: node has children -> node is ABS (identifier), do scope lookup
+    if (!strcmp(tNode->token,"ABS")){
+        symbolNode *symbol =  scopeLookup(tNode->middle->token);
+        if (symbol == NULL){
+            printf ("undefined variable [%s]\n", tNode->middle->token); //add scope
+                return 0;
+                    }
+                else
+                    return 1;
+    }
+            
+    //base 3: node is const
     if (isConst(tNode))
         return 1;
     // else - recursive call

@@ -40,7 +40,7 @@
 "*" return MULTI;
 "&" return ADDRESS;
 "^" return DEREFERENCE;
-"|" return ABSUOLUTE;
+"|" return ABSOLUTE;
 ";" return SEMICOLON;
 ":" return COLON;
 "," return COMMA;
