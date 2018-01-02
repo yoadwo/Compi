@@ -18,3 +18,5 @@ task2/part2
 task2/src/\.part2\.y\.kate-swp
 
 *.kate-swp
+
+task2/code\.t
