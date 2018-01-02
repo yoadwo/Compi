@@ -59,6 +59,9 @@
 <comment>"*/" BEGIN 0;
 "\/\/".* {/* one line comment */};
 
+"//".* {};
+
+
 [a-zA-Z][a-zA-Z0-9_]* return ID;
 [1-9][0-9]*|-?0 return INTEGER_POS;
 \-[1-9]+ return INTEGER_NEG;
