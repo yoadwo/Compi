@@ -59,7 +59,7 @@
 <comment>"*/" BEGIN 0;
 "\/\/".* {/* one line comment */};
 
-"//".* {};
+
 
 
 [a-zA-Z][a-zA-Z0-9_]* return ID;

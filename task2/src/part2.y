@@ -144,24 +144,32 @@ operator:     operator PLUS operator    {$$ = mktreeNode ("+", $1, NULL, $3); }
         | consts ;
 
 compBoolExpr:   operator
-        | operator EQUAL operator  { $$ = mktreeNode ("==", $1, NULL, $3); }
-        | operator GREATER operator  { $$ = mktreeNode (">", $1, NULL, $3); }
-        | operator GREATEREQUAL operator { $$ = mktreeNode (">=", $1, NULL, $3); }
-        | operator LESS operator { $$ = mktreeNode ("<", $1, NULL, $3); }
-        | operator LESSEQUAL operator { $$ = mktreeNode ("<=", $1, NULL, $3); }
-        | operator NOTEQUAL operator { $$ = mktreeNode ("!=", $1, NULL, $3); };
+        | compBoolExpr EQUAL compBoolExpr  { $$ = mktreeNode ("==", $1, NULL, $3); }
+        | compBoolExpr GREATER compBoolExpr  { $$ = mktreeNode (">", $1, NULL, $3); }
+        | compBoolExpr GREATEREQUAL compBoolExpr { $$ = mktreeNode (">=", $1, NULL, $3); }
+        | compBoolExpr LESS compBoolExpr { $$ = mktreeNode ("<", $1, NULL, $3); }
+        | compBoolExpr LESSEQUAL compBoolExpr { $$ = mktreeNode ("<=", $1, NULL, $3); }
+        | compBoolExpr NOTEQUAL compBoolExpr { $$ = mktreeNode ("!=", $1, NULL, $3); };
 
 
-expr:  Pexpr  
-        | expr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
+expr:   
+        /*| Pexpr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
+        | Pexpr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
+        | NOT Pexpr {$$ = mktreeNode ("NOT", $1, NULL, NULL); }
+        | compBoolExpr
+        | compBoolExpr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
+        | compBoolExpr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
+        | NOT compBoolExpr {$$ = mktreeNode ("NOT", $2, NULL, NULL); };*/
+         expr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
         | expr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
-        | NOT expr {$$ = mktreeNode ("NOT", $1, NULL, NULL); }
-        | compBoolExpr;
-        
+        | NOT expr {$$ = mktreeNode ("NOT", $2, NULL, NULL); }
+        | compBoolExpr
+        |Pexpr;
         
         /*______________________________________________________BLOCKS_____________________________________________________*/
 
 Pexpr:  LEFTPAREN expr rightParen {$$ = mktreeNode ("(", $2, NULL, $3); };
+//operator_expr:LEFTPAREN operator rightParen {$$ = mktreeNode ("(", $2, NULL, $3); };
 rightParen: RIGHTPAREN {$$ = mktreeNode (")", NULL, NULL, NULL); };
 block_return_value_statements: LEFTBRACE newline return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, $3, $5); }
             | LEFTBRACE return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, $2, $4); };
@@ -225,10 +233,10 @@ args: /* no params  */
 argsDeclare: consts COMMA  argsDeclare  {$$ = mktreeNode (",", $1, NULL, $3); }   
         | consts ;
 
-address : ADDRESS id            { symbolNode *sym = symbolLookup(&head,$2->token);
+address : ADDRESS id            { /*symbolNode *sym = symbolLookup(&head,$2->token);
                                                 if (strcmp(sym->type, "char") && strcmp(sym->type, "integer")) 
-                                                        { yyerror("pointer-type variables cannot be referenced"); YYERROR;} 
-                                                char* t = $2->token; char *s = malloc(strlen(t)+strlen("&")+1); strcat (s,"&"); strcat(s,t); 
+                                                        { yyerror("pointer-type variables cannot be referenced"); YYERROR;} */
+                                                char* t = $2->token; char *s = malloc(strlen(t)+strlen("&")+1); strcat (s,"&"); strcat(s,t);
                                                 $$ = mktreeNode (s,NULL, NULL, NULL); };        
         
               /*_________________________________________________________________________________________________________*/
@@ -662,6 +670,11 @@ void pushStatements(treeNode* tNode,int scopeLevel){
         pushScopeToStack(&topStack, "do-while",NULL, tNode->left,scopeLevel);
         // return;
     }
+     if(!strcmp(tNode->token,"NESTED")){
+        scopeLevel++;
+        pushScopeToStack(&topStack, "NESTED",NULL, tNode->left,scopeLevel);
+        // return;
+    }
     
     if(!strcmp(tNode->token,"BLOCK")){
         pushStatements(tNode->left,scopeLevel);
@@ -738,6 +751,11 @@ void pushScopeStatements(treeNode* tNode){
         pushProcSymbols(tNode);
         return;
     }
+    if(!strcmp(tNode->token,"NESTED")){
+        pushProcSymbols(tNode);
+        return;
+    }
+    
     // if(!strcmp(tNode->token,"main")){
     // return;
     // }
