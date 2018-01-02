@@ -57,6 +57,7 @@ void printScopes(struct scopeNode *node);
 symbolNode* symbolLookup (struct symbolNode** head_ref, char* token);
 int isConst(treeNode* tNode);
 int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbolNode* currentSymTab*/);
+int isReturnTypeMatch(treeNode *tNode);
 
 
 int compareCallDeclare( char *token, treeNode *callParams);
@@ -163,8 +164,8 @@ block_return_void_statements :   emptyBlock
             | LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, $3, $4); };
 
 
-return: RETURN expr {$$ = mktreeNode ("return", $2, NULL, NULL);}
-        | RETURN {$$ = mktreeNode ("return", NULL, NULL, NULL);};
+return: RETURN expr {$$ = mktreeNode ("RETURN", $2, NULL, NULL);}
+        | RETURN {$$ = mktreeNode ("RETURN", NULL, NULL, NULL);};
             
 emptyBlock: LEFTBRACE rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, NULL);}
             | LEFTBRACE RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, NULL, $4); };
@@ -484,31 +485,6 @@ char* checkEvaluation(treeNode* tNode){
             return "null";
     }
 
-/*    
-    if(!strcmp(tNode->token,"=")){
-        char* left,* right;
-        left=checkEvaluation(tNode->left);
-        right=checkEvaluation(tNode->right);
-        if(!strcmp(left,"boolean")&&!strcmp(right,"boolean"))
-            return "boolean";
-            
-        else if(!strcmp(left,"integer")&&!strcmp(right,"integer"))
-            return "integer";
-            
-        else if(!strcmp(left,"intp")&&!strcmp(right,"intp"))
-            return "intp";  
-            
-        else if(!strcmp(left,"char")&&!strcmp(right,"char"))
-            return "char";
-            
-        else if(!strcmp(left,"charp")&&!strcmp(right,"charp"))
-            return "charp"; 
-        else {
-            printf("expressionError: type mismatch in %s, type left: %s, type right:%s\n",tNode->token,left,right);
-            return "expressionError";
-        }
-            
-    }*/
     
     if(!strcmp(tNode->token,"+")||!strcmp(tNode->token,"-")||!strcmp(tNode->token,"*")||!strcmp(tNode->token,"/")){
         char* left, *right;
@@ -684,6 +660,7 @@ void pushStatements(treeNode* tNode,int scopeLevel){
         //pushProcSymbols(tNode);
         scopeLevel++;
         pushScopeToStack(&topStack,"procedure",tNode->middle, tNode->right,scopeLevel);
+        isReturnTypeMatch(tNode);
         //return;
     }
     if(!strcmp(tNode->token,"NESTED")){
@@ -1067,6 +1044,46 @@ int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbo
         return isParamsMatch(callParams->left, declaredParams->left/*, currentSymTab*/) && isParamsMatch(callParams->right, declaredParams->right/*, currentSymTab*/);
 }
 
+/* IS RETURN TYPE MATCH
+    function is called only AFTER function is added to scope\symbol symbolTable
+    evaluate the type of returned expression and compare it to declare procedure type
+*/
+int isReturnTypeMatch(treeNode *tNode){
+    char *procType = tNode->left->left->token;
+    char *returnedType;
+    
+    // if proctype is void and not exists return -> pass
+    if (!strcmp(procType,"void") && tNode->right->middle == NULL)
+        return 1;
+    //if proctype is void and exists return and has no left child -> pass
+    else if (!strcmp(procType,"void") && tNode->right->middle->left == NULL)
+        return 1;
+    //if proctype is void and exists return and return has left child -> fail
+    else if (!strcmp(procType,"void") && tNode->right->middle->left != NULL){
+        printf ("A void function (%s) cannot return a value\n", tNode->left->right->token);
+        return 0;
+    }
+    returnedType = checkEvaluation(tNode->right->middle->left);
+    if (!strcmp(returnedType,"expressionError")){
+        printf("One or more variables in function return expression were used before defined (%s)\n", tNode->left->right->token);
+        return 0;
+    }
+    // if proctype is NOT void and exists return and proctype == return type -> pass
+     if (strcmp(procType,"void") &&  !strcmp(procType, returnedType))
+        return 1;
+    // if proctype is NOT void and exists return and proctype != return type -> fail
+    else if (strcmp(procType,"void") && strcmp(returnedType,"null") &&  strcmp(procType, returnedType)){
+        printf ("Function return value (%s) does not match returned expression\'s value (%s)\n", procType, returnedType);
+        return 0;
+    }
+    // if proctype is NOT void and exists return and return has no left child-> fail
+    else if (strcmp(procType,"void") && tNode->right->middle->left == NULL ){
+        printf ("Function return value (%s) must return matching value\n", procType);
+        return 0;
+    }
+    
+}
+
 /* IS SIMILAR SYMBOLS
     return 0 if given symbol already exists twice in given scope
 */
@@ -1145,15 +1162,15 @@ symbolNode* symbolLookup (struct symbolNode** head_ref, char* token){
 }
 
 void printInfo(treeNode *root){
-    printf ("ok\n"); 
-    /*
-    printf("print symbol table:\n");
+    printf ("Syntax Tree:\n"); 
+    
+    /*printf("print symbol table:\n");
     printSymbolTable(topStack);
-    printf("\n"); 
+    printf("\n"); */
+    /*
     printf("print scopes:\n");
     printScopes(topStack);
-    */
-    printf("\n"); 
+    printf("\n"); */
 
     printtree (root,0);
 }
