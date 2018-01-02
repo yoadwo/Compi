@@ -72,18 +72,19 @@ int compareCallDeclare( char *token, treeNode *callParams);
 %nonassoc ELSE
 %right ASSIGNMENT SEMICOLON MAIN NOT
 %left LEFTBRACE RIGHTBRACE LEFTPAREN RIGHTPAREN 
-%left EQUAL GREATER GREATEREQUAL LESSEQUAL LESS NOTEQUAL
-%left PLUS MINUS AND OR
+%left PLUS MINUS
 %left MULTI DIVISION
+%left EQUAL GREATER GREATEREQUAL LESSEQUAL LESS NOTEQUAL
+%left  AND OR
 %start s
 %%
 s:      global {   startSematics($1);  };
 global:  procedures procMain  {$$ = mktreeNode ("global", $1,NULL,$2); }
-            |procMain  {$$ = mktreeNode ("global", $1,NULL,NULL); }     ;
+            | procMain  {$$ = mktreeNode ("global", $1,NULL,NULL); }     ;
        
        
        /*________________________________________________PROCEDURES________________________________________________*/
-procedures: procedures proc   {$$ = mktreeNode ("", $1,NULL, NULL); }
+procedures:    procedures proc {$$ = mktreeNode ("", $1,NULL, $2); }
                 | proc    {$$ = mktreeNode ("", $1, NULL,NULL);};
                   
 proc:  procValue  | procVoid ; 
@@ -106,7 +107,7 @@ param: varType id {$$ = mktreeNode ("", $1, NULL, $2); }   ;
   
   
        /*______________________________________________EXPR____________________________________________________________*/
-expr:     expr PLUS expr    {$$ = mktreeNode ("+", $1, NULL, $3); }
+/*expr:     expr PLUS expr    {$$ = mktreeNode ("+", $1, NULL, $3); }
         | expr MINUS expr {$$ = mktreeNode ("-", $1, NULL, $3); }
         | expr MULTI expr {$$ = mktreeNode ("*", $1, NULL, $3); }
         | expr DIVISION expr  {$$ = mktreeNode ("/", $1, NULL, $3); }
@@ -122,10 +123,38 @@ expr:     expr PLUS expr    {$$ = mktreeNode ("+", $1, NULL, $3); }
         | address 
         | derefID 
         | Pexpr
+        | consts ;*/
+        
+operator:     operator PLUS operator    {$$ = mktreeNode ("+", $1, NULL, $3); }
+        | operator MINUS operator {$$ = mktreeNode ("-", $1, NULL, $3); }
+        | operator MULTI operator {$$ = mktreeNode ("*", $1, NULL, $3); }
+        | operator DIVISION operator  {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | address 
+        | derefID 
+        //| Pexpr
         | consts ;
 
+compBoolExpr:   operator
+        | operator EQUAL operator  { $$ = mktreeNode ("==", $1, NULL, $3); }
+        | operator GREATER operator  { $$ = mktreeNode (">", $1, NULL, $3); }
+        | operator GREATEREQUAL operator { $$ = mktreeNode (">=", $1, NULL, $3); }
+        | operator LESS operator { $$ = mktreeNode ("<", $1, NULL, $3); }
+        | operator LESSEQUAL operator { $$ = mktreeNode ("<=", $1, NULL, $3); }
+        | operator NOTEQUAL operator { $$ = mktreeNode ("!=", $1, NULL, $3); };
+
+
+expr:  Pexpr  
+        | Pexpr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
+        | Pexpr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
+        | NOT Pexpr {$$ = mktreeNode ("NOT", $1, NULL, NULL); }
+        | compBoolExpr
+        | compBoolExpr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
+        | compBoolExpr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
+        | NOT compBoolExpr {$$ = mktreeNode ("NOT", $2, NULL, NULL); };
+        
         
         /*______________________________________________________BLOCKS_____________________________________________________*/
+
 Pexpr:  LEFTPAREN expr rightParen {$$ = mktreeNode ("(", $2, NULL, $3); };
 rightParen: RIGHTPAREN {$$ = mktreeNode (")", NULL, NULL, NULL); };
 block_return_value_statements: LEFTBRACE newline return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, $3, $5); }
@@ -220,7 +249,7 @@ declarations:
             /*_________________________________________________________STATEMENTS___________________________________________________*/
 statements: statement statements {$$ = mktreeNode ("STATEMENT", $1, NULL,$2); }
             | statement {$$ = mktreeNode ("STATEMENT", $1, NULL,NULL); }
-            | block_statements statements  {$$ = mktreeNode ("NESTED", $1, NULL,NULL);}
+            | block_statements statements  {$$ = mktreeNode ("NESTED", $1, NULL,$2);}
             | block_statements {$$ = mktreeNode ("NESTED", $1, NULL,NULL);};
 
 statement: 
@@ -257,7 +286,7 @@ for_cond: LEFTPAREN preCondition SEMICOLON postCondition SEMICOLON iteration {$$
 
 
 
-preCondition: /* empty */ |  expr | ASSIGNMENT_statement;
+preCondition: /* empty *//* |  expr*/ | ASSIGNMENT_statement;
 postCondition: /* empty */ | expr;
 iteration: /* empty */ | ASSIGNMENT_statement;
 cond: LEFTPAREN expr rightParen {$$ = mktreeNode ("(COND", $2, NULL, $3); };
@@ -455,8 +484,7 @@ char* checkEvaluation(treeNode* tNode){
             return "null";
     }
 
-    
-    
+/*    
     if(!strcmp(tNode->token,"=")){
         char* left,* right;
         left=checkEvaluation(tNode->left);
@@ -480,9 +508,8 @@ char* checkEvaluation(treeNode* tNode){
             return "expressionError";
         }
             
-    }
+    }*/
     
-
     if(!strcmp(tNode->token,"+")||!strcmp(tNode->token,"-")||!strcmp(tNode->token,"*")||!strcmp(tNode->token,"/")){
         char* left, *right;
         left=checkEvaluation(tNode->left);
@@ -491,7 +518,7 @@ char* checkEvaluation(treeNode* tNode){
             return "integer";
         
         else {
-            if (strcmp(right, "expressionError") || strcmp(right, "expressionError"))
+            if (strcmp(right, "expressionError") && strcmp(right, "expressionError"))
                 printf("expressionError: type mismatch in %s, type left: %s, type right:%s\n",tNode->token,left,right);
             return "expressionError";
         }
@@ -510,7 +537,6 @@ char* checkEvaluation(treeNode* tNode){
         }
     
     }
-
     if(!strcmp(tNode->token,"&&")||!strcmp(tNode->token,"||")){
         char* left, *right;
         left=checkEvaluation(tNode->left);
@@ -525,7 +551,6 @@ char* checkEvaluation(treeNode* tNode){
         }
 
     }
-
     if(!strcmp(tNode->token,"==")||!strcmp(tNode->token,"!=")){
         char* left, *right;
         left=checkEvaluation(tNode->left);
@@ -613,18 +638,6 @@ char* checkEvaluation(treeNode* tNode){
     }
 }
 
-/*bool checkVarType(treeNode * tNode,char* type){
-
-if(!strcmp(tNode->token,"+")||!strcmp(tNode->token,"-")||!strcmp(tNode->token,"*")||!strcmp(tNode->token,"/")){
-
-    if(!strcmp(tNode->left->left->token,type))
-
-}
-
-}*/
-
-
-
 
 /* PUSH STATEMENTS
     iterates all statements. statements that should open a new scope also call "push scope to stack"
@@ -673,6 +686,12 @@ void pushStatements(treeNode* tNode,int scopeLevel){
         pushScopeToStack(&topStack,"procedure",tNode->middle, tNode->right,scopeLevel);
         //return;
     }
+    if(!strcmp(tNode->token,"NESTED")){
+        //pushProcSymbols(tNode);
+        scopeLevel++;
+        pushScopeToStack(&topStack,"NESTED",NULL, tNode->left,scopeLevel);
+        //return;
+    }
     if(!strcmp(tNode->token,"main")){
         scopeLevel++;
         pushScopeToStack(&topStack, "main",NULL, tNode->left->left,scopeLevel);
@@ -704,6 +723,9 @@ void pushScopeStatements(treeNode* tNode){
     so we return upon seeing them
     */
     if(!strcmp(tNode->token,"ELSE")){
+        return;
+    }
+    if (!strcmp(tNode->token, "NESTED")){
         return;
     }
     if(!strcmp(tNode->token,"while")){
@@ -742,25 +764,32 @@ void pushScopeStatements(treeNode* tNode){
         if (!strcmp(tNode->left->token, "IF")){
             check = isDeclared(tNode->left->left->left);
             if (check){
-                checkEvaluation(tNode);
+                //checkEvaluation(tNode);
+                checkEvaluation(tNode->left->left->left);
             }
         }
         else if (!strcmp(tNode->left->token, "=")){
             check = isDeclared(tNode->left);
             if (check){
-                checkEvaluation(tNode);
+                char *left = scopeLookup(tNode->left->left->token)->type;
+                char *right = checkEvaluation(tNode->left->right);
+                if (strcmp(right,left))
+                    printf("Assignment Error mismatch: cannot assign %s to %s (%s)\n", left, right, tNode->left->left->token);
+                
             }
         }
-        else if ((!strcmp(tNode->left->token, "FOR"))){
+        else if ((!strcmp(tNode->left->token, "for"))){
             check = isDeclared(tNode->left->left);
             if (check){
-            checkEvaluation(tNode);
+                checkEvaluation(tNode->left->left->left);
+                checkEvaluation(tNode->left->left->middle);
+                checkEvaluation(tNode->left->left->right);
             }
         }
-        else if(!strcmp(tNode->left->token, "WHILE")){
+        else if(!strcmp(tNode->left->token, "while")){
             check = isDeclared(tNode->left->left->left);
             if (check){
-            checkEvaluation(tNode);
+                checkEvaluation(tNode->left->left->left);
             }
         }
     }
