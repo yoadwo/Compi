@@ -1140,13 +1140,27 @@ int isSimilarSymbols(char* scopeName, struct symbolNode* root)
 symbolNode* scopeLookup (char* token){
     // var currentScope iterates all scopes
     // var currentLevel only iterates scopes that are bound to father scope
+    char sign = (token)[0];
+    char* id;
+    if (sign == '&' || sign == '^'){
+        if (sizeof token == 2){
+            id[0] = (token)[1];
+            }
+        }
+    else{
+        id = (char*)(malloc (sizeof(token) + 1));
+        int i = 1;
+        for (i; i < sizeof((token)-1); i++){
+            id[i-1] = token[i];
+            }
+        }
     struct scopeNode* currentScope = topStack;
     struct symbolNode* result;
     int currentLevel;
     while (currentScope != NULL)
     {  
        currentLevel=currentScope->scopeLevel;
-        result=symbolLookup(&currentScope->symbolTable,token);
+        result=symbolLookup(&currentScope->symbolTable,id);
         // found some symbol
         // result may be null - because does not exist in current scope
         // however it may still exist in other scopes, so we do not fail lookup yet
