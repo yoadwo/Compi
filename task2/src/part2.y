@@ -371,15 +371,6 @@ int isCompileErrors(scopeNode *root,treeNode* tNode){
     // return 1 if all checks pass, otherwise 0;
     int pass = 1;
     pass = pass && checkDuplicateSymbols(root);
-    /*
-    char* evalCheck;
-    evalCheck=checkEvaluation(tNode);
-    
-    if(!strcmp(evalCheck,"expressionError"))
-        pass=pass && 0;
-    else
-        pass=pass&&1;
-    */
     return pass;
 }
 
@@ -766,7 +757,7 @@ void pushScopeStatements(treeNode* tNode){
                 char *left = scopeLookup(tNode->left->left->token)->type;
                 char *right = checkEvaluation(tNode->left->right);
                 if (strcmp(right,left))
-                    printf("Assignment Error mismatch: cannot assign %s to %s (%s)\n", left, right, tNode->left->left->token);
+                    printf("Assignment Error mismatch: cannot assign %s to %s (identifier %s)\n", right, left, tNode->left->left->token);
                 
             }
         }
@@ -997,6 +988,8 @@ int isConst(treeNode* tNode){
         return 1;
     else if (!strcmp(tNode->left->token, "char"))
         return 1;
+    else if (!strcmp(tNode->token, "ABS"))
+        return 1;
     //possibly unnecessary due to left token holding type data
     else if (isNumeric(tNode->token))
         return 1;
@@ -1088,7 +1081,7 @@ int isReturnTypeMatch(treeNode *tNode){
         return 1;
     // if proctype is NOT void and exists return and proctype != return type -> fail
     else if (strcmp(procType,"void") && strcmp(returnedType,"null") &&  strcmp(procType, returnedType)){
-        printf ("Function return value (%s) does not match returned expression\'s value (%s)\n", procType, returnedType);
+        printf ("Function %s return value (%s) does not match returned expression\'s value (%s)\n", tNode->left->right->token,procType, returnedType);
         return 0;
     }
     // if proctype is NOT void and exists return and return has no left child-> fail
