@@ -43,6 +43,7 @@ int isCompileErrors(scopeNode *root,treeNode* tNode);
 int isSimilarSymbols(char* scopeName, struct symbolNode* root);
 int checkDuplicateSymbols(scopeNode* root);
 int checkDuplicateProcs(scopeNode *root);
+int checkBracketsExpression(treeNode *tNode);
 void pushStatements(treeNode* tNode,int scopeLevel);
 void pushScopeStatements(treeNode* tNode);
 void pushSymbols( char* type,treeNode* tNode);
@@ -192,7 +193,7 @@ rightbrace: RIGHTBRACE  {$$ = mktreeNode (")", NULL, NULL,NULL ); };
                     };
                 }
                     | numbers | booleans | csnull | chars | procCall | strings ; */
-consts: id | numbers | booleans | csnull | strings |chars | procCall | absolute ;
+consts: id | numbers | booleans | csnull | strings |chars | procCall | absolute | stringArray;
 
 absolute: ABSOLUTE id ABSOLUTE {$$ = mktreeNode ("ABS",mktreeNode("integer", NULL,NULL,NULL),$2,mktreeNode("pos",NULL,NULL,NULL));};
 
@@ -229,9 +230,12 @@ args: /* no params  */
 argsDeclare: consts COMMA  argsDeclare  {$$ = mktreeNode (",", $1, NULL, $3); }   
         | consts ;
 
-address : ADDRESS id            { symbolNode *sym = symbolLookup(&head,$2->token);
+stringArray: id LEFTBRACKET numbers RIGHTBRACKET {$$ = mktreeNode ("ARRAY", mktreeNode("char", NULL,NULL,NULL), $1, $3);}
+        | id LEFTBRACKET id RIGHTBRACKET {$$ = mktreeNode ("ARRAY", mktreeNode("char", NULL,NULL,NULL), $1, $3);};
+    
+address : ADDRESS id            {/* symbolNode *sym = symbolLookup(&head,$2->token);
                                                 if (strcmp(sym->type, "char") && strcmp(sym->type, "integer")) 
-                                                        { yyerror("pointer-type variables cannot be referenced"); YYERROR;} 
+                                                        { yyerror("pointer-type variables cannot be referenced"); YYERROR;}*/
                                                 char* t = $2->token; char *s = malloc(strlen(t)+strlen("&")+1); strcat (s,"&"); strcat(s,t); 
                                                 $$ = mktreeNode (s,NULL, NULL, NULL); };        
         
@@ -328,11 +332,7 @@ variablesDeclare: id COMMA variablesDeclare    {$$ = mktreeNode ("", $1, NULL, $
   
 variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {/*pushSymbols( $1->token,$2);*/ $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
                               |varType StringDeclare {/*pushSymbols("String",$2);*/ $$ = mktreeNode ("DECLARE", $1, NULL, $2); };
-/*variable_declare_statements: 
-                            varType variablesDeclare  { if (!pushSymbols(&head, $1->token,$2)){ yyerror("duplicate identifier found"); YYERROR;};
-                                                                                                                        $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
-                          | STRING StringDeclare       { if (!pushSymbols(&head, "charp",$2)){ yyerror("duplicate identifier found"); YYERROR;};
-                                                                                                                        $$ = mktreeNode ("DECLARE", mktreeNode ("charp", NULL, NULL, NULL), NULL, $2); };*/
+
   
 %%
 
@@ -378,7 +378,7 @@ treeNode *mktreeNode    (char *token, treeNode *left, treeNode* middle, treeNode
 int isCompileErrors(scopeNode *root,treeNode* tNode){
     // return 1 if all checks pass, otherwise 0;
     int pass = 1;
-    pass = pass && checkDuplicateSymbols(root);
+    pass = checkDuplicateSymbols(root) && pass;
     return pass;
 }
 
@@ -398,7 +398,7 @@ int isDeclared(treeNode *tNode){
         // ')' can also be seen as a leaf
                 symbolNode *symbol =  scopeLookup(tNode->token);
                 if (symbol == NULL){
-                    printf ("undefined variable [%s]\n", tNode->token); //add scope
+                    printf ("undefined variable [%s]\n", tNode->token); //add scope?
                     return 0;
                     }
                 else
@@ -408,14 +408,28 @@ int isDeclared(treeNode *tNode){
     if (!strcmp(tNode->token,"ABS")){
         symbolNode *symbol =  scopeLookup(tNode->middle->token);
         if (symbol == NULL){
-            printf ("undefined variable [%s]\n", tNode->middle->token); //add scope
+            printf ("undefined variable [%s]\n", tNode->middle->token); //add scope?
                 return 0;
                     }
                 else
                     return 1;
     }
+    //base 3: node has children -> node is ARRAY (string[const\id]), return 1 if has const child or scopelookup result if has id child)
+    if (!strcmp(tNode->token,"ARRAY")){
+        if (isConst(tNode->right))
+            return 1;
+        else{
+            symbolNode *symbol =  scopeLookup(tNode->right->token);
+            if (symbol == NULL){
+                printf ("undefined variable [%s]\n", tNode->right->token); //add scope?
+                return 0;
+            }
+            else
+                return 1;
+        }
+    }
             
-    //base 3: node is const
+    //base 4: node is const
     if (isConst(tNode))
         return 1;
     // else - recursive call
@@ -470,7 +484,22 @@ int compareCallDeclare(char *token, treeNode *callParams){
     return 0;
     
 }
+/*  CHECK BRACKETS EXPRESSION
+    functions checks if expression inside brackets is from type integer
+    tNode is the ARRAY node
 
+*/
+int checkBracketsExpression(treeNode *tNode){
+    symbolNode* bracketExpression = scopeLookup (tNode->right->token);
+    if (bracketExpression){
+        //printf("checking Brackets Expression for variable %s\n",bracketExpression->id);
+        if ( strcmp (bracketExpression->type, "integer")){
+            printf ("Brackets expression type for string must be integer (not %s)\n",bracketExpression->type );
+        }
+    }
+        
+    
+}
 
 char* checkEvaluation(treeNode* tNode){
     
@@ -490,7 +519,12 @@ char* checkEvaluation(treeNode* tNode){
         else
             return "null";
     }
-
+    
+    if (!strcmp(tNode->token,"ARRAY")){
+            checkBracketsExpression(tNode);
+            return "char";
+    }
+    
     
     if(!strcmp(tNode->token,"+")||!strcmp(tNode->token,"-")||!strcmp(tNode->token,"*")||!strcmp(tNode->token,"/")){
         char* left, *right;
@@ -628,6 +662,7 @@ char* checkEvaluation(treeNode* tNode){
 void pushStatements(treeNode* tNode,int scopeLevel){
     if(tNode==NULL)
         return;
+        
     //int scopeID=0;
     // struct scopeNode* currentStack;
     // currentStack= (struct scopeNode*) malloc(sizeof(struct scopeNode));
@@ -740,6 +775,14 @@ void pushScopeStatements(treeNode* tNode){
     
      if (!strcmp(tNode->token, "func call")){
         compareCallDeclare( tNode->left->token, tNode->right);      
+    }
+    
+    if (!strcmp(tNode->token, "ARRAY")){
+        //if (bracketExpression !=NULL)
+           checkBracketsExpression(tNode);
+        //if (isDeclared(tNode->right))
+        
+         
     }
     
      if (!strcmp(tNode->token, "STATEMENT")){
@@ -986,7 +1029,7 @@ int isConst(treeNode* tNode){
         return 1;
     else if (!strcmp(tNode->left->token, "charp"))
         return 1;
-    else if (!strcmp(tNode->left->token, "char"))
+    else if (tNode->left != NULL && tNode->right && NULL && !strcmp(tNode->left->token, "char"))
         return 1;
     else if (!strcmp(tNode->token, "ABS"))
         return 1;
@@ -1171,8 +1214,8 @@ symbolNode* symbolLookup (struct symbolNode** head_ref, char* token){
 
 void printInfo(treeNode *root){
     printf ("Syntax Tree:\n"); 
-    
-    /*printf("print symbol table:\n");
+    /*
+    printf("print symbol table:\n");
     printSymbolTable(topStack);
     printf("\n"); */
     /*
