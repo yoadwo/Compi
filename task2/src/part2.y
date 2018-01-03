@@ -67,7 +67,7 @@ int compareCallDeclare( char *token, treeNode *callParams);
 %token IF, ELSE, WHILE, FOR ,DO
 %token MAIN,  RETURN
 %token BOOLTRUE, BOOLFALSE, CSNULL, INTEGER_POS, INTEGER_NEG, CHAR_CONST, STRING_CONST, HEX_CONST, OCTAL_CONST, BINARY_CONST 
-%token ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSUOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT, QUOTES
+%token ASSIGNMENT,AND,DIVISION,EQUAL,GREATER,GREATEREQUAL,LESS,LESSEQUAL,MINUS,NOT,NOTEQUAL,OR,PLUS,MULTI,ADDRESS,DEREFERENCE,ABSOLUTE,SEMICOLON,COLON,COMMA,LEFTBRACE,RIGHTBRACE,LEFTPAREN,RIGHTPAREN,LEFTBRACKET,RIGHTBRACKET,PERCENT, QUOTES
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
@@ -175,15 +175,8 @@ rightbrace: RIGHTBRACE  {$$ = mktreeNode (")", NULL, NULL,NULL ); };
 
               /*_________________________________________________TYPES________________________________________________*/
               
-/*consts: id { symbolNode *s = scopeLookup($1->token);
-                    if (s == NULL ) 
-                    {
-                        yyerror("unknown variable is used"); 
-                        YYERROR;
-                    };
-                }
-                    | numbers | booleans | csnull | chars | procCall | strings ; */
-consts: id | numbers | booleans | csnull | strings |chars | procCall ;
+
+consts: id | numbers | booleans | csnull | strings |chars | procCall | absolute;
 
 
 id:   ID            {$$ = mktreeNode (yytext, NULL, NULL, NULL); }  ;
@@ -219,6 +212,8 @@ args: /* no params  */
 argsDeclare: consts COMMA  argsDeclare  {$$ = mktreeNode (",", $1, NULL, $3); }   
         | consts ;
 
+absolute: ABSOLUTE id ABSOLUTE {$$ = mktreeNode ("ABS",mktreeNode("integer", NULL,NULL,NULL),$2,mktreeNode("pos",NULL,NULL,NULL));};
+    
 address : ADDRESS id            { symbolNode *sym = symbolLookup(&head,$2->token);
                                                 if (strcmp(sym->type, "char") && strcmp(sym->type, "integer")) 
                                                         { yyerror("pointer-type variables cannot be referenced"); YYERROR;} 
@@ -408,8 +403,18 @@ int isDeclared(treeNode *tNode){
                 else
                     return 1;
         }
+    //base 2: node has children -> node is ABS (identifier), do scope lookup
+    if (!strcmp(tNode->token,"ABS")){
+        symbolNode *symbol =  scopeLookup(tNode->middle->token);
+          if (symbol == NULL){
+                    printf ("undefined variable [%s]\n", tNode->middle->token); //add scope
+                    return 0;
+                    }
+                else
+                    return 1;
+    }
                 
-    //base 2: node is const
+    //base 3: node is const
     if (isConst(tNode))
         return 1;
     // else - recursive call
