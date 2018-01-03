@@ -201,8 +201,8 @@ chars: CHAR_CONST {$$ = mktreeNode (yytext, mktreeNode("char", NULL,NULL,NULL), 
 
 /*procCall: id LEFTPAREN args RIGHTPAREN { $$ = mktreeNode ("func call", $1, NULL, $3); };*/
 
-procCall: id LEFTPAREN args RIGHTPAREN {$$ = mktreeNode ("func call", $1, NULL, $3); }; 
-
+procCall: id LEFTPAREN args RIGHTPAREN {$$ = mktreeNode ("func call", $1, NULL, $3); }
+            | id LEFTPAREN RIGHTPAREN {$$ = mktreeNode ("func call", $1, NULL, NULL); };
 args: argsDeclare {$$ = mktreeNode ("args:", $1, NULL, NULL); };
 argsDeclare: expr COMMA  argsDeclare  {$$ = mktreeNode (",", $1, NULL, $3); }   
         | expr ;
@@ -526,6 +526,19 @@ char* checkEvaluation(treeNode* tNode){
         }
         else
             return "null";
+    }
+    
+    else if (!strcmp(tNode->token, "func call")){
+        symbolNode* node;
+        node=scopeLookup(tNode->left->token);
+        if (node!=NULL){
+            char *varType = node->type;
+            if (varType)
+                return varType;
+            else
+                return "null";
+        }
+    
     }
     
     if (!strcmp(tNode->token,"ARRAY")){
@@ -1065,7 +1078,9 @@ int isParamsMatch(treeNode* callParams, treeNode* declaredParams/*, struct symbo
 {
 
     // fail if empty node
-    if (callParams == NULL || declaredParams == NULL)
+    if (callParams == NULL && declaredParams == NULL)
+        return 1;
+    if ((callParams != NULL && declaredParams == NULL) || (callParams == NULL && declaredParams == NULL))
         return 0;
     
     //token begins as "args", skip it
