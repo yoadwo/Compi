@@ -221,11 +221,8 @@ args: argsDeclare {$$ = mktreeNode ("args:", $1, NULL, NULL); };
 argsDeclare: expr COMMA  argsDeclare  {$$ = mktreeNode (",", $1, NULL, $3); }   
         | expr ;
 
-address : ADDRESS id            { symbolNode *sym = scopeLookup($2->token);
-                                                if (strcmp(sym->type, "char") && strcmp(sym->type, "integer")) 
-                                                        { yyerror("pointer-type variables cannot be referenced"); YYERROR;} 
-                                                char* t = $2->token; char *s = malloc(strlen(t)+strlen("&")+1); strcat (s,"&"); strcat(s,t); 
-                                                $$ = mktreeNode (s,NULL, NULL, NULL); };        
+address : ADDRESS id  {char* t = $2->token; char *s = malloc(strlen(t)+strlen("&")+1); strcat (s,"&"); strcat(s,t); 
+                            $$ = mktreeNode (s,NULL, NULL, NULL); };        
         
               /*_________________________________________________________________________________________________________*/
 derefID: DEREFERENCE id  {char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); $$ = mktreeNode (s,NULL, NULL, NULL); } ;
@@ -388,13 +385,42 @@ int isDeclared(treeNode *tNode){
     //base 1: node has no children -> node is identifier, do scope lookup
     if (tNode->left == NULL && tNode->middle == NULL  && tNode->right == NULL ){
         // ')' can also be seen as a leaf
-                symbolNode *symbol =  scopeLookup(tNode->token);
+        char sign = (tNode->token)[0];
+        if (sign == '&' || sign == '^'){
+            if (sizeof tNode->token == 2){
+                char* id;
+                id[0] = (tNode->token)[1];
+                symbolNode *symbol =  scopeLookup(id);
                 if (symbol == NULL){
                     printf ("undefined variable [%s]\n", tNode->token); //add scope
                     return 0;
                     }
                 else
                     return 1;
+            }
+            else{
+                char* id = (char*)(malloc (sizeof(tNode->token) + 1));
+                //copy tNode->token from [1] to end into id
+                int i = 1;
+                for (i; i < sizeof((tNode->token)-1); i++){
+                    id[i-1] = tNode->token[i];
+                    }
+                symbolNode *symbol =  scopeLookup(id);
+                if (symbol == NULL){
+                    printf ("undefined variable [%s]\n", tNode->token); //add scope
+                    return 0;
+                    }
+                else
+                    return 1;
+                }
+        }
+        symbolNode *symbol =  scopeLookup(tNode->token);
+        if (symbol == NULL){
+            printf ("undefined variable [%s]\n", tNode->token); //add scope
+            return 0;
+            }
+        else
+            return 1;
         }
     //base 2: node has children -> node is ABS (identifier), do scope lookup
     if (!strcmp(tNode->token,"ABS")){
