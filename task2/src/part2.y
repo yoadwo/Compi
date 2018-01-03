@@ -108,23 +108,7 @@ param: varType id {$$ = mktreeNode ("", $1, NULL, $2); }   ;
   
   
        /*______________________________________________EXPR____________________________________________________________*/
-/*expr:     expr PLUS expr    {$$ = mktreeNode ("+", $1, NULL, $3); }
-        | expr MINUS expr {$$ = mktreeNode ("-", $1, NULL, $3); }
-        | expr MULTI expr {$$ = mktreeNode ("*", $1, NULL, $3); }
-        | expr DIVISION expr  {$$ = mktreeNode ("/", $1, NULL, $3); }
-        | expr EQUAL expr  { $$ = mktreeNode ("==", $1, NULL, $3); }
-        | expr GREATER expr  { $$ = mktreeNode (">", $1, NULL, $3); }
-        | expr GREATEREQUAL expr { $$ = mktreeNode (">=", $1, NULL, $3); }
-        | expr LESS expr { $$ = mktreeNode ("<", $1, NULL, $3); }
-        | expr LESSEQUAL expr { $$ = mktreeNode ("<=", $1, NULL, $3); }
-        | expr NOTEQUAL expr { $$ = mktreeNode ("!=", $1, NULL, $3); }
-        | expr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
-        | expr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
-        | NOT expr {$$ = mktreeNode ("NOT", $2, NULL, NULL); }
-        | address 
-        | derefID 
-        | Pexpr
-        | consts ;*/
+
         
 operator:     operator PLUS operator    {$$ = mktreeNode ("+", $1, NULL, $3); }
         | operator MINUS operator {$$ = mktreeNode ("-", $1, NULL, $3); }
@@ -170,7 +154,8 @@ rightParen: RIGHTPAREN {$$ = mktreeNode (")", NULL, NULL, NULL); };
 block_return_value_statements: LEFTBRACE newline return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, $3, $5); }
             | LEFTBRACE return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, $2, $4); };
 block_return_void_statements :   emptyBlock 
-            | LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, $3, $4); };
+            | LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, $3, $5); }
+            | LEFTBRACE newline SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $4); };
 
 
 return: RETURN expr {$$ = mktreeNode ("RETURN", $2, NULL, NULL);}
