@@ -156,7 +156,7 @@ block_return_value_statements: LEFTBRACE newline return SEMICOLON rightbrace {$$
             | LEFTBRACE return SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", NULL, $2, $4); };
 block_return_void_statements :   emptyBlock 
             | LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, $3, $5); }
-            | LEFTBRACE newline SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $4); };
+            | LEFTBRACE newline  rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $3); };
 
 
 return: RETURN expr {$$ = mktreeNode ("RETURN", $2, NULL, NULL);}
@@ -292,19 +292,20 @@ void: VOID        {$$ = mktreeNode ("void", NULL, NULL, NULL); };
             
             /*____________________________________DECLARATIONS_______________________________________*/
             
-StringDeclare:id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare {$$ = mktreeNode ("STRING", $1, NULL, $6); }
-              | str_ASSIGNMENT_statement{/*$$ = mktreeNode ("STRING", $1, NULL,NULL); */}
-              |str_ASSIGNMENT_statement COMMA StringDeclare {$$ = mktreeNode ("STRING", $1,$3, NULL); }
-              |id LEFTBRACKET numbers RIGHTBRACKET     {/*$$ = mktreeNode ("STRING", $1,NULL, NULL);*/ };
+StringDeclare:id LEFTBRACKET numbers RIGHTBRACKET COMMA StringDeclare {$$ = mktreeNode ("", $1, NULL, $6); }
+              |str_ASSIGNMENT_statement COMMA StringDeclare {$$ = mktreeNode ("", $1,NULL, $3); }
+              |id LEFTBRACKET numbers RIGHTBRACKET     {/*$$ = mktreeNode ("STRING", $1,NULL, NULL);*/ }
+              | str_ASSIGNMENT_statement{/*$$ = mktreeNode ("STRING", $1, NULL,NULL); */};
                           
 
 variablesDeclare: id COMMA variablesDeclare    {$$ = mktreeNode ("", $1, NULL, $3); }
             |  ASSIGNMENT_statement COMMA  variablesDeclare   {$$ = mktreeNode ("", $1, NULL, $3); }
-            | ASSIGNMENT_statement 
-            | id;
+            | id
+            | ASSIGNMENT_statement;
+            
   
 variable_declare_statements: varType variablesDeclare /*SEMICOLON*/ {/*pushSymbols( $1->token,$2);*/ $$ = mktreeNode ("DECLARE", $1, NULL, $2);}
-                              |varType StringDeclare {/*pushSymbols("String",$2);*/ $$ = mktreeNode ("DECLARE", $1, NULL, $2); };
+                              |varType StringDeclare {/*pushSymbols("String",$2);*/ $$ = mktreeNode ("DECLARE", mktreeNode ("STRING", NULL, NULL,NULL), NULL,$2); };
 
   
 %%
@@ -516,7 +517,11 @@ char* checkEvaluation(treeNode* tNode){
         node=scopeLookup(tNode->token);
         if(node!=NULL){
             varType=node->type;
-            return varType;
+            //string types are saved as strings but are treated as charp ~~~
+            if (!strcmp(varType,"STRING"))
+                return "charp";
+            else
+                return varType;
         }
         else
             return "null";
@@ -1182,27 +1187,31 @@ int isSimilarSymbols(char* scopeName, struct symbolNode* root)
 symbolNode* scopeLookup (char* token){
     // var currentScope iterates all scopes
     // var currentLevel only iterates scopes that are bound to father scope
-    char sign = (token)[0];
+   
+   char sign = (token)[0];
     char* id;
     if (sign == '&' || sign == '^'){
         if (sizeof token == 2){
             id[0] = (token)[1];
             }
-        }
-    else{
-        id = (char*)(malloc (sizeof(token) + 1));
-        int i = 1;
-        for (i; i < sizeof((token)-1); i++){
-            id[i-1] = token[i];
+        else{
+            id = (char*)(malloc (sizeof(token) + 1));
+            int i = 1;
+            for (i; i < sizeof((token)-1); i++){
+                id[i-1] = token[i];
+                }
             }
+            token = id;
         }
+    
+
     struct scopeNode* currentScope = topStack;
     struct symbolNode* result;
     int currentLevel;
     while (currentScope != NULL)
     {  
        currentLevel=currentScope->scopeLevel;
-        result=symbolLookup(&currentScope->symbolTable,id);
+        result=symbolLookup(&currentScope->symbolTable,token);
         // found some symbol
         // result may be null - because does not exist in current scope
         // however it may still exist in other scopes, so we do not fail lookup yet
