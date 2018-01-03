@@ -130,6 +130,18 @@ operator:     operator PLUS operator    {$$ = mktreeNode ("+", $1, NULL, $3); }
         | operator MINUS operator {$$ = mktreeNode ("-", $1, NULL, $3); }
         | operator MULTI operator {$$ = mktreeNode ("*", $1, NULL, $3); }
         | operator DIVISION operator  {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | Pexpr PLUS Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | Pexpr MINUS Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | Pexpr MULTI Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }       
+        | Pexpr DIVISION Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | operator PLUS Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | operator MINUS Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | operator MULTI Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }       
+        | operator DIVISION Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | Pexpr PLUS operator {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | Pexpr MINUS operator {$$ = mktreeNode ("/", $1, NULL, $3); }
+        | Pexpr MULTI operator {$$ = mktreeNode ("/", $1, NULL, $3); }       
+        | Pexpr DIVISION operator {$$ = mktreeNode ("/", $1, NULL, $3); }
         | address 
         | derefID 
         //| Pexpr
@@ -145,13 +157,10 @@ compBoolExpr:   operator
 
 
 expr:  Pexpr  
-        | Pexpr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
-        | Pexpr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
-        | NOT Pexpr {$$ = mktreeNode ("NOT", $1, NULL, NULL); }
-        | compBoolExpr
-        | compBoolExpr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
-        | compBoolExpr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
-        | NOT compBoolExpr {$$ = mktreeNode ("NOT", $2, NULL, NULL); };
+        | expr AND expr {$$ = mktreeNode ("&&", $1, NULL, $3); }
+        | expr OR expr {$$ = mktreeNode ("||", $1, NULL, $3); }
+        | NOT expr {$$ = mktreeNode ("NOT", $1, NULL, NULL); }
+        | compBoolExpr;
         
         
         /*______________________________________________________BLOCKS_____________________________________________________*/
@@ -175,9 +184,17 @@ rightbrace: RIGHTBRACE  {$$ = mktreeNode (")", NULL, NULL,NULL ); };
 
               /*_________________________________________________TYPES________________________________________________*/
               
+/*consts: id { symbolNode *s = scopeLookup($1->token);
+                    if (s == NULL ) 
+                    {
+                        yyerror("unknown variable is used"); 
+                        YYERROR;
+                    };
+                }
+                    | numbers | booleans | csnull | chars | procCall | strings ; */
+consts: id | numbers | booleans | csnull | strings |chars | procCall | absolute ;
 
-consts: id | numbers | booleans | csnull | strings |chars | procCall | absolute;
-
+absolute: ABSOLUTE id ABSOLUTE {$$ = mktreeNode ("ABS",mktreeNode("integer", NULL,NULL,NULL),$2,mktreeNode("pos",NULL,NULL,NULL));};
 
 id:   ID            {$$ = mktreeNode (yytext, NULL, NULL, NULL); }  ;
 
@@ -212,8 +229,6 @@ args: /* no params  */
 argsDeclare: consts COMMA  argsDeclare  {$$ = mktreeNode (",", $1, NULL, $3); }   
         | consts ;
 
-absolute: ABSOLUTE id ABSOLUTE {$$ = mktreeNode ("ABS",mktreeNode("integer", NULL,NULL,NULL),$2,mktreeNode("pos",NULL,NULL,NULL));};
-    
 address : ADDRESS id            { symbolNode *sym = symbolLookup(&head,$2->token);
                                                 if (strcmp(sym->type, "char") && strcmp(sym->type, "integer")) 
                                                         { yyerror("pointer-type variables cannot be referenced"); YYERROR;} 
@@ -392,14 +407,14 @@ int isDeclared(treeNode *tNode){
     //base 2: node has children -> node is ABS (identifier), do scope lookup
     if (!strcmp(tNode->token,"ABS")){
         symbolNode *symbol =  scopeLookup(tNode->middle->token);
-          if (symbol == NULL){
-                    printf ("undefined variable [%s]\n", tNode->middle->token); //add scope
-                    return 0;
+        if (symbol == NULL){
+            printf ("undefined variable [%s]\n", tNode->middle->token); //add scope
+                return 0;
                     }
                 else
                     return 1;
     }
-                
+            
     //base 3: node is const
     if (isConst(tNode))
         return 1;
