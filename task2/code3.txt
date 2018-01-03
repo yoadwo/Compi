@@ -2,73 +2,73 @@
 comment long
 comment */
 
-boolean f2(integer a, integer d, integer y, char c)
-{
-	char x, b;
-	boolean flag;
-        
-        b = '&';
-        // a = x;
-	// b = 8;
-	a = (y * 7)/a-y;
-	// a = (y * 7)/b-y; 
-	// a = (y * 7)/a-c; 
-
-	flag = (b == c) && (y > a);
-	// flag = (b == c) && (y + a); 
-	// 3 + 6 = 9; 
-	// ^x = 6; 
-	
-    	return flag ;
-}
-
-
-integer f3(integer i, integer j, integer k)
-{
-    char x, k;
-    boolean f4(integer l, integer m, integer n)
-    {
-	boolean x, j, n;
-	k = '@';
-	i = l + l;
-	// i = j + 1;
-	// i = k + 1; 
-	if ((k == '*') || (x != false) && (l+m < i)){
-		x = l < m;
-	}
-	//return m;
-        return x;
-    }
-    {
-	boolean k;
-               k=f4(5,i,j);
-	// x =f4(5,i,j); 
-	// k = f4(5,i); 
-	// k = f4(5,x,j); 
-     }
-    // n = false; 
-    x = '#';	
-    //return k;
-    return 90;
-}
-
-
-integer f5(integer i, integer j, integer k)
-{
-    integer f6(integer t) /* procedure declarations */ 
-    {
-        integer temp;
-        temp = t* t;
-        return temp;
-    }
-
-    integer total;                       /* variable declarations */
-    boolean bool;
-    bool = f2(i,j,k,'^');
-    // j = f1(); 
-    total = f6(i+j+k);                    /* statements */
-    return 0;
-}
+// boolean f2(integer a, integer d, integer y, char c)
+// {
+// 	char x, b;
+// 	boolean flag;
+//         
+//         b = '&';
+//         // a = x;
+// 	// b = 8;
+// 	a = (y * 7)/a-y;
+// 	// a = (y * 7)/b-y; 
+// 	// a = (y * 7)/a-c; 
+// 
+// 	flag = (b == c) && (y > a);
+// 	// flag = (b == c) && (y + a); 
+// 	// 3 + 6 = 9;
+// 	// ^x = 6;
+// 	
+//     	return flag ;
+// }
+// 
+// 
+// integer f3(integer i, integer j, integer k)
+// {
+//     char x, k;
+//     boolean f4(integer l, integer m, integer n)
+//     {
+// 	boolean x, j, n;
+// 	k = '@';
+// 	i = l + l;
+// 	// i = j + 1;
+// 	// i = k + 1; 
+// 	if ((k == '*') || (x != false) && (l+m < i)){
+// 		x = l < m;
+// 	}
+// 	//return m;
+//         return x;
+//     }
+//     {
+// 	boolean k;
+//                k=f4(5,i,j);
+// 	// x =f4(5,i,j); 
+// 	// k = f4(5,i); 
+// 	// k = f4(5,x,j); 
+//      }
+//     // n = false; 
+//     x = '#';	
+//     //return k;
+//     return 90;
+// }
+// 
+// 
+// integer f5(integer i, integer j, integer k)
+// {
+//     integer f6(integer t) /* procedure declarations */ 
+//     {
+//         integer temp;
+//         temp = t* t;
+//         return temp;
+//     }
+// 
+//     integer total;                       /* variable declarations */
+//     boolean bool;
+//     bool = f2(i,j,k,'^');
+//     // j = f1(); 
+//     total = f6(i+j+k);                    /* statements */
+//     return 0;
+// }
 
 
 integer f1() 
@@ -91,48 +91,48 @@ integer f1()
 }
 
 
-void f7()
-{
-    {   
-	integer x;
-	intp y;
-	x = 5;
-	y = &x;
-	x = 6;
-	//^x = 7;
-	//&x = y;
-	//y = x;
-	if (&x == y && ^y == x){
-		^y = 9;
-	}
-     	{
-		charp x;
-		string y[10];
-		char z;
-		y = "foobar";
-		//y='b';
-		x = &y[5];
-		//x=&y; 
-		z = ^x;        
-		//z = ^x - 5;       
-		y = "barfoo"; 
-   		 {
-			char x;
-			intp y;
-			charp z;
-			char g;
-
-			x = ^z; 
-			// f = x;
-			// x = &(1+3);
-			//y = &x;             
-			//z = &(&g);
-    		  }
-		 //z = x;
-		 // z = &x;
-	}
-     }
-}
+// void f7()
+// {
+//     {   
+// 	integer x;
+// 	intp y;
+// 	x = 5;
+// 	y = &x;
+// 	x = 6;
+// 	//^x = 7;
+// 	//&x = y;
+// 	//y = x;
+// 	if (&x == y && ^y == x){
+// 		^y = 9;
+// 	}
+//      	{
+// 		charp x;
+// 		string y[10];
+// 		char z;
+// 		y = "foobar";
+// 		//y='b';
+// 		x = &y[5];
+// 		//x=&y; 
+// 		z = ^x;        
+// 		//z = ^x - 5;       
+// 		y = "barfoo"; 
+//    		 {
+// 			char x;
+// 			intp y;
+// 			charp z;
+// 			char g;
+// 
+// 			x = ^z; 
+// 			// f = x;
+// 			// x = &(1+3);
+// 			//y = &x;             
+// 			//z = &(&g);
+//     		  }
+// 		 //z = x;
+// 		 // z = &x;
+// 	}
+//      }
+// }
 
 
 
