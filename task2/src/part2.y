@@ -215,21 +215,13 @@ chars: CHAR_CONST {$$ = mktreeNode (yytext, mktreeNode("char", NULL,NULL,NULL), 
 
 /*procCall: id LEFTPAREN args RIGHTPAREN { $$ = mktreeNode ("func call", $1, NULL, $3); };*/
 
-procCall: id LEFTPAREN args RIGHTPAREN 
-                    { 
-                    /*
-                    if (!compareCallDeclare  (topStack, $1->left->token,$3)   ){
-                        yyerror("function params mismatch"); YYERROR;
-                    }*/
-                    $$ = mktreeNode ("func call", $1, NULL, $3);
-                    }; 
+procCall: id LEFTPAREN args RIGHTPAREN {$$ = mktreeNode ("func call", $1, NULL, $3); }; 
 
-args: /* no params  */
-        | argsDeclare {$$ = mktreeNode ("args:", $1, NULL, NULL); };
-argsDeclare: consts COMMA  argsDeclare  {$$ = mktreeNode (",", $1, NULL, $3); }   
-        | consts ;
+args: argsDeclare {$$ = mktreeNode ("args:", $1, NULL, NULL); };
+argsDeclare: expr COMMA  argsDeclare  {$$ = mktreeNode (",", $1, NULL, $3); }   
+        | expr ;
 
-address : ADDRESS id            { symbolNode *sym = symbolLookup(&head,$2->token);
+address : ADDRESS id            { symbolNode *sym = scopeLookup($2->token);
                                                 if (strcmp(sym->type, "char") && strcmp(sym->type, "integer")) 
                                                         { yyerror("pointer-type variables cannot be referenced"); YYERROR;} 
                                                 char* t = $2->token; char *s = malloc(strlen(t)+strlen("&")+1); strcat (s,"&"); strcat(s,t); 
@@ -237,12 +229,7 @@ address : ADDRESS id            { symbolNode *sym = symbolLookup(&head,$2->token
         
               /*_________________________________________________________________________________________________________*/
 derefID: DEREFERENCE id  {char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); $$ = mktreeNode (s,NULL, NULL, NULL); } ;
-/*derefID: DEREFERENCE id  { symbolNode *sym = symbolLookup(&head,$2->token);
-                                                if (strcmp(sym->type, "charp") && strcmp(sym->type, "intp")) 
-                                                        { yyerror("non-pointer-type variables cannot be dereferenced"); YYERROR;} 
-                                                char* t = $2->token; char *s = malloc(strlen(t)+strlen("^")+1); strcat (s,"^"); strcat(s,t); 
-                                                $$ = mktreeNode (s,NULL, NULL, NULL); 
-                                                } ;*/
+
                                                 
 /*_______________________________________________________BLOCK_BODY_STRUCTURE_________________________________________*/
 
@@ -279,7 +266,7 @@ block_statements: emptyBlock
             //| LEFTBRACE newline RETURN SEMICOLON rightbrace {$$ = mktreeNode ("(BLOCK", $2, NULL, $4);};  //why is this working?? enables any block to end with RETURN
             
                  /*_______________________________________CONDITIONAL_STATEMENTS___________________________________*/ 
-IF_statements: IF cond statements_type {$$ = mktreeNode ("IF", $2,$3,NULL);} %prec LOWER_THAN_ELSE
+IF_statements: IF cond statements_type {$$ = mktreeNode ("IF", $2,$3,NULL); } %prec LOWER_THAN_ELSE
              | IF cond statements_type else{$$ = mktreeNode ("IF", $2,$3, $4);};
                
 else:    ELSE statements_type{$$ = mktreeNode ("ELSE", $2,NULL, NULL); };
@@ -350,7 +337,7 @@ int main(){
     start top down creation and semantics check of tree created by grammar rules
     */
 void startSematics(treeNode *root){
-    
+      
     // create a stack of scopes, each one has its own list of symbols (symbol table)
     pushStatements(root, 1);
     // print scopes, symbol tables and concrete syntax tree
@@ -726,9 +713,17 @@ void pushScopeStatements(treeNode* tNode){
         return;
     }
     if(!strcmp(tNode->token,"while")){
+     if(!strcmp(tNode->left->token,"(COND")){
+        if(strcmp(checkEvaluation(tNode->left->left),"boolean"))
+            printf("Type mismatch: while condition dosn't match type boolean\n");
+    }
         return;
     }
     if(!strcmp(tNode->token,"IF")){
+     if(!strcmp(tNode->left->token,"(COND")){
+        if(strcmp(checkEvaluation(tNode->left->left),"boolean"))
+            printf("Type mismatch: IF condition dosn't match type boolean\n");
+    }
         return;
     }
 
@@ -742,9 +737,9 @@ void pushScopeStatements(treeNode* tNode){
         pushProcSymbols(tNode);
         return;
     }
-    // if(!strcmp(tNode->token,"main")){
-    // return;
-    // }
+   
+    
+                                            
     
     if(!strcmp(tNode->token,"DECLARE")){
         pushSymbols(tNode->left->token,tNode->right);
