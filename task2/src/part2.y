@@ -115,17 +115,17 @@ operator:     operator PLUS operator    {$$ = mktreeNode ("+", $1, NULL, $3); }
         | operator MINUS operator {$$ = mktreeNode ("-", $1, NULL, $3); }
         | operator MULTI operator {$$ = mktreeNode ("*", $1, NULL, $3); }
         | operator DIVISION operator  {$$ = mktreeNode ("/", $1, NULL, $3); }
-        | Pexpr PLUS Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
-        | Pexpr MINUS Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
-        | Pexpr MULTI Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }       
+        | Pexpr PLUS Pexpr {$$ = mktreeNode ("+", $1, NULL, $3); }
+        | Pexpr MINUS Pexpr {$$ = mktreeNode ("-", $1, NULL, $3); }
+        | Pexpr MULTI Pexpr {$$ = mktreeNode ("*", $1, NULL, $3); }       
         | Pexpr DIVISION Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
-        | operator PLUS Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
-        | operator MINUS Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
-        | operator MULTI Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }       
+        | operator PLUS Pexpr {$$ = mktreeNode ("+", $1, NULL, $3); }
+        | operator MINUS Pexpr {$$ = mktreeNode ("-", $1, NULL, $3); }
+        | operator MULTI Pexpr {$$ = mktreeNode ("*", $1, NULL, $3); }       
         | operator DIVISION Pexpr {$$ = mktreeNode ("/", $1, NULL, $3); }
-        | Pexpr PLUS operator {$$ = mktreeNode ("/", $1, NULL, $3); }
-        | Pexpr MINUS operator {$$ = mktreeNode ("/", $1, NULL, $3); }
-        | Pexpr MULTI operator {$$ = mktreeNode ("/", $1, NULL, $3); }       
+        | Pexpr PLUS operator {$$ = mktreeNode ("+", $1, NULL, $3); }
+        | Pexpr MINUS operator {$$ = mktreeNode ("-", $1, NULL, $3); }
+        | Pexpr MULTI operator {$$ = mktreeNode ("*", $1, NULL, $3); }       
         | Pexpr DIVISION operator {$$ = mktreeNode ("/", $1, NULL, $3); }
         | address 
         | derefID 
@@ -276,7 +276,8 @@ cond: LEFTPAREN expr rightParen {$$ = mktreeNode ("(COND", $2, NULL, $3); };
 
 
             /*________________________________ASSIGNMENT STATEMENTS____________________________________*/
-ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mktreeNode ("=", $1, NULL, $3); } 
+ASSIGNMENT_statement: id ASSIGNMENT expr  {$$ = mktreeNode ("=", $1, NULL, $3); }
+            /*| id ASSIGNMENT procCall  {$$ = mktreeNode ("=", $1, NULL, $3); } */
             | derefID ASSIGNMENT expr  {$$ = mktreeNode ("=", $1, NULL, $3); } ;
 str_ASSIGNMENT_statement: id LEFTBRACKET numbers RIGHTBRACKET ASSIGNMENT strings  {$$ = mktreeNode ("=", $1, NULL, $6); };
 
