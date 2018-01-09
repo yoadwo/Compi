@@ -145,7 +145,8 @@ struct
 S:Start {buildST($<IST.tree>1); printtree($<IST.tree>1);
 if (isMain != 0) printST(); else printf("Cannot find Main() function! Error!\n");
 _3ACMain($<IST.tree>1); TAC_FillCode($<IST.tree>1); strcat(codebuffer,"\0"); //printf("%s\n",codebuffer); //TAC_PrintCode($<IST.tree>1);
-buildLabelStruct(); printFixedCode();};
+buildLabelStruct(); printFixedCode();
+};
 
 
 Start: Procedure Start {$<IST.tree>$=mknode("BLOCK","BLOCK",$<IST.tree>1,$<IST.tree>2);}
@@ -243,7 +244,8 @@ $<IST.tree>$->right->constType = strdup("procedure");
 IndexedAssign: ID {$<IST.tree>$ = $<IST.tree>1;}
 |CHAR_CONST {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 , NULL,NULL);};
 
-Define: VAR IDents COLON Types SEMICOLON {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,$<IST.tree>2,$<IST.tree>4);};
+/*Define: VAR IDents COLON Types SEMICOLON {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,$<IST.tree>2,$<IST.tree>4);};*/
+Define: Types IDents SEMICOLON {$<IST.tree>$ = mknode("var","var" ,$<IST.tree>2,$<IST.tree>1);};
 // right subtree is type. left subtree is variable/variables
 
 IDents: IDENTIFIER SEPERATOR IDents {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1 ,mknode($<IST.string>2,$<IST.type>2 ,NULL,NULL),$<IST.tree>3);}
