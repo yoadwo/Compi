@@ -1,0 +1,14 @@
+/* multi line 
+ *comment */
+
+
+void main()
+{
+    integer x= remove;
+  void f1(){}
+  boolean f2(){
+      return  1 < 3;
+}
+
+    return;
+}
