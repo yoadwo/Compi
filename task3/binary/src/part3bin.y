@@ -236,7 +236,6 @@ $<IST.tree>$->right->constType = strdup("procedure");
 |ID ASSIGN ValueAddressID SEMICOLON {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);} /*( z = ^(x-5); )*/
 |ValueAddressID ASSIGN E SEMICOLON {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);}
 |ValueAddressID ASSIGN CHAR_CONST SEMICOLON {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);}
-//|ID ASSIGN Absolute SEMICOLON {$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);} //ohad
 |ID ASSIGN NIL SEMICOLON {$<IST.tree>$ = mknode("=","=" ,$<IST.tree>1, mknode($<IST.string>3,$<IST.type>3 , NULL,NULL));}
 |ID ASSIGN LogicOp SEMICOLON {$<IST.tree>$ = mknode("=","=" ,$<IST.tree>1,$<IST.tree>3);};
 

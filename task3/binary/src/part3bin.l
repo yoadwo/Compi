@@ -6,7 +6,7 @@
 
 %}
  int flag = 0;
- 
+%x comment
 %%
 
 .+ { if(flag==0) REJECT;} 
@@ -61,6 +61,11 @@ null {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("null"); return N
 \/%.*%\/ ;
 \n {yylineno = yylineno + 1;}
 [ \t] ;
+"/*" BEGIN comment;
+<comment>[^\n] ;
+<comment>\n     ;/*counter++;*/
+<comment>"*/" BEGIN 0;
+"\/\/".* {/* one line comment */};
 . {flag=1; yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("err"); return ERR;}
 %%
 
