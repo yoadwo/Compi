@@ -129,7 +129,7 @@ struct
     }IST;
 }
 
-%token BOOLEAN CONST_BOOLEAN CHAR INTEGER STRING //Types
+%token BOOLEAN CONST_BOOLEAN CHAR INTEGER STRING VOID //Types
 %token INTPTR CHARPTR //PtrTypes
 %token IF ELSE WHILE //condition and loop
 %token VAR ASSIGN
@@ -153,7 +153,7 @@ Start: Procedure Start {$<IST.tree>$=mknode("BLOCK","BLOCK",$<IST.tree>1,$<IST.t
 //| COMMENT Start {$<IST.tree>$=mknode("COMMENT","COMMENT", mknode($<IST.string>1,$<IST.type>1, NULL,NULL), $<IST.tree>2);}
 | {$<IST.tree>$=NULL;};
 
-Procedure: PROCEDURE ProcedureSignature ProcedureBlock {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,$<IST.tree>3);};
+Procedure: ProcedureSignature ProcedureBlock {$<IST.tree>$=mknode("procedure","procedure",$<IST.tree>1,$<IST.tree>2);};
 
 ProcedureBlock: START_BLOCK_OF_CODE Block Return END_BLOCK_OF_CODE {$<IST.tree>$=mknode("","",$<IST.tree>2,$<IST.tree>3);};
 
@@ -166,25 +166,26 @@ Block:Define Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tre
 |START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE Block {$<IST.tree>$=mknode("NewBlock","NewBlock",mknode("NewRow","NewRow",$<IST.tree>2, mknode("EndBlock","EndBlock",NULL,NULL)), $<IST.tree>4);}
 | {$<IST.tree>$=NULL;};
 
-ProcedureSignature: ID BEGIN_PARAMETER_LIST Parameters END_PARAMETER_LIST ProcedureReturn {
+ProcedureSignature: Types ID BEGIN_PARAMETER_LIST Parameters END_PARAMETER_LIST  {
 char * e=strchr($<IST.string>$,'_');
 if(e!=NULL && (int)(e-$<IST.string>1)==0)
 {
 	yyerror("syntax error");
 	YYERROR;
 }
-$<IST.tree>$=mknode($<IST.string>1,"procedure",$<IST.tree>3,$<IST.tree>5);};
+$<IST.tree>$=mknode($<IST.string>2,"procedure",$<IST.tree>4,mknode("return","return",$<IST.tree>1,NULL));};
 
-Parameters: IDENTIFIER SomeParameters {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);}
-|IDENTIFIER SomeParameters SEMICOLON Parameters {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,$<IST.tree>4);}
+Parameters: SomeParameters IDENTIFIER  {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,NULL);}
+| SomeParameters IDENTIFIER SEMICOLON Parameters {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,$<IST.tree>4);}
 |{$<IST.tree>$=NULL;};
 
 SomeParameters: SEPERATOR IDENTIFIER SomeParameters {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>3,NULL);}
-|COLON Types {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);};
+| Types {$<IST.tree>$=mknode(":",":",$<IST.tree>1,NULL);};
 
 Types: BOOLEAN {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);}
 |CHAR {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);}
 |INTEGER {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);}
+|VOID {$<IST.tree>$ = mknode("integer","int" ,NULL,NULL);}
 |STRING {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1, NULL,NULL);}
 |PtrTypes {$<IST.tree>$ = $<IST.tree>1;}
 |ArrayType {$<IST.tree>$ = $<IST.tree>1;};
@@ -236,7 +237,6 @@ $<IST.tree>$->right->constType = strdup("procedure");
 |ID ASSIGN ValueAddressID SEMICOLON {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);} /*( z = ^(x-5); )*/
 |ValueAddressID ASSIGN E SEMICOLON {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);}
 |ValueAddressID ASSIGN CHAR_CONST SEMICOLON {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);}
-//|ID ASSIGN Absolute SEMICOLON {$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);} //ohad
 |ID ASSIGN NIL SEMICOLON {$<IST.tree>$ = mknode("=","=" ,$<IST.tree>1, mknode($<IST.string>3,$<IST.type>3 , NULL,NULL));}
 |ID ASSIGN LogicOp SEMICOLON {$<IST.tree>$ = mknode("=","=" ,$<IST.tree>1,$<IST.tree>3);};
 
@@ -363,7 +363,7 @@ Return: RETURN E SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IS
 |RETURN IDENTIFIER BEGIN_PARAMETER_LIST EmptyOrPara END_PARAMETER_LIST SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,$<IST.tree>4,NULL),NULL);}
 |RETURN NIL SEMICOLON {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);};
 
-ProcedureReturn: RETURN Types {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);};
+//ProcedureReturn:  Types {$<IST.tree>$=mknode("return","return",$<IST.tree>1,NULL);};
 
 
 

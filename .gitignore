@@ -23,4 +23,14 @@ task2/code\.t
 
 task2/dugma\.txt
 
+<<<<<<< Updated upstream
 task3/binary/bin/
+=======
+task2/code3\.txt
+>>>>>>> Stashed changes
+
+task3/binary ignore/
+
+task3/binary/part3bin
+
+*.t

@@ -6,7 +6,7 @@
 
 %}
  int flag = 0;
- 
+%x comment
 %%
 
 .+ { if(flag==0) REJECT;} 
@@ -15,6 +15,7 @@ true {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("boolean"); retur
 false {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("boolean"); return CONST_BOOLEAN;}
 char {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("char"); return CHAR;}
 integer	{yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("int"); return INTEGER;}
+void	{yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("void"); return VOID;}
 string {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("string"); return STRING;}
 intptr {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("intptr"); return INTPTR;}
 charptr	{yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("charptr"); return CHARPTR;}
@@ -45,7 +46,7 @@ null {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("null"); return N
 '.' {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("char"); return CHAR_CONST;}
 [0|1]+b {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("int"); return BINARY;}
 0[0-7]+ {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("int"); return OCTAL;}
-0|[1-9][0-9]+? {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("int"); return INTEGER_CONST;}
+0|[-]?[1-9][0-9]+? {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("int"); return INTEGER_CONST;}
 \".*\" {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("string"); return STRING_CONST;}
 \; {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("semicolon"); return SEMICOLON;}
 \: {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("colon"); return COLON;}
@@ -61,6 +62,11 @@ null {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("null"); return N
 \/%.*%\/ ;
 \n {yylineno = yylineno + 1;}
 [ \t] ;
+"/*" BEGIN comment;
+<comment>[^\n] ;
+<comment>\n     ;/*counter++;*/
+<comment>"*/" BEGIN 0;
+"\/\/".* {/* one line comment */};
 . {flag=1; yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("err"); return ERR;}
 %%
 
