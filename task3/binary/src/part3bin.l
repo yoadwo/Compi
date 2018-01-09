@@ -15,6 +15,7 @@ true {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("boolean"); retur
 false {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("boolean"); return CONST_BOOLEAN;}
 char {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("char"); return CHAR;}
 integer	{yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("int"); return INTEGER;}
+void	{yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("void"); return VOID;}
 string {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("string"); return STRING;}
 intptr {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("intptr"); return INTPTR;}
 charptr	{yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("charptr"); return CHARPTR;}
