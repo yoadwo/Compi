@@ -2131,7 +2131,7 @@ char * buildVarOfProcedure(node * tree, char * procedureName) // ariel && michae
 void buildVar(node * tree)
 {
 	//symbolTable * originalCurrent = current; //save state before
-	node * tempTree=tree;
+	node * tempTree=tree, *saveTree = NULL;
 	char * type= tempTree->right->type;
 	//printf("var type: |%s|\tcurrent type: |%s|\n",type, current->type);
 	tempTree=tempTree->left;
@@ -2142,16 +2142,29 @@ void buildVar(node * tree)
 			exist=1;
 		else
 		{
-			tempTree->type = strdup(type); // 
-			symbolTable * temp=(symbolTable*)malloc(sizeof(symbolTable));
-			temp->scopeNumber = scopeCounter;
-			temp->prevST=current;
-			current=temp;
-			current->name=strdup(tempTree->token);
-			current->type=strdup(type);
-			current->scope=strdup("var");
-			//printf("name: |%s|\ttype: |%s|\tscope: |%s|\n",current->name, current->type,current->scope);
+                        // if we have an empty node followed by assignment node, jump to left child (holding new var)
+                        if (!strcmp(tempTree->token, "")){
+                                saveTree = tempTree;
+                                tempTree = tempTree->left->left;
+                        }
+                        // we declare var with no value (and add to symbol table)
+                
+                        tempTree->type = strdup(type); // 
+                        symbolTable * temp=(symbolTable*)malloc(sizeof(symbolTable));
+                        temp->scopeNumber = scopeCounter;
+                        temp->prevST=current;
+                        current=temp;
+                        current->name=strdup(tempTree->token);
+                        current->type=strdup(type);
+                        current->scope=strdup("var");
+                        
+                        // restore tree iterator to original address
+                        if (saveTree)
+                            tempTree = saveTree;
+                        //printf("name: |%s|\ttype: |%s|\tscope: |%s|\n",current->name, current->type,current->scope);
+			
 			tempTree=tempTree->right;
+			
 		}
 		//current = originalCurrent;
 	}
@@ -2189,6 +2202,9 @@ void UpdateIDType(node * tempTree)
 
 	if(tempTree!=NULL)
 	{
+                // case 1: UpdateIDType was called when variable was declared with a value: <ID> = <value>
+                
+                // case 2: UpdateIDType was called when a previously declared variable was being re-assigned
 		UpdateIDType(tempTree->left);
 		UpdateIDType(tempTree->right);
 		if(strcmp(tempTree->type,"var")==0)
