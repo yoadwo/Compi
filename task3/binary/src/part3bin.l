@@ -45,7 +45,7 @@ null {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("null"); return N
 '.' {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("char"); return CHAR_CONST;}
 [0|1]+b {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("int"); return BINARY;}
 0[0-7]+ {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("int"); return OCTAL;}
-0|[1-9][0-9]+? {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("int"); return INTEGER_CONST;}
+0|[-]?[1-9][0-9]+? {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("int"); return INTEGER_CONST;}
 \".*\" {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("string"); return STRING_CONST;}
 \; {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("semicolon"); return SEMICOLON;}
 \: {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("colon"); return COLON;}
