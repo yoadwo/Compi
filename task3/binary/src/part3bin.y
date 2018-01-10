@@ -271,8 +271,10 @@ Define: Types IDents SEMICOLON {$<IST.tree>$ = mknode("var","var" ,$<IST.tree>2,
 
 IDents: IDENTIFIER SEPERATOR IDents {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1 ,mknode($<IST.string>2,$<IST.type>2 ,NULL,NULL),$<IST.tree>3);}
 |IDENTIFIER {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 , NULL,NULL);}
-|Assignment SEPERATOR IDents  {$<IST.tree>$=mknode("","",$<IST.tree>1 ,mknode($<IST.string>2,$<IST.type>2 ,$<IST.tree>3,NULL));}
-|Assignment {$<IST.tree>$ = mknode("","" , $<IST.tree>1,NULL);};
+|Assignment SEPERATOR IDents  {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2 ,$<IST.tree>1,NULL) ,$<IST.tree>3);}
+//|Assignment SEPERATOR IDents 
+//{$<IST.tree>$=mknode("","",$<IST.tree>1 ,mknode($<IST.string>3, $<IST.type>3,  mknode($<IST.string>2,$<IST.type>2 ,NULL,NULL)   ,$<IST.tree>3->right ));}
+|Assignment {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 , $<IST.tree>1,NULL);};
 
 /*
 //old
