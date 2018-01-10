@@ -153,9 +153,14 @@ Start: Procedure Start {$<IST.tree>$=mknode("BLOCK","BLOCK",$<IST.tree>1,$<IST.t
 //| COMMENT Start {$<IST.tree>$=mknode("COMMENT","COMMENT", mknode($<IST.string>1,$<IST.type>1, NULL,NULL), $<IST.tree>2);}
 | {$<IST.tree>$=NULL;};
 
-Procedure: ProcedureSignature ProcedureBlock {$<IST.tree>$=mknode("procedure","procedure",$<IST.tree>1,$<IST.tree>2);};
+// ProcedureSignature ProcedureBlock {$<IST.tree>$=mknode("procedure","procedure",$<IST.tree>1,$<IST.tree>2);};
+
+Procedure: ProcVoid | ProcValue;
+ProcVoid: VoidProcedureSignature VoidProcedureBlock {$<IST.tree>$=mknode("procedure","procedure",$<IST.tree>1,$<IST.tree>2);};
+ProcValue: ProcedureSignature ProcedureBlock {$<IST.tree>$=mknode("procedure","procedure",$<IST.tree>1,$<IST.tree>2);};
 
 ProcedureBlock: START_BLOCK_OF_CODE Block Return END_BLOCK_OF_CODE {$<IST.tree>$=mknode("","",$<IST.tree>2,$<IST.tree>3);};
+VoidProcedureBlock: START_BLOCK_OF_CODE Block VoidReturn END_BLOCK_OF_CODE {$<IST.tree>$=mknode("","",$<IST.tree>2,$<IST.tree>3);};
 
 Block:Define Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
 |Assignment SEMICOLON Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>3);}
@@ -175,8 +180,17 @@ if(e!=NULL && (int)(e-$<IST.string>1)==0)
 }
 $<IST.tree>$=mknode($<IST.string>2,"procedure",$<IST.tree>4,mknode("return","return",$<IST.tree>1,NULL));};
 
+VoidProcedureSignature: TypeVoid ID BEGIN_PARAMETER_LIST Parameters END_PARAMETER_LIST  {
+char * e=strchr($<IST.string>$,'_');
+if(e!=NULL && (int)(e-$<IST.string>1)==0)
+{
+	yyerror("syntax error");
+	YYERROR;
+}
+$<IST.tree>$=mknode($<IST.string>2,"procedure",$<IST.tree>4,mknode("return","return",$<IST.tree>1,NULL));};
+
 Parameters: SomeParameters IDENTIFIER  {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,NULL);}
-| SomeParameters IDENTIFIER SEMICOLON Parameters {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,$<IST.tree>4);}
+| SomeParameters IDENTIFIER SEPERATOR Parameters {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,$<IST.tree>4);}
 |{$<IST.tree>$=NULL;}
 |IDENTIFIER StringParameter {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);};
 
@@ -188,10 +202,12 @@ SomeParameters: SEPERATOR IDENTIFIER SomeParameters {$<IST.tree>$=mknode($<IST.s
 Types: BOOLEAN {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);}
 |CHAR {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);}
 |INTEGER {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);}
-|VOID {$<IST.tree>$ = mknode("integer","int" ,NULL,NULL);}
+//|VOID {$<IST.tree>$ = mknode("integer","int" ,NULL,NULL);}
 |STRING {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1, NULL,NULL);}
 |PtrTypes {$<IST.tree>$ = $<IST.tree>1;}
 |ArrayType {$<IST.tree>$ = $<IST.tree>1;};
+
+TypeVoid: VOID {$<IST.tree>$ = mknode("void","void" ,NULL,NULL);};
 
 PtrTypes:INTPTR {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);}
 |CHARPTR {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);};
@@ -380,7 +396,8 @@ Condition:E CompOp E {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree
 
 //PreLogicOp:BEGIN_PARAMETER_LIST LogicOp END_PARAMETER_LIST {$<IST.tree>$=$<IST.tree>2;};
 
-Return: RETURN E SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);}
+Return: 
+RETURN E SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);}
 |RETURN Consts SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);}
 |RETURN CONST_BOOLEAN SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);} // michael
 |RETURN AddressID SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);}
@@ -388,14 +405,16 @@ Return: RETURN E SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IS
 |RETURN IDENTIFIER BEGIN_PARAMETER_LIST EmptyOrPara END_PARAMETER_LIST SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,$<IST.tree>4,NULL),NULL);}
 |RETURN NIL SEMICOLON {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);};
 
+VoidReturn: RETURN SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,NULL,NULL);}
+|  {$<IST.tree>$=mknode("","",NULL,NULL);}
+
+
+
 //ProcedureReturn:  Types {$<IST.tree>$=mknode("return","return",$<IST.tree>1,NULL);};
-
-
-
 //ID {$<IST.tree>$=mknode($<IST.tree>1,$<IST.tree>1,NULL,NULL);} // if(x) // ~michael //
 
 
-Loop: // michaell
+Loop:
 WHILE BEGIN_PARAMETER_LIST ID END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>6);}
 |WHILE BEGIN_PARAMETER_LIST LogicOp END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>6);};
 
@@ -1530,8 +1549,15 @@ void _3ACForVar(node * tree)
 	while (tree->right)
 	{
 		idCounter += 1;
+		// tree->left->left points to "=" node
+		if (tree->left->left)
+                    _3ACForAssignment(tree->left->left);
+            
 		tree = tree->right;
 	}
+	// loop ended before reaching last node
+	if (tree->left!=NULL)
+                _3ACForAssignment(tree->left);
 	//printf("idCounter: %d\tbyteCounter: %d\n",idCounter,bytesByType);
 	byteCounter += idCounter*bytesByType; // update global counter of bytes //
 }
@@ -1793,76 +1819,76 @@ void buildST(node * tree)
 	if(strcmp(tree->token,"procedure")==0)
 	{
 	    if(strcmp("Main", tree->left->token) == 0)
-		{
+            {
 		    if (isMain == 0)
-			{
+                    {
 			    isMain = 1;
-		        }
-			else
-			{
-			    printf("Function Main already exists!");
-				exit(1);
-			}
-			if (tree->left->left != NULL)
-			{
-				printf("Function Main cannot accept any arguments");
-				exit(1);
-			}
-		}
-		char* saveStateOfReturnType; // create local return type to use if i have nested functions //
-		symbolTable * currentState;
-		int parameterCounter = 0;
+		    }
+                    else
+                    {
+                        printf("Function Main already exists!");
+                            exit(1);
+                    }
+                    if (tree->left->left != NULL)
+                    {
+                            printf("Function Main cannot accept any arguments");
+                            exit(1);
+                    }
+            }
+            char* saveStateOfReturnType; // create local return type to use if i have nested functions //
+            symbolTable * currentState;
+            int parameterCounter = 0;
 
-		if(checkExist(tree->left->token))
-		{
-			printf("The name %s exists\n",tree->left->token);
-			exit(1);
-		}
-		scopeCounter = scopeCounter+1;
-		temp=(symbolTable*)malloc(sizeof(symbolTable));
-		temp->scopeNumber = scopeCounter;
-		temp->prevST=current; // point the new ST to the previous //
-		// change current state //
-		current=temp;
-		current->name=strdup(tree->left->token);
-		current->type=strdup(tree->left->right->left->type);
-		//printf("current %s\t scope number: %d\n",current->name,scopeCounter);
-		if (currentReturnType != NULL)
-			saveStateOfReturnType = currentReturnType; // save the current return type to use in the end of this block //
-		// change current return type //		
-		currentReturnType = current->type; // use global variable of return type //
-		current->scope=strdup(tree->token);
-		if (tree->left->left != NULL)
-		{
-			buildVarOfProcedure(tree->left->left,tree->left->token); 
-			parameterCounter = countNumberOfParameters(tree->left->left);
-		}
+            if(checkExist(tree->left->token))
+            {
+                    printf("The name %s exists\n",tree->left->token);
+                    exit(1);
+            }
+            scopeCounter = scopeCounter+1;
+            temp=(symbolTable*)malloc(sizeof(symbolTable));
+            temp->scopeNumber = scopeCounter;
+            temp->prevST=current; // point the new ST to the previous //
+            // change current state //
+            current=temp;
+            current->name=strdup(tree->left->token);
+            current->type=strdup(tree->left->right->left->type);
+            //printf("current %s\t scope number: %d\n",current->name,scopeCounter);
+            if (currentReturnType != NULL)
+                    saveStateOfReturnType = currentReturnType; // save the current return type to use in the end of this block //
+            // change current return type //		
+            currentReturnType = current->type; // use global variable of return type //
+            current->scope=strdup(tree->token);
+            if (tree->left->left != NULL)
+            {
+                    buildVarOfProcedure(tree->left->left,tree->left->token); 
+                    parameterCounter = countNumberOfParameters(tree->left->left);
+            }
 
-		currentState = current; //save state before changing current //
+            currentState = current; //save state before changing current //
 
-		// michael update - do NOT DELETE!!:
-		// it saves in the SymbolTable the function + the parameters it should get.
-		// the problem is that the names of the parameters are also saved. Therefore we can't use those names anymore (because they already exist)
-		// Example:		procedure foo(a,b: integer) return integer {...}
-		//			Now in other functions, i can't use 'a' or 'b'.
-		// Solution: we need to delete the name when we finish with this function (delete only the name) //	
+            // michael update - do NOT DELETE!!:
+            // it saves in the SymbolTable the function + the parameters it should get.
+            // the problem is that the names of the parameters are also saved. Therefore we can't use those names anymore (because they already exist)
+            // Example:		procedure foo(a,b: integer) return integer {...}
+            //			Now in other functions, i can't use 'a' or 'b'.
+            // Solution: we need to delete the name when we finish with this function (delete only the name) //	
 
 
 
-		flagLeftSubTree = 1;
-		if (tree->right->left != NULL)
-			buildST(tree->right->left);
-		//buildST(tree->right); // i have to make it here so i will return to the exact point (in case of nested functions) //
-		//scopeCounter = scopeCounter - 1;
-		if (tree->right->right != NULL)
-			buildST(tree->right->right);	
-		flagRightSubTree = 1;	
-		currentReturnType = saveStateOfReturnType; // save the privious return type //
-		if (currentState != NULL)
-		{
-			current = currentState; // save the privious Symbol table state //
-			deleteNameOfParameters(parameterCounter); // delete the names of the parameters
-		}
+            flagLeftSubTree = 1;
+            if (tree->right->left != NULL)
+                    buildST(tree->right->left);
+            //buildST(tree->right); // i have to make it here so i will return to the exact point (in case of nested functions) //
+            //scopeCounter = scopeCounter - 1;
+            if (tree->right->right != NULL)
+                    buildST(tree->right->right);	
+            flagRightSubTree = 1;	
+            currentReturnType = saveStateOfReturnType; // save the privious return type //
+            if (currentState != NULL)
+            {
+                    current = currentState; // save the privious Symbol table state //
+                    deleteNameOfParameters(parameterCounter); // delete the names of the parameters
+            }
 
 		
 		
@@ -1941,33 +1967,38 @@ void buildST(node * tree)
 	}
 	else if(strcmp(tree->token,"return")==0)
 	{ 
-		if(checkIfProcedure(tree->left->token))
-		{
-			//printf("BEFORE -> procedure Name: |%s|\n",tree->left->token); 
-			CallProcedureParasTreat(tree->left->token,tree->left);//foo,params with foo
-			//printf("AFTER -> procedure Name: |%s|\n",tree->left->token); 
-		}
-		else
-		{
-			char * lvaltype;
-			if(!CheckID(tree->left))
-			{
-				printf("ID Not exists!\n");
-				exit(1);
-			}
-			UpdateIDType(tree->left); // get the type of left node //
-			buildST(tree->left); // 
-			if (strcmp(tree->left->type,"string")==0)
-			{
-				printf("return type can not be of type string!\n");
-				exit(1);
-			}
-	
-			lvaltype=strdup(tree->left->type);
-			
-			//printf("return type: |%s|\n",lvaltype); // temp //
-			//printf("actual return type: |%s|\tdeclared type: |%s|\n",lvaltype,currentReturnType); // temp //
-			strcpy(tree->type,(checkBinaryOperations("return",lvaltype,currentReturnType))); 
+                //only non-void functions have "return"->left, and therefore enter
+                // void functions have no left child
+                if (tree->left != NULL)
+                {// check if current function was already declared (proc->right return)
+                        if(checkIfProcedure(tree->left->token))
+                        {
+                                //printf("BEFORE -> procedure Name: |%s|\n",tree->left->token); 
+                                CallProcedureParasTreat(tree->left->token,tree->left);//foo,params with foo
+                                //printf("AFTER -> procedure Name: |%s|\n",tree->left->token); 
+                        }
+                        else
+                        {
+                                char * lvaltype;
+                                if(!CheckID(tree->left))
+                                {
+                                        printf("ID Not exists!\n");
+                                        exit(1);
+                                }
+                                UpdateIDType(tree->left); // get the type of left node //
+                                buildST(tree->left); // 
+                                if (strcmp(tree->left->type,"string")==0)
+                                {
+                                        printf("return type can not be of type string!\n");
+                                        exit(1);
+                                }
+                
+                                lvaltype=strdup(tree->left->type);
+                                
+                                //printf("return type: |%s|\n",lvaltype); // temp //
+                                //printf("actual return type: |%s|\tdeclared type: |%s|\n",lvaltype,currentReturnType); // temp //
+                                strcpy(tree->type,(checkBinaryOperations("return",lvaltype,currentReturnType))); 
+                        }
 		}
 	}
 	else if((strcmp(tree->token,"||")==0) || (strcmp(tree->token,"&&")==0) || (strcmp(tree->token,">")==0) || (strcmp(tree->token,">=")==0) || (strcmp(tree->token,"<")==0) || (strcmp(tree->token,"<=")==0) || (strcmp(tree->token,"==")==0) || (strcmp(tree->token,"!=")==0) || (strcmp(tree->token,"=")==0) || (strcmp(tree->token,"+")==0) || (strcmp(tree->token,"-")==0) || (strcmp(tree->token,"*")==0) || (strcmp(tree->token,"/")==0))
