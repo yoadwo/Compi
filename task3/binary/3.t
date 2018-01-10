@@ -1,29 +1,42 @@
-procedure foo(f:boolean) return integer
+// integer foo(boolean f)
+// {
+// 	integer a,b,c;
+// 	boolean e;
+// 	boolean d;
+//         string[4] x;
+// 	if ((!e || a<c) && (a<b && a<c))
+// 	{
+// 		a = 5;
+// 	}
+// 	else
+// 	{a=20;}
+// 	return a;
+// }
+// void Main(){
+// 	integer a,b;
+// 	intptr ptr;
+// 	boolean c;
+// 	boolean d;
+// 	integer foo1()
+// 	{return 0;}
+// 	if ((!c && a<b) || (a<b && a<b))
+// 	{
+// 		a = a+1;
+// 	}
+// 	else
+// 	{a=foo(d);
+// 	^ptr=a;}
+// 	a=10;
+// 	return 0;
+// }
+
+
+void Main()
 {
-	var a,b,c: integer;
-	var e: boolean;
-	var d: boolean;
-	if ((!e || a<c) && (a<b && a<c))
-	{
-		a = 5;
-	}
-	else
-	{a=20;}
-	return a;
-}
-procedure Main() return integer{
-	var a,b: integer;
-	var ptr: intptr;
-	var c: boolean;
-	var d: boolean;
-	procedure foo1() return integer
-	{return 0;}
-	if ((!c && a<b) || (a<b && a<b))
-	{
-		a = a+1;
-	}
-	else
-	{a=foo(d);
-	^ptr=a;}
-	return 0;
+    integer a,b,c,d;
+    for(a=1;b<4;c=d+1)
+    {
+        a=5;
+    }
+    return 0;
 }
