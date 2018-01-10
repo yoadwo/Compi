@@ -84,31 +84,31 @@ symbolTable* dupST(char * proName,symbolTable * st);
 void UpdateParameterType(node * tempTree);
 void addProcedureParametersToST(char * proName,node * paras);
 static symbolTable * current;
-static symbolTable * procedureParas; //orel
+static symbolTable * procedureParas; 
 static labelStruct * labelHead;
 static char * currentReturnType;
 char * freshLabel();
-void ConditionTreatment(node * condition);//orel
-void SwapSides(node * condition);//orel
-void MakeIfIntoIfZ(node * condition,char * nextLabel, char * elseLabel);//orel
-void InsertLabelsIntoCondition(node * condition,char * thenLabel,char * nextLabel, char * elseLabel);//orel
-int ThereisAND(node * condition);//orel
-void _3ACForAssignment(node * tree);//ohad ariel
-void _3ACMain(node * tree); //ariel
-void TAC_PrintCode(node * tree); //ariel
-void TAC_FillCode(node * tree); //orel
+void ConditionTreatment(node * condition);
+void SwapSides(node * condition);
+void MakeIfIntoIfZ(node * condition,char * nextLabel, char * elseLabel);
+void InsertLabelsIntoCondition(node * condition,char * thenLabel,char * nextLabel, char * elseLabel);
+int ThereisAND(node * condition);
+void _3ACForAssignment(node * tree);
+void _3ACMain(node * tree);
+void TAC_PrintCode(node * tree);
+void TAC_FillCode(node * tree); 
 char * _3ACForOperations(node * tree);
 int _3ACForProcedureParameters(node * tree);
 char* _3ACForProcedureActivate(node * tree);
 void _3ACForProcedureDefine(node * tree);
-void _3ACForReturn(node * tree); // michael
-int numberOfBytes (char *type); // michael
-void _3ACForVar(node * tree); // michael
-int countNumberOfParameters(node *tree); // michael
-void deleteNameOfParameters(int numberOfParametersToDelete); // michael
+void _3ACForReturn(node * tree);
+int numberOfBytes (char *type); 
+void _3ACForVar(node * tree); 
+int countNumberOfParameters(node *tree); 
+void deleteNameOfParameters(int numberOfParametersToDelete); 
 char* _3ACString(node* tree);
 void recursivePrint(node* tree);
-void checkIfConditionTypeIsBoolean(node *cond); // michael
+void checkIfConditionTypeIsBoolean(node *cond); 
 void printFixedCode();
 void buildLabelStruct();
 //#define YYDEBUG 1 
