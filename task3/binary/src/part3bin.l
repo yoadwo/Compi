@@ -22,6 +22,7 @@ charptr	{yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("charptr"); re
 if {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("if"); return IF;}
 else {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("else"); return ELSE;}
 while {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("while"); return WHILE;}
+for {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("for"); return FOR;}
 var {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("var"); return VAR;}
 \= {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("operator"); return ASSIGN;}
 \== {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("operator"); return EQ;}
