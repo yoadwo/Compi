@@ -131,7 +131,7 @@ struct
 
 %token BOOLEAN CONST_BOOLEAN CHAR INTEGER STRING VOID //Types
 %token INTPTR CHARPTR //PtrTypes
-%token IF ELSE WHILE //condition and loop
+%token IF ELSE WHILE FOR //condition and loop
 %token VAR ASSIGN
 %token EQ GT GE LT LE NE NOT //comparison
 %token MINUS PLUS MUL DIVISION //operators
@@ -162,6 +162,7 @@ Block:Define Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tre
 |Procedure Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
 |Loop Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
 |If Block{$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
+|for Block{$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
 //|COMMENT Block {$<IST.tree>$=mknode("COMMENT","COMMENT", mknode($<IST.string>1,$<IST.type>1, NULL,NULL), $<IST.tree>2);}
 |START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE Block {$<IST.tree>$=mknode("NewBlock","NewBlock",mknode("NewRow","NewRow",$<IST.tree>2, mknode("EndBlock","EndBlock",NULL,NULL)), $<IST.tree>4);}
 | {$<IST.tree>$=NULL;};
@@ -203,16 +204,18 @@ CONST_INT: INTEGER_CONST {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1, NUL
 |OCTAL {$<IST.tree>$ = mknode(octalToDec($<IST.string>1),$<IST.type>1, NULL,NULL);}
 |HEXADECIMAL {$<IST.tree>$ = mknode(HexaToDec($<IST.string>1),$<IST.type>1, NULL,NULL);};
 
-E:E PLUS T {$<IST.tree>$ = mknode("+","+", $<IST.tree>1,$<IST.tree>3);}
-| E MINUS T {$<IST.tree>$ = mknode("-","-", $<IST.tree>1,$<IST.tree>3);}
-|T {$<IST.tree>$ = $<IST.tree>1;};
+E: T {$<IST.tree>$ = $<IST.tree>1;}
+|E PLUS T {$<IST.tree>$ = mknode("+","+", $<IST.tree>1,$<IST.tree>3);}
+| E MINUS T {$<IST.tree>$ = mknode("-","-", $<IST.tree>1,$<IST.tree>3);};
 
-T:T MUL F {$<IST.tree>$ = mknode("*","*", $<IST.tree>1,$<IST.tree>3);}
-|T DIVISION F {$<IST.tree>$ = mknode("/","/", $<IST.tree>1,$<IST.tree>3);}
-|F {$<IST.tree>$ = $<IST.tree>1;}; 
+
+T: F {$<IST.tree>$ = $<IST.tree>1;}
+|T MUL F {$<IST.tree>$ = mknode("*","*", $<IST.tree>1,$<IST.tree>3);}
+|T DIVISION F {$<IST.tree>$ = mknode("/","/", $<IST.tree>1,$<IST.tree>3);};
 
 F: BEGIN_PARAMETER_LIST E END_PARAMETER_LIST {$<IST.tree>$ = $<IST.tree>2;}
-|ID {$<IST.tree>$ = $<IST.tree>1;}|CONST_INT {$<IST.tree>$ = $<IST.tree>1;}
+|ID {$<IST.tree>$ = $<IST.tree>1;}
+|CONST_INT {$<IST.tree>$ = $<IST.tree>1;}
 |Absolute {$<IST.tree>$ = $<IST.tree>1;}
 |StringLenth {$<IST.tree>$ = $<IST.tree>1;};
 
@@ -374,8 +377,8 @@ Condition:E CompOp E {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree
 |CONST_BOOLEAN CompOp CONST_BOOLEAN {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,mknode($<IST.string>1,$<IST.type>1,NULL,NULL),mknode($<IST.string>3,$<IST.type>3,NULL,NULL));}
 |CONST_BOOLEAN CompOp E {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,mknode($<IST.string>1,$<IST.type>1,NULL,NULL),$<IST.tree>3);}
 |E CompOp CONST_BOOLEAN {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,mknode($<IST.string>3,$<IST.type>3,NULL,NULL));}
-|NOT ID {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);} // NOT (!x) // ~michael //
-|NOT CONST_BOOLEAN {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);}; // NOT (!false)
+|NOT ID {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);} // NOT (!x)
+|NOT CONST_BOOLEAN {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);}; 
 
 
 //PreLogicOp:BEGIN_PARAMETER_LIST LogicOp END_PARAMETER_LIST {$<IST.tree>$=$<IST.tree>2;};
@@ -395,7 +398,7 @@ Return: RETURN E SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IS
 //ID {$<IST.tree>$=mknode($<IST.tree>1,$<IST.tree>1,NULL,NULL);} // if(x) // ~michael //
 
 
-Loop: // michaell
+Loop:
 WHILE BEGIN_PARAMETER_LIST ID END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>6);}
 |WHILE BEGIN_PARAMETER_LIST LogicOp END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>6);};
 
@@ -415,6 +418,13 @@ $<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>
 {
 $<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>6),NULL);
 };
+
+for:
+FOR BEGIN_PARAMETER_LIST forCondition END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE 
+{$<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,NULL),$<IST.tree>6);};
+
+forCondition: Assignment SEMICOLON Condition SEMICOLON Assignment
+{"for","for",mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,mknode($<IST.string>4,$<IST.type>4,$<IST.tree>3,$<IST.tree>5));};
 
 Array: BEGIN_STRING_INDEX E END_STRING_INDEX {$<IST.tree>$ = $<IST.tree>2;};
 
@@ -1097,7 +1107,7 @@ void _3ACMain(node * tree)
 		int byteCounterLOCAL = byteCounter; // save localy the global byte counter //
 		_3ACForProcedureDefine(tree);
 		varCounter = varCounterLOCAL;
-		byteCounter = byteCounterLOCAL;	
+		byteCounter = byteCounterLOCAL;	            
 		notToEnterLeft = 1;
 		notToEnterRight = 1; 	
 	}
