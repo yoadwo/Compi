@@ -111,6 +111,7 @@ void recursivePrint(node* tree);
 void checkIfConditionTypeIsBoolean(node *cond); 
 void printFixedCode();
 void buildLabelStruct();
+//void checkIDForCond(node * forCond);
 //#define YYDEBUG 1 
 int yylex();
 int yyerror();
@@ -421,10 +422,10 @@ $<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>
 
 for:
 FOR BEGIN_PARAMETER_LIST forCondition END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE 
-{$<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,NULL),$<IST.tree>6);};
+{$<IST.tree>$=mknode("for","for",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,NULL),$<IST.tree>6);};
 
 forCondition: Assignment SEMICOLON Condition SEMICOLON Assignment
-{"for","for",mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,mknode($<IST.string>4,$<IST.type>4,$<IST.tree>3,$<IST.tree>5));};
+{"1","1",mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,mknode($<IST.string>4,$<IST.type>4,$<IST.tree>3,$<IST.tree>5));};
 
 Array: BEGIN_STRING_INDEX E END_STRING_INDEX {$<IST.tree>$ = $<IST.tree>2;};
 
@@ -1785,6 +1786,26 @@ int checkIfProcedure(char * name)//orel --check if need?
 		}
 	return 0;
 }
+
+//check recrusivly that all ID's in the "for" loop are declared
+// void checkIDForCond(node * forCond)
+// {
+//     while (forCond != NULL)
+//     {
+//         if (!strcmp(forCond->type,"var")
+//         {
+//             if(!CheckID(forCond))
+//             {
+//                     printf("ID Not exists!\n");
+//                     exit(1);
+//             }
+//         }
+//         checkIDForCond(forCond->left);
+//         checkIDForCond(forCond->right);
+//     }
+//     return;
+// }
+
 void buildST(node * tree)
 {	
 	if (tree == NULL)
@@ -1949,6 +1970,28 @@ void buildST(node * tree)
 		flagLeftSubTree = 1;
 		flagRightSubTree = 1;
 	}
+	else if(strcmp(tree->token,"for")==0) 
+	{ 
+		char * lvaltype;
+		char * rvaltype;
+		node * forCond=tree->left;
+		node * forBlock;
+		symbolTable * curr=current;//save state before
+		forBlock=tree->right;
+		node * tempForCond = forCond;
+		//checkIDForCond(forCond);
+		UpdateIDType(forCond);
+		buildST(forCond);
+
+		//checkIfConditionTypeIsBoolean(forCond); // michaell
+
+		scopeCounter = scopeCounter + 1;  
+		buildST(forBlock);
+		scopeCounter = scopeCounter - 1; 
+		current=curr;
+		flagLeftSubTree = 1;
+		flagRightSubTree = 1;
+        }
 	else if(strcmp(tree->token,"return")==0)
 	{ 
 		if(checkIfProcedure(tree->left->token))
