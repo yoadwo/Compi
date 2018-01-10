@@ -168,7 +168,7 @@ Block:Define Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tre
 |Procedure Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
 |Loop Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
 |If Block{$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
-|for Block{$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
+|For Block{$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
 //|COMMENT Block {$<IST.tree>$=mknode("COMMENT","COMMENT", mknode($<IST.string>1,$<IST.type>1, NULL,NULL), $<IST.tree>2);}
 |START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE Block {$<IST.tree>$=mknode("NewBlock","NewBlock",mknode("NewRow","NewRow",$<IST.tree>2, mknode("EndBlock","EndBlock",NULL,NULL)), $<IST.tree>4);}
 | {$<IST.tree>$=NULL;};
@@ -410,7 +410,7 @@ RETURN E SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2
 |RETURN NIL SEMICOLON {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);};
 
 VoidReturn: RETURN SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,NULL,NULL);}
-|  {$<IST.tree>$=mknode("","",NULL,NULL);}
+|  {$<IST.tree>$=mknode("","",NULL,NULL);};
 
 
 
@@ -438,13 +438,24 @@ $<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>
 {
 $<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>6),NULL);
 };
-
-for:
+/*
+For:
 FOR BEGIN_PARAMETER_LIST forCondition END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE 
 {$<IST.tree>$=mknode("for","for",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,NULL),$<IST.tree>6);};
 
 forCondition: Assignment SEMICOLON Condition SEMICOLON Assignment
-{"1","1",mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,mknode($<IST.string>4,$<IST.type>4,$<IST.tree>3,$<IST.tree>5));};
+{"1","1",mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,mknode($<IST.string>4,$<IST.type>4,$<IST.tree>3,$<IST.tree>5));};*/
+For: FOR BEGIN_PARAMETER_LIST forCondition END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE 
+{$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,  $<IST.tree>3,  $<IST.tree>6   );  };
+
+
+//|Assignment SEPERATOR IDents  {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2 ,$<IST.tree>1,NULL) ,$<IST.tree>3);}
+forCondition: initCond  endAndStep {$<IST.tree>$=mknode("for-COND","COND",$<IST.tree>1, $<IST.tree>2);};
+initCond:   Assignment SEMICOLON  {$<IST.tree>$ = mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1, NULL);};
+endAndStep: endCond SEMICOLON Step {$<IST.tree>$ = mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1, $<IST.tree>3);};
+endCond: Condition {};
+Step: Assignment {};
+
 
 Array: BEGIN_STRING_INDEX E END_STRING_INDEX {$<IST.tree>$ = $<IST.tree>2;};
 
