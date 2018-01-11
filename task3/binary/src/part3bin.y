@@ -3,8 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#define ROWS 18
-#define COLS 4
+
 int tabCounter=0;
 int isMain=0;
 int scopeCounter = 0;
@@ -44,7 +43,7 @@ struct labelStruct * next;
 
 typedef enum type
 {
-	BOOLEAN_t, CHAR_t, INT_t, STRING_t, STRINGARRAY_t, INTPTR_t, CHARPTR_t, RETURN_t, Null_t, ELSE_t
+    BOOLEAN_t, CHAR_t, INT_t, STRING_t, STRINGARRAY_t, INTPTR_t, CHARPTR_t, RETURN_t, Null_t, ELSE_t
 }type;
 
 node * mknode(char * token,char *type, node * left, node * right);
@@ -1145,6 +1144,13 @@ void _3ACMain(node * tree)
 				tree->left->next=strdup(freshLabel());//next label
 			}
 		}
+		if(strcmp(tree->left->token,"for")==0)
+		{	
+			if(strcmp(tree->left->next,"")==0)//first time to put label
+			{	
+				tree->left->next=strdup(freshLabel());//next label
+			}
+		}
 	}
 	else if(strcmp(tree->token,"COND")==0 && strcmp(tree->left->trueLabel,"")==0)//to avoid 2nd enter because of variables calc.
 	{ 
@@ -1277,7 +1283,7 @@ void _3ACMain(node * tree)
 		_3ACForVar(tree);
 		return;
 	}
-	if (tree->left && !notToEnterLeft)
+	if ( tree->left && !notToEnterLeft)
 		_3ACMain(tree->left);
 	if (tree->right && !notToEnterRight)
 		_3ACMain(tree->right);
@@ -1738,7 +1744,7 @@ symbolTable* reverseST(symbolTable * st)//new
 		st=nextOldST;
 	}
 	st->prevST=prevOfNew; 
-	//printf("Name: %s, Type: %s, scope : %s \n",st->name,st->type,st->scope);
+	printf("Name: %s, Type: %s, scope : %s \n",st->name,st->type,st->scope);
 	return st;
 }	
 
@@ -2005,7 +2011,7 @@ void buildST(node * tree)
 	{ 
 		char * lvaltype;
 		char * rvaltype;
-		node * forCond=tree->left;
+		node * forCond=tree->left->right->left;
 		node * forBlock;
 		symbolTable * curr=current;//save state before
 		forBlock=tree->right;
@@ -2326,7 +2332,7 @@ void printST()
 	symbolTable * temp=current;
 	while(temp){
 		printf("name: %s\ttype: %s\tscope: %s\n",temp->name,temp->type,temp->scope);
-		temp=temp->prevST;
+		temp = temp->prevST;
 
 	}
 }
