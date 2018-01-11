@@ -957,7 +957,22 @@ void TAC_FillCode(node * tree)
 		strcat(codebuffer,tree->left->trueLabel);
 		strcat(codebuffer,":\n");
 		//only if has statements in code, otherwise block is not build (right child is null)
-		if (tree->right)
+		if (tree->right != NULL)
+                    TAC_FillCode(tree->right);
+		strcat(codebuffer,tree->code);
+		strcat(codebuffer,tree->next);
+		strcat(codebuffer,":\n");	
+	}
+	
+	else if(strcmp(tree->token,"for")==0)//need to fix to put the label before the ifz and not before the variables.
+	{
+		strcat(codebuffer,tree->left->right->left->trueLabel);
+		strcat(codebuffer,":\n");
+		TAC_FillCode(tree->left);
+		strcat(codebuffer,tree->right->trueLabel);
+		strcat(codebuffer,":\n");
+		//only if has statements in code, otherwise block is not build (right child is null)
+		if (tree->right != NULL)
                     TAC_FillCode(tree->right);
 		strcat(codebuffer,tree->code);
 		strcat(codebuffer,tree->next);
@@ -971,7 +986,7 @@ void TAC_FillCode(node * tree)
 		strcat(codebuffer,tree->left->trueLabel);
 		strcat(codebuffer,":\n");
 		//only if has statements in code, otherwise block is not build (right child is null)
-		if (tree->left->right)
+		if (tree->left->right != NULL)
                     TAC_FillCode(tree->left->right);
 		strcat(codebuffer,tree->left->code);
 		if (tree->right)
@@ -1016,7 +1031,7 @@ void TAC_FillCode(node * tree)
 		}
 	}
 }
-void buildLabelStruct()//orel
+void buildLabelStruct()
 {
 	int index=0;
 	
@@ -1080,7 +1095,7 @@ void buildLabelStruct()//orel
 
 
 
-void printFixedCode()//orel
+void printFixedCode()
 {
 	
 	int index=0;
@@ -1289,7 +1304,7 @@ void _3ACMain(node * tree)
 		char * forLabel;
 		//char thencode[2000]="";
 		char forcode[2000]="";
-		_3ACForAssignment(tree->left->left->left);//code
+		_3ACForAssignment(tree->left->left->left);//init the for loop
 		node * condition=tree->left->right->left;//if(x>y) => condition= '>')
 		notToEnterLeft=1;
 		notToEnterRight=1;
@@ -1320,7 +1335,6 @@ void _3ACMain(node * tree)
 			MakeIfIntoIfZ(condition,tree->next, NULL);
 			ConditionTreatment(condition);
 		}
-		strcat(forcode,"AFTER \n");
 		strcat(forcode,"goto ");
 		strcat(forcode,forLabel);
 		strcat(forcode,"\n");
