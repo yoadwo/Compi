@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#define ROWS 18
-#define COLS 4
 int tabCounter=0;
 int isMain=0;
 int scopeCounter = 0;
@@ -649,25 +647,25 @@ void InsertLabelsIntoCondition(node * condition,char * thenLabel,char * nextLabe
 			InsertLabelsIntoCondition(condition->right,thenLabel,nextLabel,elseLabel);
 		}
 	}
-	else if(strcmp(condition->token,"&&")==0 && strcmp(condition->left->token,"||")==0)
-	{
-		char * otherThen=strdup(freshLabel());
-		if(strcmp(condition->trueLabel,"")==0)
-			condition->trueLabel=strdup(otherThen);
-		if(elseLabel)
-			InsertLabelsIntoCondition(condition->left,otherThen,nextLabel,elseLabel);
-		else
-			InsertLabelsIntoCondition(condition->left,otherThen,nextLabel,elseLabel);
-		if(strcmp(condition->right->token,"||")!=0 && strcmp(condition->right->token,"&&")!=0)
-		{
-			condition->right->next=strdup(elseLabel);
-		}
-		else
-		{
-			condition->right->left->var=strdup(otherThen);
-			InsertLabelsIntoCondition(condition->right,thenLabel,nextLabel,elseLabel);
-		}
-	}
+// 	else if(strcmp(condition->token,"&&")==0 && strcmp(condition->left->token,"||")==0)
+// 	{
+// 		char * otherThen=strdup(freshLabel());
+// 		if(strcmp(condition->trueLabel,"")==0)
+// 			condition->trueLabel=strdup(otherThen);
+// 		if(elseLabel)
+// 			InsertLabelsIntoCondition(condition->left,otherThen,nextLabel,elseLabel);
+// 		else
+// 			InsertLabelsIntoCondition(condition->left,otherThen,nextLabel,elseLabel);
+// 		if(strcmp(condition->right->token,"||")!=0 && strcmp(condition->right->token,"&&")!=0)
+// 		{
+// 			condition->right->next=strdup(elseLabel);
+// 		}
+// 		else
+// 		{
+// 			condition->right->left->var=strdup(otherThen);
+// 			InsertLabelsIntoCondition(condition->right,thenLabel,nextLabel,elseLabel);
+// 		}
+// 	}
 	else 
 	{
 		if(strcmp(condition->left->token,"||")==0 || strcmp(condition->left->token,"&&")==0)
@@ -944,7 +942,9 @@ void TAC_FillCode(node * tree)
 		TAC_FillCode(tree->left);
 		strcat(codebuffer,tree->left->trueLabel);
 		strcat(codebuffer,":\n");
-		TAC_FillCode(tree->right);
+		//only if has statements in code, otherwise block is not build (right child is null)
+		if (tree->right)
+                    TAC_FillCode(tree->right);
 		strcat(codebuffer,tree->code);
 		strcat(codebuffer,tree->next);
 		strcat(codebuffer,":\n");	
@@ -956,7 +956,9 @@ void TAC_FillCode(node * tree)
 		TAC_FillCode(tree->left->left);
 		strcat(codebuffer,tree->left->trueLabel);
 		strcat(codebuffer,":\n");
-		TAC_FillCode(tree->left->right);
+		//only if has statements in code, otherwise block is not build (right child is null)
+		if (tree->left->right)
+                    TAC_FillCode(tree->left->right);
 		strcat(codebuffer,tree->left->code);
 		if (tree->right)
 		{
@@ -1145,6 +1147,14 @@ void _3ACMain(node * tree)
 				tree->left->next=strdup(freshLabel());//next label
 			}
 		}
+		else if (strcmp(tree->left->token,"for")==0){
+                        if(strcmp(tree->left->next,"")==0)//first time to put label)
+                        {
+                                tree->left->next=strdup(freshLabel());//next label
+                        }
+                }
+		
+		
 	}
 	else if(strcmp(tree->token,"COND")==0 && strcmp(tree->left->trueLabel,"")==0)//to avoid 2nd enter because of variables calc.
 	{ 
@@ -1155,7 +1165,9 @@ void _3ACMain(node * tree)
 		notToEnterLeft=1;
 		notToEnterRight=1;
 		thenLabel=strdup(freshLabel());
-		_3ACMain(tree->left->right);//then block 
+                // if FOR\COND has an empty block then right child will be null
+                if (tree->left->right != NULL)
+                    _3ACMain(tree->left->right);//then block 
 		tree->left->trueLabel=strdup(thenLabel);
 		if(tree->right)
 		{
@@ -1226,14 +1238,16 @@ void _3ACMain(node * tree)
 		
 		char * thenLabel;
 		char * whileLabel;
-		char thencode[2000]="";
+		//char thencode[2000]="";
 		char whilecode[2000]="";
 		node * condition=tree->left;//if(x>y) => condition= '>')
 		notToEnterLeft=1;
 		notToEnterRight=1;
 		thenLabel=strdup(freshLabel());
 		whileLabel=strdup(freshLabel());
-		_3ACMain(tree->right);//then block 
+		// if WHILE has an empty block then right child will be null
+		if (tree->right !=NULL)
+                    _3ACMain(tree->right);//then block 
 		tree->trueLabel=strdup(whileLabel);
 		tree->left->trueLabel=strdup(thenLabel);
 		if(strcmp(condition->token,"||")!=0 && strcmp(condition->token,"&&")!=0)
@@ -1260,6 +1274,52 @@ void _3ACMain(node * tree)
 		strcat(whilecode,"\n");
 		strcat(whilecode,"\0");
 		tree->code=strdup(whilecode);
+		
+	}
+	else if(strcmp(tree->token,"for")==0 && strcmp(tree->trueLabel,"")==0)
+	{ 
+		
+		char * thenLabel;
+		char * forLabel;
+		//char thencode[2000]="";
+		char forcode[2000]="";
+		_3ACForAssignment(tree->left->left->left);//code
+		node * condition=tree->left->right->left;//if(x>y) => condition= '>')
+		notToEnterLeft=1;
+		notToEnterRight=1;
+		thenLabel=strdup(freshLabel());
+		forLabel=strdup(freshLabel());
+		// if FOR has an empty block then right child will be null
+		if (tree->right !=NULL)
+                    _3ACMain(tree->right);//then block  //code
+		tree->trueLabel=strdup(forLabel);
+		// give the condition's label its "then label"'
+		tree->left->right->left->trueLabel=strdup(thenLabel);
+		if(strcmp(condition->token,"||")!=0 && strcmp(condition->token,"&&")!=0)
+		{ //@@@@@
+			char * buffer=(char *) malloc(300);
+			char * cond3AC=_3ACForOperations(condition);
+			strcat(buffer,condition->code);
+			strcat(buffer," \nifz ");
+			strcat(buffer,cond3AC);
+			strcat(buffer," goto ");
+			strcat(buffer,tree->next);
+			strcat(buffer,"\0");
+			condition->code=strdup(buffer);
+		}
+		else
+		{
+			SwapSides(condition);
+			InsertLabelsIntoCondition(condition,thenLabel,tree->next,NULL);
+			MakeIfIntoIfZ(condition,tree->next, NULL);
+			ConditionTreatment(condition);
+		}
+		strcat(forcode,"AFTER \n");
+		strcat(forcode,"goto ");
+		strcat(forcode,forLabel);
+		strcat(forcode,"\n");
+		strcat(forcode,"\0");
+		tree->code=strdup(forcode);
 		
 	}
 	else if(strcmp(tree->token,"=")==0)
@@ -1976,30 +2036,33 @@ void buildST(node * tree)
 		node * whilecond=tree->left;
 		node * whileblock;
 		symbolTable * curr=current;//save state before
-		if(strcmp(tree->right->token,"")==0)
-		{
-			whileblock=tree->right->left;
-		}
-		else
-		{
-			whileblock=tree->right;
-		}
-		if(!CheckID(whilecond))
-		{
-			printf("ID Not exists!\n");
-			exit(1);
-		}
-		UpdateIDType(whilecond);
-		buildST(whilecond);
+		//if has a non-empty block
+                if(!CheckID(whilecond))
+                {
+                        printf("ID Not exists!\n");
+                        exit(1);
+                }
+                UpdateIDType(whilecond);
+                buildST(whilecond);
+                checkIfConditionTypeIsBoolean(whilecond); // michaell
+                
+		if (tree->right){
+                        if(strcmp(tree->right->token,"")==0)
+                        {
+                                whileblock=tree->right->left;
+                        }
+                        else
+                        {
+                                whileblock=tree->right;
+                        }
 
-		checkIfConditionTypeIsBoolean(whilecond); // michaell
-
-		scopeCounter = scopeCounter + 1;  
-		buildST(whileblock);
-		scopeCounter = scopeCounter - 1; 
-		current=curr;
-		flagLeftSubTree = 1;
-		flagRightSubTree = 1;
+                        scopeCounter = scopeCounter + 1;  
+                        buildST(whileblock);
+                        scopeCounter = scopeCounter - 1; 
+                        current=curr;
+                        flagLeftSubTree = 1;
+                        flagRightSubTree = 1;
+		}
 	}
 	else if(strcmp(tree->token,"for")==0) 
 	{ 
@@ -2148,6 +2211,7 @@ void buildST(node * tree)
 	}
 	if (strcmp(tree->token, "return") == 0)
 		ReturnFlag = 1;
+		
 }
 
 void checkIfConditionTypeIsBoolean(node *cond) // michaell
