@@ -648,25 +648,25 @@ void InsertLabelsIntoCondition(node * condition,char * thenLabel,char * nextLabe
 			InsertLabelsIntoCondition(condition->right,thenLabel,nextLabel,elseLabel);
 		}
 	}
-// 	else if(strcmp(condition->token,"&&")==0 && strcmp(condition->left->token,"||")==0)
-// 	{
-// 		char * otherThen=strdup(freshLabel());
-// 		if(strcmp(condition->trueLabel,"")==0)
-// 			condition->trueLabel=strdup(otherThen);
-// 		if(elseLabel)
-// 			InsertLabelsIntoCondition(condition->left,otherThen,nextLabel,elseLabel);
-// 		else
-// 			InsertLabelsIntoCondition(condition->left,otherThen,nextLabel,elseLabel);
-// 		if(strcmp(condition->right->token,"||")!=0 && strcmp(condition->right->token,"&&")!=0)
-// 		{
-// 			condition->right->next=strdup(elseLabel);
-// 		}
-// 		else
-// 		{
-// 			condition->right->left->var=strdup(otherThen);
-// 			InsertLabelsIntoCondition(condition->right,thenLabel,nextLabel,elseLabel);
-// 		}
-// 	}
+	else if(strcmp(condition->token,"&&")==0 && strcmp(condition->left->token,"||")==0)
+	{
+		char * otherThen=strdup(freshLabel());
+		if(strcmp(condition->trueLabel,"")==0)
+			condition->trueLabel=strdup(otherThen);
+		if(elseLabel)
+			InsertLabelsIntoCondition(condition->left,otherThen,nextLabel,elseLabel);
+		else
+			InsertLabelsIntoCondition(condition->left,otherThen,nextLabel,elseLabel);
+		if(strcmp(condition->right->token,"||")!=0 && strcmp(condition->right->token,"&&")!=0)
+		{
+			condition->right->next=strdup(elseLabel);
+		}
+		else
+		{
+			condition->right->left->var=strdup(otherThen);
+			InsertLabelsIntoCondition(condition->right,thenLabel,nextLabel,elseLabel);
+		}
+	}
 	else 
 	{
 		if(strcmp(condition->left->token,"||")==0 || strcmp(condition->left->token,"&&")==0)
@@ -880,6 +880,15 @@ void TAC_PrintCode(node * tree)
 {
 	
 	if(strcmp(tree->token,"while")==0)//need to fix to put the label before the ifz and not before the variables.
+	{
+		printf("%s:\n",tree->trueLabel);
+		TAC_PrintCode(tree->left);
+		printf("%s:\n",tree->left->trueLabel);
+		TAC_PrintCode(tree->right);
+		printf("%s",tree->code);
+		printf("%s:\n",tree->next);	
+	}
+        else if(strcmp(tree->token,"for")==0)//need to fix to put the label before the ifz and not before the variables.
 	{
 		printf("%s:\n",tree->trueLabel);
 		TAC_PrintCode(tree->left);
