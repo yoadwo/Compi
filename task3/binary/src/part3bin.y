@@ -648,25 +648,25 @@ void InsertLabelsIntoCondition(node * condition,char * thenLabel,char * nextLabe
 			InsertLabelsIntoCondition(condition->right,thenLabel,nextLabel,elseLabel);
 		}
 	}
-	else if(strcmp(condition->token,"&&")==0 && strcmp(condition->left->token,"||")==0)
-	{
-		char * otherThen=strdup(freshLabel());
-		if(strcmp(condition->trueLabel,"")==0)
-			condition->trueLabel=strdup(otherThen);
-		if(elseLabel)
-			InsertLabelsIntoCondition(condition->left,otherThen,nextLabel,elseLabel);
-		else
-			InsertLabelsIntoCondition(condition->left,otherThen,nextLabel,elseLabel);
-		if(strcmp(condition->right->token,"||")!=0 && strcmp(condition->right->token,"&&")!=0)
-		{
-			condition->right->next=strdup(elseLabel);
-		}
-		else
-		{
-			condition->right->left->var=strdup(otherThen);
-			InsertLabelsIntoCondition(condition->right,thenLabel,nextLabel,elseLabel);
-		}
-	}
+// 	else if(strcmp(condition->token,"&&")==0 && strcmp(condition->left->token,"||")==0)
+// 	{
+// 		char * otherThen=strdup(freshLabel());
+// 		if(strcmp(condition->trueLabel,"")==0)
+// 			condition->trueLabel=strdup(otherThen);
+// 		if(elseLabel)
+// 			InsertLabelsIntoCondition(condition->left,otherThen,nextLabel,elseLabel);
+// 		else
+// 			InsertLabelsIntoCondition(condition->left,otherThen,nextLabel,elseLabel);
+// 		if(strcmp(condition->right->token,"||")!=0 && strcmp(condition->right->token,"&&")!=0)
+// 		{
+// 			condition->right->next=strdup(elseLabel);
+// 		}
+// 		else
+// 		{
+// 			condition->right->left->var=strdup(otherThen);
+// 			InsertLabelsIntoCondition(condition->right,thenLabel,nextLabel,elseLabel);
+// 		}
+// 	}
 	else 
 	{
 		if(strcmp(condition->left->token,"||")==0 || strcmp(condition->left->token,"&&")==0)
@@ -1151,13 +1151,6 @@ void _3ACMain(node * tree)
 	else if(strcmp(tree->token,"NewRow")==0)//if the left is condition or while, ill put in next of cond or while the next code after it to jump
 	{
 		if(strcmp(tree->left->token,"COND")==0 || strcmp(tree->left->token,"while")==0)
-		{	
-			if(strcmp(tree->left->next,"")==0)//first time to put label
-			{	
-				tree->left->next=strdup(freshLabel());//next label
-			}
-		}
-		if(strcmp(tree->left->token,"for")==0)
 		{	
 			if(strcmp(tree->left->next,"")==0)//first time to put label
 			{	
