@@ -946,10 +946,10 @@ void TAC_FillCode(node * tree)
 	
 	else if(strcmp(tree->token,"for")==0)//need to fix to put the label before the ifz and not before the variables.
 	{
-		strcat(codebuffer,tree->left->right->left->trueLabel);
+		strcat(codebuffer,tree->trueLabel);
 		strcat(codebuffer,":\n");
-		TAC_FillCode(tree->left);
-		strcat(codebuffer,tree->right->trueLabel);
+		TAC_FillCode(tree->left->right->left);
+		strcat(codebuffer,tree->left->right->left->trueLabel);
 		strcat(codebuffer,":\n");
 		//only if has statements in code, otherwise block is not build (right child is null)
 		if (tree->right != NULL)
@@ -1149,7 +1149,7 @@ void _3ACMain(node * tree)
 	}
 	else if(strcmp(tree->token,"NewRow")==0)//if the left is condition or while, ill put in next of cond or while the next code after it to jump
 	{
-		if(strcmp(tree->left->token,"COND")==0 || strcmp(tree->left->token,"while")==0)
+		if(strcmp(tree->left->token,"COND")==0 || strcmp(tree->left->token,"while")==0||strcmp(tree->left->token,"for")==0)
 		{	
 			if(strcmp(tree->left->next,"")==0)//first time to put label
 			{	
