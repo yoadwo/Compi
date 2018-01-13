@@ -1,8 +1,8 @@
 procedure foo(f:boolean) return integer
 {
-	 integer a,b,c ;
-	boolean e ;
-	boolean d ;
+	var a,b,c: integer;
+	var e: boolean;
+	var d: boolean;
 	if ((!e || a<c) && (a<b && a<c))
 	{
 		a = 5;
@@ -12,10 +12,10 @@ procedure foo(f:boolean) return integer
 	return a;
 }
 procedure Main() return integer{
-	integer a,b ;
-	intptr ptr ;
-	boolean c ;
-	boolean d ;
+	var a,b: integer;
+	var ptr: intptr;
+	var c: boolean;
+	var d: boolean;
 	procedure foo1() return integer
 	{return 0;}
 	if ((!c && a<b) || (a<b && a<b))
