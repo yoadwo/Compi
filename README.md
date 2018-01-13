@@ -8,3 +8,5 @@ Using a flex (lex) for token analysis, and bison (yacc) for determining grammar 
 Part 1: Lexical Analysis
 
 Part 2: Semantical Analysis
+
+Part 3: Intermediate Representation (Following 3-Address-Code principle)
