@@ -195,6 +195,8 @@ Parameters: SomeParameters IDENTIFIER  {$<IST.tree>$=mknode($<IST.string>2,$<IST
 |{$<IST.tree>$=NULL;}
 |IDENTIFIER StringParameter {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);};
 
+
+
 SomeParameters: SEPERATOR IDENTIFIER SomeParameters {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>3,NULL);}
 |COLON Types {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);};
 
@@ -1154,6 +1156,7 @@ void _3ACMain(node * tree)
 				tree->left->next=strdup(freshLabel());//next label
 			}
 		}
+		
 	}
 	else if(strcmp(tree->token,"COND")==0 && strcmp(tree->left->trueLabel,"")==0)//to avoid 2nd enter because of variables calc.
 	{ 
