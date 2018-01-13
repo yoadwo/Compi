@@ -34,3 +34,7 @@ task3/binary ignore/
 task3/binary/part3bin
 
 *.t
+
+task3/code3\.txt
+
+task3/code3\.txt\.unix
