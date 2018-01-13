@@ -382,7 +382,7 @@ Condition:E CompOp E {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree
 Return: 
 RETURN E SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);}
 |RETURN Consts SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);}
-|RETURN CONST_BOOLEAN SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);} // michael
+|RETURN CONST_BOOLEAN SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);}
 |RETURN AddressID SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);}
 |RETURN VALUE_ADDRESS E SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,$<IST.tree>3,NULL),NULL);}
 |RETURN IDENTIFIER BEGIN_PARAMETER_LIST EmptyOrPara END_PARAMETER_LIST SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,$<IST.tree>4,NULL),NULL);}
@@ -952,8 +952,12 @@ void TAC_FillCode(node * tree)
 		strcat(codebuffer,tree->left->right->left->trueLabel);
 		strcat(codebuffer,":\n");
 		//only if has statements in code, otherwise block is not build (right child is null)
-		if (tree->right != NULL)
+		// does not enter FOR at all if no body. optimization? if we want anyway, take out of condition
+		if (tree->right != NULL){
                     TAC_FillCode(tree->right);
+                    }
+                TAC_FillCode(tree->left->right->right->right);
+                //strcat(codebuffer,tree->left->right->right->right->code);
 		strcat(codebuffer,tree->code);
 		strcat(codebuffer,tree->next);
 		strcat(codebuffer,":\n");	
@@ -1285,7 +1289,8 @@ void _3ACMain(node * tree)
 		char * forLabel;
 		//char thencode[2000]="";
 		char forcode[2000]="";
-		_3ACForAssignment(tree->left->left->left);//init the for loop
+		_3ACForAssignment(tree->left->left->left);// build code for the "start" assignment
+		_3ACForAssignment(tree->left->right->right);// build code for the "step" assignment
 		node * condition=tree->left->right->left;//if(x>y) => condition= '>')
 		notToEnterLeft=1;
 		notToEnterRight=1;
@@ -1316,7 +1321,8 @@ void _3ACMain(node * tree)
 			MakeIfIntoIfZ(condition,tree->next, NULL);
 			ConditionTreatment(condition);
 		}
-		strcat(forcode,"goto ");
+		strcat(forcode,tree->left->right->right->code);
+		strcat(forcode,"\ngoto ");
 		strcat(forcode,forLabel);
 		strcat(forcode,"\n");
 		strcat(forcode,"\0");
@@ -1344,7 +1350,7 @@ void _3ACMain(node * tree)
 		_3ACMain(tree->right);
 	//print
 	//if(strcmp(tree->code,"")!=0) //if empty, not print
-	//	printf("%s\n",tree->code);
+	//	printf("--------\n%s\n",tree->code);
 
 }
 
@@ -1799,7 +1805,7 @@ symbolTable* reverseST(symbolTable * st)//new
 		st=nextOldST;
 	}
 	st->prevST=prevOfNew; 
-	printf("Name: %s, Type: %s, scope : %s \n",st->name,st->type,st->scope);
+	//printf("Name: %s, Type: %s, scope : %s \n",st->name,st->type,st->scope);
 	return st;
 }	
 
@@ -2070,13 +2076,18 @@ void buildST(node * tree)
 		char * lvaltype;
 		char * rvaltype;
 		node * forCond=tree->left->right->left;
+		node * forStep=tree->left->right->right;
 		node * forBlock;
 		symbolTable * curr=current;//save state before
 		forBlock=tree->right;
-		node * tempForCond = forCond;
+		
 		//checkIDForCond(forCond);
 		UpdateIDType(forCond);
 		buildST(forCond);
+		
+		//added by yoad: before was not checking all of FOR's conditios
+		UpdateIDType(forStep);
+		buildST(forStep);
 
 		//checkIfConditionTypeIsBoolean(forCond); // michaell
 
