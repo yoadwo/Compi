@@ -74,13 +74,13 @@ char* checkUnaryOperations(char* op, char* str);
 void UpdateIDType(node * tempTree);
 char * ReturnIDType(char * name);
 int checkIfProcedure(char * name);
-char* freshVar(char *type); 
-int get_int_len();
-void CallProcedureParasTreat(char * proName,node * paras);
-void checkFuncParam(char * proName,node * paras,node * nameAndParas);
-symbolTable* reverseST(symbolTable * st);
-symbolTable* dupST(char * proName,symbolTable * st);
-void UpdateParameterType(node * tempTree);
+char* freshVar(char *type); //last
+int get_int_len();//last
+void CallProcedureParasTreat(char * proName,node * paras);//orel
+void checkFuncParam(char * proName,node * paras,node * nameAndParas);//orel
+symbolTable* reverseST(symbolTable * st);//orel
+symbolTable* dupST(char * proName,symbolTable * st);//orel
+void UpdateParameterType(node * tempTree);//orel &&michael
 void addProcedureParametersToST(char * proName,node * paras);
 static symbolTable * current;
 static symbolTable * procedureParas; 
@@ -171,15 +171,15 @@ Block:Define Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tre
 //|COMMENT Block {$<IST.tree>$=mknode("COMMENT","COMMENT", mknode($<IST.string>1,$<IST.type>1, NULL,NULL), $<IST.tree>2);}
 |START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE Block {$<IST.tree>$=mknode("NewBlock","NewBlock",mknode("NewRow","NewRow",$<IST.tree>2, mknode("EndBlock","EndBlock",NULL,NULL)), $<IST.tree>4);}
 | {$<IST.tree>$=NULL;};
-
-ProcedureSignature: ID BEGIN_PARAMETER_LIST Parameters END_PARAMETER_LIST ProcedureReturn {
+ 
+ProcedureSignature: Types ID BEGIN_PARAMETER_LIST Parameters END_PARAMETER_LIST  {
 char * e=strchr($<IST.string>$,'_');
 if(e!=NULL && (int)(e-$<IST.string>1)==0)
 {
-	yyerror("syntax error");
-	YYERROR;
+  yyerror("syntax error");
+  YYERROR;
 }
-$<IST.tree>$=mknode($<IST.string>1,"procedure",$<IST.tree>3,$<IST.tree>5);};
+$<IST.tree>$=mknode($<IST.string>2,"procedure",$<IST.tree>4,mknode("return","return",$<IST.tree>1,NULL));};
 
 VoidProcedureSignature: TypeVoid ID BEGIN_PARAMETER_LIST Parameters END_PARAMETER_LIST  {
 char * e=strchr($<IST.string>$,'_');
@@ -194,8 +194,6 @@ Parameters: SomeParameters IDENTIFIER  {$<IST.tree>$=mknode($<IST.string>2,$<IST
 | SomeParameters IDENTIFIER SEPERATOR Parameters {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,$<IST.tree>4);}
 |{$<IST.tree>$=NULL;}
 |IDENTIFIER StringParameter {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);};
-
-StringParameter: ArrayType {$<IST.tree>$ = $<IST.tree>1;};
 
 SomeParameters: SEPERATOR IDENTIFIER SomeParameters {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>3,NULL);}
 |COLON Types {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);};
@@ -245,23 +243,6 @@ AddressID: AMPERSAND ID {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 , $<I
 ValueAddressID: VALUE_ADDRESS E {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 , $<IST.tree>2,NULL);};
 
 
-//Assignment:ID ASSIGN E SEMICOLON {$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);}
-//|ID ASSIGN AddressID SEMICOLON {$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);} 
-//|ID ASSIGN ID BEGIN_PARAMETER_LIST EmptyOrPara END_PARAMETER_LIST SEMICOLON {$<IST.tree>$=mknode("=","=",$<IST.tree>1,mknode($<IST.tree>3->token,$<IST.tree>3->type, $<IST.tree>5,NULL));
-//if($<IST.tree>$->right->constType != NULL)
-//free($<IST.tree>$->right->constType);
-//$<IST.tree>$->right->constType = strdup("procedure");
-//}
-
-//|ID ASSIGN Consts SEMICOLON{$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);}
-//|ID Array ASSIGN IndexedAssign SEMICOLON {$<IST.tree>$ = mknode("=","=", mknode("[]","[]", $<IST.tree>1, $<IST.tree>2), $<IST.tree>4);}
-//|ID ASSIGN AddressID Array SEMICOLON {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, mknode("[]","[]", $<IST.tree>3, $<IST.tree>4));} /* ( x = &arr[2]; )*/
-//|ID ASSIGN ValueAddressID SEMICOLON {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);} /*( z = ^(x-5); )*/
-//|ValueAddressID ASSIGN E SEMICOLON {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);}
-//|ValueAddressID ASSIGN CHAR_CONST SEMICOLON {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);}
-//|ID ASSIGN NIL SEMICOLON {$<IST.tree>$ = mknode("=","=" ,$<IST.tree>1, mknode($<IST.string>3,$<IST.type>3 , NULL,NULL));}
-//|ID ASSIGN LogicOp SEMICOLON {$<IST.tree>$ = mknode("=","=" ,$<IST.tree>1,$<IST.tree>3);};
-
 Assignment:ID ASSIGN E  {$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);}
 |ID ASSIGN AddressID  {$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);} 
 |ID ASSIGN ID BEGIN_PARAMETER_LIST EmptyOrPara END_PARAMETER_LIST  {$<IST.tree>$=mknode("=","=",$<IST.tree>1,mknode($<IST.tree>3->token,$<IST.tree>3->type, $<IST.tree>5,NULL));
@@ -276,9 +257,9 @@ $<IST.tree>$->right->constType = strdup("procedure");
 |ID ASSIGN ValueAddressID  {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);} /*( z = ^(x-5); )*/
 |ValueAddressID ASSIGN E  {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);}
 |ValueAddressID ASSIGN CHAR_CONST  {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);}
+//|ID ASSIGN Absolute SEMICOLON {$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);} //ohad
 |ID ASSIGN NIL  {$<IST.tree>$ = mknode("=","=" ,$<IST.tree>1, mknode($<IST.string>3,$<IST.type>3 , NULL,NULL));}
 |ID ASSIGN LogicOp  {$<IST.tree>$ = mknode("=","=" ,$<IST.tree>1,$<IST.tree>3);};
-
 
 
 IndexedAssign: ID {$<IST.tree>$ = $<IST.tree>1;}
@@ -290,11 +271,8 @@ Define: Types IDents SEMICOLON {$<IST.tree>$ = mknode("var","var" ,$<IST.tree>2,
 
 IDents: IDENTIFIER SEPERATOR IDents {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1 ,mknode($<IST.string>2,$<IST.type>2 ,NULL,NULL),$<IST.tree>3);}
 |IDENTIFIER {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 , NULL,NULL);}
-|Assignment SEPERATOR IDents  {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2 ,$<IST.tree>1,NULL) ,$<IST.tree>3);}
-//|Assignment SEPERATOR IDents 
-//{$<IST.tree>$=mknode("","",$<IST.tree>1 ,mknode($<IST.string>3, $<IST.type>3,  mknode($<IST.string>2,$<IST.type>2 ,NULL,NULL)   ,$<IST.tree>3->right ));}
-|Assignment {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 , $<IST.tree>1,NULL);};
-
+|Assignment SEPERATOR IDents {$<IST.tree>$=mknode( $<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2 ,$<IST.tree>1,NULL),$<IST.tree>3);}
+|Assignment {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,$<IST.tree>1,NULL);};
 /*
 //old
 IDentsWithEmpty: E SEPERATOR IDentsWithEmpty {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1 ,mknode($<IST.string>2,$<IST.type>2 ,NULL,NULL),$<IST.tree>3);}
@@ -2306,7 +2284,7 @@ char * buildVarOfProcedure(node * tree, char * procedureName) // ariel && michae
 void buildVar(node * tree)
 {
 	//symbolTable * originalCurrent = current; //save state before
-	node * tempTree=tree, *saveTree = NULL;
+	node * tempTree=tree,* saveTree=NULL ;
 	char * type= tempTree->right->type;
 	//printf("var type: |%s|\tcurrent type: |%s|\n",type, current->type);
 	tempTree=tempTree->left;
@@ -2318,29 +2296,19 @@ void buildVar(node * tree)
 			exist=1;
 		else
 		{
-                        // if we have an empty node followed by assignment node, jump to left child (holding new var)
-                        if (!strcmp(tempTree->token, "")){
-                                saveTree = tempTree;
-                                tempTree = tempTree->left->left;
-                        }
-                        // we declare var with no value (and add to symbol table)
+           
+			tempTree->type = strdup(type); // 
+			symbolTable * temp=(symbolTable*)malloc(sizeof(symbolTable));
+			temp->scopeNumber = scopeCounter;
+			temp->prevST=current;
+			current=temp;
+			current->name=strdup(tempTree->token);
+			current->type=strdup(type);
+			current->scope=strdup("var");
+			
                 
-                        tempTree->type = strdup(type); // 
-                        symbolTable * temp=(symbolTable*)malloc(sizeof(symbolTable));
-                        temp->scopeNumber = scopeCounter;
-                        temp->prevST=current;
-                        current=temp;
-                        current->name=strdup(tempTree->token);
-                        current->type=strdup(type);
-                        current->scope=strdup("var");
-                        
-                        // restore tree iterator to original address
-                        if (saveTree)
-                            tempTree = saveTree;
-                        //printf("name: |%s|\ttype: |%s|\tscope: |%s|\n",current->name, current->type,current->scope);
-			
+			//printf("name: |%s|\ttype: |%s|\tscope: |%s|\n",current->name, current->type,current->scope);
 			tempTree=tempTree->right;
-			
 		}
 		//current = originalCurrent;
 	}
@@ -2378,9 +2346,6 @@ void UpdateIDType(node * tempTree)
 
 	if(tempTree!=NULL)
 	{
-                // case 1: UpdateIDType was called when variable was declared with a value: <ID> = <value>
-                
-                // case 2: UpdateIDType was called when a previously declared variable was being re-assigned
 		UpdateIDType(tempTree->left);
 		UpdateIDType(tempTree->right);
 		if(strcmp(tempTree->type,"var")==0)
