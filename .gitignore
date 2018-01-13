@@ -35,6 +35,10 @@ task3/binary/part3bin
 
 *.t
 
+<<<<<<< Updated upstream
 task3/code3\.txt
 
 task3/code3\.txt\.unix
+=======
+task3/bin/
+>>>>>>> Stashed changes
