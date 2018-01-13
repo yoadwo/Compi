@@ -15,13 +15,14 @@ true {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("boolean"); retur
 false {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("boolean"); return CONST_BOOLEAN;}
 char {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("char"); return CHAR;}
 integer	{yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("int"); return INTEGER;}
-void	{yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("void"); return VOID;}
+void {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("void"); return VOID;}
 string {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("string"); return STRING;}
 intptr {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("intptr"); return INTPTR;}
 charptr	{yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("charptr"); return CHARPTR;}
 if {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("if"); return IF;}
 else {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("else"); return ELSE;}
 while {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("while"); return WHILE;}
+for {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("for"); return FOR;}
 var {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("var"); return VAR;}
 \= {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("operator"); return ASSIGN;}
 \== {yylval.IST.string=strdup(yytext); yylval.IST.type=strdup("operator"); return EQ;}

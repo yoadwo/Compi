@@ -3,8 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#define ROWS 18
-#define COLS 4
+
 int tabCounter=0;
 int isMain=0;
 int scopeCounter = 0;
@@ -44,7 +43,7 @@ struct labelStruct * next;
 
 typedef enum type
 {
-	BOOLEAN_t, CHAR_t, INT_t, STRING_t, STRINGARRAY_t, INTPTR_t, CHARPTR_t, RETURN_t, Null_t, ELSE_t
+    BOOLEAN_t, CHAR_t, INT_t, STRING_t, STRINGARRAY_t, INTPTR_t, CHARPTR_t, RETURN_t, Null_t, ELSE_t
 }type;
 
 node * mknode(char * token,char *type, node * left, node * right);
@@ -111,6 +110,7 @@ void recursivePrint(node* tree);
 void checkIfConditionTypeIsBoolean(node *cond); 
 void printFixedCode();
 void buildLabelStruct();
+//void checkIDForCond(node * forCond);
 //#define YYDEBUG 1 
 int yylex();
 int yyerror();
@@ -131,7 +131,7 @@ struct
 
 %token BOOLEAN CONST_BOOLEAN CHAR INTEGER STRING VOID //Types
 %token INTPTR CHARPTR //PtrTypes
-%token IF ELSE WHILE //condition and loop
+%token IF ELSE WHILE FOR //condition and loop
 %token VAR ASSIGN
 %token EQ GT GE LT LE NE NOT //comparison
 %token MINUS PLUS MUL DIVISION //operators
@@ -153,15 +153,21 @@ Start: Procedure Start {$<IST.tree>$=mknode("BLOCK","BLOCK",$<IST.tree>1,$<IST.t
 //| COMMENT Start {$<IST.tree>$=mknode("COMMENT","COMMENT", mknode($<IST.string>1,$<IST.type>1, NULL,NULL), $<IST.tree>2);}
 | {$<IST.tree>$=NULL;};
 
-Procedure: PROCEDURE ProcedureSignature ProcedureBlock {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,$<IST.tree>3);};
+// ProcedureSignature ProcedureBlock {$<IST.tree>$=mknode("procedure","procedure",$<IST.tree>1,$<IST.tree>2);};
+
+Procedure: ProcVoid | ProcValue;
+ProcVoid: VoidProcedureSignature VoidProcedureBlock {$<IST.tree>$=mknode("procedure","procedure",$<IST.tree>1,$<IST.tree>2);};
+ProcValue: ProcedureSignature ProcedureBlock {$<IST.tree>$=mknode("procedure","procedure",$<IST.tree>1,$<IST.tree>2);};
 
 ProcedureBlock: START_BLOCK_OF_CODE Block Return END_BLOCK_OF_CODE {$<IST.tree>$=mknode("","",$<IST.tree>2,$<IST.tree>3);};
+VoidProcedureBlock: START_BLOCK_OF_CODE Block VoidReturn END_BLOCK_OF_CODE {$<IST.tree>$=mknode("","",$<IST.tree>2,$<IST.tree>3);};
 
 Block:Define Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
 |Assignment SEMICOLON Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>3);}
 |Procedure Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
 |Loop Block {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
 |If Block{$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
+|For Block{$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,$<IST.tree>2);}
 //|COMMENT Block {$<IST.tree>$=mknode("COMMENT","COMMENT", mknode($<IST.string>1,$<IST.type>1, NULL,NULL), $<IST.tree>2);}
 |START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE Block {$<IST.tree>$=mknode("NewBlock","NewBlock",mknode("NewRow","NewRow",$<IST.tree>2, mknode("EndBlock","EndBlock",NULL,NULL)), $<IST.tree>4);}
 | {$<IST.tree>$=NULL;};
@@ -175,8 +181,17 @@ if(e!=NULL && (int)(e-$<IST.string>1)==0)
 }
 $<IST.tree>$=mknode($<IST.string>1,"procedure",$<IST.tree>3,$<IST.tree>5);};
 
+VoidProcedureSignature: TypeVoid ID BEGIN_PARAMETER_LIST Parameters END_PARAMETER_LIST  {
+char * e=strchr($<IST.string>$,'_');
+if(e!=NULL && (int)(e-$<IST.string>1)==0)
+{
+	yyerror("syntax error");
+	YYERROR;
+}
+$<IST.tree>$=mknode($<IST.string>2,"procedure",$<IST.tree>4,mknode("return","return",$<IST.tree>1,NULL));};
+
 Parameters: SomeParameters IDENTIFIER  {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,NULL);}
-| SomeParameters IDENTIFIER SEMICOLON Parameters {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,$<IST.tree>4);}
+| SomeParameters IDENTIFIER SEPERATOR Parameters {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,$<IST.tree>4);}
 |{$<IST.tree>$=NULL;}
 |IDENTIFIER StringParameter {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);};
 
@@ -188,10 +203,12 @@ SomeParameters: SEPERATOR IDENTIFIER SomeParameters {$<IST.tree>$=mknode($<IST.s
 Types: BOOLEAN {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);}
 |CHAR {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);}
 |INTEGER {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);}
-|VOID {$<IST.tree>$ = mknode("integer","int" ,NULL,NULL);} 
+//|VOID {$<IST.tree>$ = mknode("integer","int" ,NULL,NULL);}
 |STRING {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1, NULL,NULL);}
 |PtrTypes {$<IST.tree>$ = $<IST.tree>1;}
 |ArrayType {$<IST.tree>$ = $<IST.tree>1;};
+
+TypeVoid: VOID {$<IST.tree>$ = mknode("void","void" ,NULL,NULL);};
 
 PtrTypes:INTPTR {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);}
 |CHARPTR {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);};
@@ -203,16 +220,18 @@ CONST_INT: INTEGER_CONST {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1, NUL
 |OCTAL {$<IST.tree>$ = mknode(octalToDec($<IST.string>1),$<IST.type>1, NULL,NULL);}
 |HEXADECIMAL {$<IST.tree>$ = mknode(HexaToDec($<IST.string>1),$<IST.type>1, NULL,NULL);};
 
-E:E PLUS T {$<IST.tree>$ = mknode("+","+", $<IST.tree>1,$<IST.tree>3);}
-| E MINUS T {$<IST.tree>$ = mknode("-","-", $<IST.tree>1,$<IST.tree>3);}
-|T {$<IST.tree>$ = $<IST.tree>1;};
+E: T {$<IST.tree>$ = $<IST.tree>1;}
+|E PLUS T {$<IST.tree>$ = mknode("+","+", $<IST.tree>1,$<IST.tree>3);}
+| E MINUS T {$<IST.tree>$ = mknode("-","-", $<IST.tree>1,$<IST.tree>3);};
 
-T:T MUL F {$<IST.tree>$ = mknode("*","*", $<IST.tree>1,$<IST.tree>3);}
-|T DIVISION F {$<IST.tree>$ = mknode("/","/", $<IST.tree>1,$<IST.tree>3);}
-|F {$<IST.tree>$ = $<IST.tree>1;}; 
+
+T: F {$<IST.tree>$ = $<IST.tree>1;}
+|T MUL F {$<IST.tree>$ = mknode("*","*", $<IST.tree>1,$<IST.tree>3);}
+|T DIVISION F {$<IST.tree>$ = mknode("/","/", $<IST.tree>1,$<IST.tree>3);};
 
 F: BEGIN_PARAMETER_LIST E END_PARAMETER_LIST {$<IST.tree>$ = $<IST.tree>2;}
-|ID {$<IST.tree>$ = $<IST.tree>1;}|CONST_INT {$<IST.tree>$ = $<IST.tree>1;}
+|ID {$<IST.tree>$ = $<IST.tree>1;}
+|CONST_INT {$<IST.tree>$ = $<IST.tree>1;}
 |Absolute {$<IST.tree>$ = $<IST.tree>1;}
 |StringLenth {$<IST.tree>$ = $<IST.tree>1;};
 
@@ -374,13 +393,14 @@ Condition:E CompOp E {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree
 |CONST_BOOLEAN CompOp CONST_BOOLEAN {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,mknode($<IST.string>1,$<IST.type>1,NULL,NULL),mknode($<IST.string>3,$<IST.type>3,NULL,NULL));}
 |CONST_BOOLEAN CompOp E {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,mknode($<IST.string>1,$<IST.type>1,NULL,NULL),$<IST.tree>3);}
 |E CompOp CONST_BOOLEAN {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,mknode($<IST.string>3,$<IST.type>3,NULL,NULL));}
-|NOT ID {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);} // NOT (!x) // ~michael //
-|NOT CONST_BOOLEAN {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);}; // NOT (!false)
+|NOT ID {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);} // NOT (!x)
+|NOT CONST_BOOLEAN {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);}; 
 
 
 //PreLogicOp:BEGIN_PARAMETER_LIST LogicOp END_PARAMETER_LIST {$<IST.tree>$=$<IST.tree>2;};
 
-Return: RETURN E SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);}
+Return: 
+RETURN E SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);}
 |RETURN Consts SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);}
 |RETURN CONST_BOOLEAN SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);} // michael
 |RETURN AddressID SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);}
@@ -388,14 +408,16 @@ Return: RETURN E SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IS
 |RETURN IDENTIFIER BEGIN_PARAMETER_LIST EmptyOrPara END_PARAMETER_LIST SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,$<IST.tree>4,NULL),NULL);}
 |RETURN NIL SEMICOLON {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);};
 
-ProcedureReturn: RETURN Types {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);};
+VoidReturn: RETURN SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,NULL,NULL);}
+|  {$<IST.tree>$=mknode("","",NULL,NULL);};
 
 
 
+//ProcedureReturn:  Types {$<IST.tree>$=mknode("return","return",$<IST.tree>1,NULL);};
 //ID {$<IST.tree>$=mknode($<IST.tree>1,$<IST.tree>1,NULL,NULL);} // if(x) // ~michael //
 
 
-Loop: // michaell
+Loop:
 WHILE BEGIN_PARAMETER_LIST ID END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>6);}
 |WHILE BEGIN_PARAMETER_LIST LogicOp END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>6);};
 
@@ -415,6 +437,18 @@ $<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>
 {
 $<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>6),NULL);
 };
+
+
+For: FOR BEGIN_PARAMETER_LIST forCondition END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE 
+{$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,  $<IST.tree>3,  $<IST.tree>6   );  };
+
+
+forCondition: initCond  endAndStep {$<IST.tree>$=mknode("for-COND","COND",$<IST.tree>1, $<IST.tree>2);};
+initCond:   Assignment SEMICOLON  {$<IST.tree>$ = mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1, NULL);};
+endAndStep: endCond SEMICOLON Step {$<IST.tree>$ = mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1, $<IST.tree>3);};
+endCond: Condition {};
+Step: Assignment {};
+
 
 Array: BEGIN_STRING_INDEX E END_STRING_INDEX {$<IST.tree>$ = $<IST.tree>2;};
 
@@ -854,6 +888,15 @@ void TAC_PrintCode(node * tree)
 		printf("%s",tree->code);
 		printf("%s:\n",tree->next);	
 	}
+        else if(strcmp(tree->token,"for")==0)//need to fix to put the label before the ifz and not before the variables.
+	{
+		printf("%s:\n",tree->trueLabel);
+		TAC_PrintCode(tree->left);
+		printf("%s:\n",tree->left->trueLabel);
+		TAC_PrintCode(tree->right);
+		printf("%s",tree->code);
+		printf("%s:\n",tree->next);	
+	}
 	
 	else if(strcmp(tree->token,"COND")==0 )
 	{
@@ -869,6 +912,10 @@ void TAC_PrintCode(node * tree)
 			printf("%s:\n",tree->next);
 		}
 		
+	}
+	else if(strcmp(tree->token,"for-COND")==0 )
+	{
+                
 	}
 	
 	else
@@ -909,7 +956,24 @@ void TAC_FillCode(node * tree)
 		TAC_FillCode(tree->left);
 		strcat(codebuffer,tree->left->trueLabel);
 		strcat(codebuffer,":\n");
-		TAC_FillCode(tree->right);
+		//only if has statements in code, otherwise block is not build (right child is null)
+		if (tree->right != NULL)
+                    TAC_FillCode(tree->right);
+		strcat(codebuffer,tree->code);
+		strcat(codebuffer,tree->next);
+		strcat(codebuffer,":\n");	
+	}
+	
+	else if(strcmp(tree->token,"for")==0)//need to fix to put the label before the ifz and not before the variables.
+	{
+		strcat(codebuffer,tree->left->right->left->trueLabel);
+		strcat(codebuffer,":\n");
+		TAC_FillCode(tree->left);
+		strcat(codebuffer,tree->right->trueLabel);
+		strcat(codebuffer,":\n");
+		//only if has statements in code, otherwise block is not build (right child is null)
+		if (tree->right != NULL)
+                    TAC_FillCode(tree->right);
 		strcat(codebuffer,tree->code);
 		strcat(codebuffer,tree->next);
 		strcat(codebuffer,":\n");	
@@ -921,7 +985,9 @@ void TAC_FillCode(node * tree)
 		TAC_FillCode(tree->left->left);
 		strcat(codebuffer,tree->left->trueLabel);
 		strcat(codebuffer,":\n");
-		TAC_FillCode(tree->left->right);
+		//only if has statements in code, otherwise block is not build (right child is null)
+		if (tree->left->right != NULL)
+                    TAC_FillCode(tree->left->right);
 		strcat(codebuffer,tree->left->code);
 		if (tree->right)
 		{
@@ -965,7 +1031,7 @@ void TAC_FillCode(node * tree)
 		}
 	}
 }
-void buildLabelStruct()//orel
+void buildLabelStruct()
 {
 	int index=0;
 	
@@ -1029,7 +1095,7 @@ void buildLabelStruct()//orel
 
 
 
-void printFixedCode()//orel
+void printFixedCode()
 {
 	
 	int index=0;
@@ -1097,7 +1163,7 @@ void _3ACMain(node * tree)
 		int byteCounterLOCAL = byteCounter; // save localy the global byte counter //
 		_3ACForProcedureDefine(tree);
 		varCounter = varCounterLOCAL;
-		byteCounter = byteCounterLOCAL;	
+		byteCounter = byteCounterLOCAL;	            
 		notToEnterLeft = 1;
 		notToEnterRight = 1; 	
 	}
@@ -1120,7 +1186,9 @@ void _3ACMain(node * tree)
 		notToEnterLeft=1;
 		notToEnterRight=1;
 		thenLabel=strdup(freshLabel());
-		_3ACMain(tree->left->right);//then block 
+                // if FOR\COND has an empty block then right child will be null
+                if (tree->left->right != NULL)
+                    _3ACMain(tree->left->right);//then block 
 		tree->left->trueLabel=strdup(thenLabel);
 		if(tree->right)
 		{
@@ -1191,14 +1259,16 @@ void _3ACMain(node * tree)
 		
 		char * thenLabel;
 		char * whileLabel;
-		char thencode[2000]="";
+		//char thencode[2000]="";
 		char whilecode[2000]="";
 		node * condition=tree->left;//if(x>y) => condition= '>')
 		notToEnterLeft=1;
 		notToEnterRight=1;
 		thenLabel=strdup(freshLabel());
 		whileLabel=strdup(freshLabel());
-		_3ACMain(tree->right);//then block 
+		// if WHILE has an empty block then right child will be null
+		if (tree->right !=NULL)
+                    _3ACMain(tree->right);//then block 
 		tree->trueLabel=strdup(whileLabel);
 		tree->left->trueLabel=strdup(thenLabel);
 		if(strcmp(condition->token,"||")!=0 && strcmp(condition->token,"&&")!=0)
@@ -1227,6 +1297,51 @@ void _3ACMain(node * tree)
 		tree->code=strdup(whilecode);
 		
 	}
+	else if(strcmp(tree->token,"for")==0 && strcmp(tree->trueLabel,"")==0)
+	{ 
+		
+		char * thenLabel;
+		char * forLabel;
+		//char thencode[2000]="";
+		char forcode[2000]="";
+		_3ACForAssignment(tree->left->left->left);//init the for loop
+		node * condition=tree->left->right->left;//if(x>y) => condition= '>')
+		notToEnterLeft=1;
+		notToEnterRight=1;
+		thenLabel=strdup(freshLabel());
+		forLabel=strdup(freshLabel());
+		// if FOR has an empty block then right child will be null
+		if (tree->right !=NULL)
+                    _3ACMain(tree->right);//then block  //code
+		tree->trueLabel=strdup(forLabel);
+		// give the condition's label its "then label"'
+		tree->left->right->left->trueLabel=strdup(thenLabel);
+		if(strcmp(condition->token,"||")!=0 && strcmp(condition->token,"&&")!=0)
+		{ //@@@@@
+			char * buffer=(char *) malloc(300);
+			char * cond3AC=_3ACForOperations(condition);
+			strcat(buffer,condition->code);
+			strcat(buffer," \nifz ");
+			strcat(buffer,cond3AC);
+			strcat(buffer," goto ");
+			strcat(buffer,tree->next);
+			strcat(buffer,"\0");
+			condition->code=strdup(buffer);
+		}
+		else
+		{
+			SwapSides(condition);
+			InsertLabelsIntoCondition(condition,thenLabel,tree->next,NULL);
+			MakeIfIntoIfZ(condition,tree->next, NULL);
+			ConditionTreatment(condition);
+		}
+		strcat(forcode,"goto ");
+		strcat(forcode,forLabel);
+		strcat(forcode,"\n");
+		strcat(forcode,"\0");
+		tree->code=strdup(forcode);
+		
+	}
 	else if(strcmp(tree->token,"=")==0)
 	{
 		_3ACForAssignment(tree);
@@ -1242,7 +1357,7 @@ void _3ACMain(node * tree)
 		_3ACForVar(tree);
 		return;
 	}
-	if (tree->left && !notToEnterLeft)
+	if ( tree->left && !notToEnterLeft)
 		_3ACMain(tree->left);
 	if (tree->right && !notToEnterRight)
 		_3ACMain(tree->right);
@@ -1530,8 +1645,15 @@ void _3ACForVar(node * tree)
 	while (tree->right)
 	{
 		idCounter += 1;
+		// tree->left->left points to "=" node
+		if (tree->left->left)
+                    _3ACForAssignment(tree->left->left);
+            
 		tree = tree->right;
 	}
+	// loop ended before reaching last node
+	if (tree->left!=NULL)
+                _3ACForAssignment(tree->left);
 	//printf("idCounter: %d\tbyteCounter: %d\n",idCounter,bytesByType);
 	byteCounter += idCounter*bytesByType; // update global counter of bytes //
 }
@@ -1696,7 +1818,7 @@ symbolTable* reverseST(symbolTable * st)//new
 		st=nextOldST;
 	}
 	st->prevST=prevOfNew; 
-	//printf("Name: %s, Type: %s, scope : %s \n",st->name,st->type,st->scope);
+	printf("Name: %s, Type: %s, scope : %s \n",st->name,st->type,st->scope);
 	return st;
 }	
 
@@ -1775,6 +1897,26 @@ int checkIfProcedure(char * name)//orel --check if need?
 		}
 	return 0;
 }
+
+//check recrusivly that all ID's in the "for" loop are declared
+// void checkIDForCond(node * forCond)
+// {
+//     while (forCond != NULL)
+//     {
+//         if (!strcmp(forCond->type,"var")
+//         {
+//             if(!CheckID(forCond))
+//             {
+//                     printf("ID Not exists!\n");
+//                     exit(1);
+//             }
+//         }
+//         checkIDForCond(forCond->left);
+//         checkIDForCond(forCond->right);
+//     }
+//     return;
+// }
+
 void buildST(node * tree)
 {	
 	if (tree == NULL)
@@ -1793,76 +1935,76 @@ void buildST(node * tree)
 	if(strcmp(tree->token,"procedure")==0)
 	{
 	    if(strcmp("Main", tree->left->token) == 0)
-		{
+            {
 		    if (isMain == 0)
-			{
+                    {
 			    isMain = 1;
-		        }
-			else
-			{
-			    printf("Function Main already exists!");
-				exit(1);
-			}
-			if (tree->left->left != NULL)
-			{
-				printf("Function Main cannot accept any arguments");
-				exit(1);
-			}
-		}
-		char* saveStateOfReturnType; // create local return type to use if i have nested functions //
-		symbolTable * currentState;
-		int parameterCounter = 0;
+		    }
+                    else
+                    {
+                        printf("Function Main already exists!");
+                            exit(1);
+                    }
+                    if (tree->left->left != NULL)
+                    {
+                            printf("Function Main cannot accept any arguments");
+                            exit(1);
+                    }
+            }
+            char* saveStateOfReturnType; // create local return type to use if i have nested functions //
+            symbolTable * currentState;
+            int parameterCounter = 0;
 
-		if(checkExist(tree->left->token))
-		{
-			printf("The name %s exists\n",tree->left->token);
-			exit(1);
-		}
-		scopeCounter = scopeCounter+1;
-		temp=(symbolTable*)malloc(sizeof(symbolTable));
-		temp->scopeNumber = scopeCounter;
-		temp->prevST=current; // point the new ST to the previous //
-		// change current state //
-		current=temp;
-		current->name=strdup(tree->left->token);
-		current->type=strdup(tree->left->right->left->type);
-		//printf("current %s\t scope number: %d\n",current->name,scopeCounter);
-		if (currentReturnType != NULL)
-			saveStateOfReturnType = currentReturnType; // save the current return type to use in the end of this block //
-		// change current return type //		
-		currentReturnType = current->type; // use global variable of return type //
-		current->scope=strdup(tree->token);
-		if (tree->left->left != NULL)
-		{
-			buildVarOfProcedure(tree->left->left,tree->left->token); 
-			parameterCounter = countNumberOfParameters(tree->left->left);
-		}
+            if(checkExist(tree->left->token))
+            {
+                    printf("The name %s exists\n",tree->left->token);
+                    exit(1);
+            }
+            scopeCounter = scopeCounter+1;
+            temp=(symbolTable*)malloc(sizeof(symbolTable));
+            temp->scopeNumber = scopeCounter;
+            temp->prevST=current; // point the new ST to the previous //
+            // change current state //
+            current=temp;
+            current->name=strdup(tree->left->token);
+            current->type=strdup(tree->left->right->left->type);
+            //printf("current %s\t scope number: %d\n",current->name,scopeCounter);
+            if (currentReturnType != NULL)
+                    saveStateOfReturnType = currentReturnType; // save the current return type to use in the end of this block //
+            // change current return type //		
+            currentReturnType = current->type; // use global variable of return type //
+            current->scope=strdup(tree->token);
+            if (tree->left->left != NULL)
+            {
+                    buildVarOfProcedure(tree->left->left,tree->left->token); 
+                    parameterCounter = countNumberOfParameters(tree->left->left);
+            }
 
-		currentState = current; //save state before changing current //
+            currentState = current; //save state before changing current //
 
-		// michael update - do NOT DELETE!!:
-		// it saves in the SymbolTable the function + the parameters it should get.
-		// the problem is that the names of the parameters are also saved. Therefore we can't use those names anymore (because they already exist)
-		// Example:		procedure foo(a,b: integer) return integer {...}
-		//			Now in other functions, i can't use 'a' or 'b'.
-		// Solution: we need to delete the name when we finish with this function (delete only the name) //	
+            // michael update - do NOT DELETE!!:
+            // it saves in the SymbolTable the function + the parameters it should get.
+            // the problem is that the names of the parameters are also saved. Therefore we can't use those names anymore (because they already exist)
+            // Example:		procedure foo(a,b: integer) return integer {...}
+            //			Now in other functions, i can't use 'a' or 'b'.
+            // Solution: we need to delete the name when we finish with this function (delete only the name) //	
 
 
 
-		flagLeftSubTree = 1;
-		if (tree->right->left != NULL)
-			buildST(tree->right->left);
-		//buildST(tree->right); // i have to make it here so i will return to the exact point (in case of nested functions) //
-		//scopeCounter = scopeCounter - 1;
-		if (tree->right->right != NULL)
-			buildST(tree->right->right);	
-		flagRightSubTree = 1;	
-		currentReturnType = saveStateOfReturnType; // save the privious return type //
-		if (currentState != NULL)
-		{
-			current = currentState; // save the privious Symbol table state //
-			deleteNameOfParameters(parameterCounter); // delete the names of the parameters
-		}
+            flagLeftSubTree = 1;
+            if (tree->right->left != NULL)
+                    buildST(tree->right->left);
+            //buildST(tree->right); // i have to make it here so i will return to the exact point (in case of nested functions) //
+            //scopeCounter = scopeCounter - 1;
+            if (tree->right->right != NULL)
+                    buildST(tree->right->right);	
+            flagRightSubTree = 1;	
+            currentReturnType = saveStateOfReturnType; // save the privious return type //
+            if (currentState != NULL)
+            {
+                    current = currentState; // save the privious Symbol table state //
+                    deleteNameOfParameters(parameterCounter); // delete the names of the parameters
+            }
 
 		
 		
@@ -1914,60 +2056,90 @@ void buildST(node * tree)
 		node * whilecond=tree->left;
 		node * whileblock;
 		symbolTable * curr=current;//save state before
-		if(strcmp(tree->right->token,"")==0)
-		{
-			whileblock=tree->right->left;
-		}
-		else
-		{
-			whileblock=tree->right;
-		}
-		if(!CheckID(whilecond))
-		{
-			printf("ID Not exists!\n");
-			exit(1);
-		}
-		UpdateIDType(whilecond);
-		buildST(whilecond);
+		//if has a non-empty block
+                if(!CheckID(whilecond))
+                {
+                        printf("ID Not exists!\n");
+                        exit(1);
+                }
+                UpdateIDType(whilecond);
+                buildST(whilecond);
+                checkIfConditionTypeIsBoolean(whilecond); // michaell
+                
+		if (tree->right){
+                        if(strcmp(tree->right->token,"")==0)
+                        {
+                                whileblock=tree->right->left;
+                        }
+                        else
+                        {
+                                whileblock=tree->right;
+                        }
 
-		checkIfConditionTypeIsBoolean(whilecond); // michaell
+                        scopeCounter = scopeCounter + 1;  
+                        buildST(whileblock);
+                        scopeCounter = scopeCounter - 1; 
+                        current=curr;
+                        flagLeftSubTree = 1;
+                        flagRightSubTree = 1;
+		}
+	}
+	else if(strcmp(tree->token,"for")==0) 
+	{ 
+		char * lvaltype;
+		char * rvaltype;
+		node * forCond=tree->left->right->left;
+		node * forBlock;
+		symbolTable * curr=current;//save state before
+		forBlock=tree->right;
+		node * tempForCond = forCond;
+		//checkIDForCond(forCond);
+		UpdateIDType(forCond);
+		buildST(forCond);
+
+		//checkIfConditionTypeIsBoolean(forCond); // michaell
 
 		scopeCounter = scopeCounter + 1;  
-		buildST(whileblock);
+		buildST(forBlock);
 		scopeCounter = scopeCounter - 1; 
 		current=curr;
 		flagLeftSubTree = 1;
 		flagRightSubTree = 1;
-	}
+        }
 	else if(strcmp(tree->token,"return")==0)
 	{ 
-		if(checkIfProcedure(tree->left->token))
-		{
-			//printf("BEFORE -> procedure Name: |%s|\n",tree->left->token); 
-			CallProcedureParasTreat(tree->left->token,tree->left);//foo,params with foo
-			//printf("AFTER -> procedure Name: |%s|\n",tree->left->token); 
-		}
-		else
-		{
-			char * lvaltype;
-			if(!CheckID(tree->left))
-			{
-				printf("ID Not exists!\n");
-				exit(1);
-			}
-			UpdateIDType(tree->left); // get the type of left node //
-			buildST(tree->left); // 
-			if (strcmp(tree->left->type,"string")==0)
-			{
-				printf("return type can not be of type string!\n");
-				exit(1);
-			}
-	
-			lvaltype=strdup(tree->left->type);
-			
-			//printf("return type: |%s|\n",lvaltype); // temp //
-			//printf("actual return type: |%s|\tdeclared type: |%s|\n",lvaltype,currentReturnType); // temp //
-			strcpy(tree->type,(checkBinaryOperations("return",lvaltype,currentReturnType))); 
+                //only non-void functions have "return"->left, and therefore enter
+                // void functions have no left child
+                if (tree->left != NULL)
+                {// check if current function was already declared (proc->right return)
+                        if(checkIfProcedure(tree->left->token))
+                        {
+                                //printf("BEFORE -> procedure Name: |%s|\n",tree->left->token); 
+                                CallProcedureParasTreat(tree->left->token,tree->left);//foo,params with foo
+                                //printf("AFTER -> procedure Name: |%s|\n",tree->left->token); 
+                        }
+                        else
+                        {
+                                char * lvaltype;
+                                if(!CheckID(tree->left))
+                                {
+                                        printf("ID Not exists!\n");
+                                        exit(1);
+                                }
+                                UpdateIDType(tree->left); // get the type of left node //
+                                buildST(tree->left); // 
+                                if (strcmp(tree->left->type,"string")==0)
+                                {
+                                        printf("return type can not be of type string!\n");
+                                        exit(1);
+                                }
+                
+                                lvaltype=strdup(tree->left->type);
+                                
+                                //printf("return type: |%s|\n",lvaltype); // temp //
+                                //printf("actual return type: |%s|\tdeclared type: |%s|\n",lvaltype,currentReturnType); // temp //
+                                strcpy(tree->type,(checkBinaryOperations("return",lvaltype,currentReturnType))); 
+                        }
 		}
 	}
 	else if((strcmp(tree->token,"||")==0) || (strcmp(tree->token,"&&")==0) || (strcmp(tree->token,">")==0) || (strcmp(tree->token,">=")==0) || (strcmp(tree->token,"<")==0) || (strcmp(tree->token,"<=")==0) || (strcmp(tree->token,"==")==0) || (strcmp(tree->token,"!=")==0) || (strcmp(tree->token,"=")==0) || (strcmp(tree->token,"+")==0) || (strcmp(tree->token,"-")==0) || (strcmp(tree->token,"*")==0) || (strcmp(tree->token,"/")==0))
@@ -2059,6 +2231,7 @@ void buildST(node * tree)
 	}
 	if (strcmp(tree->token, "return") == 0)
 		ReturnFlag = 1;
+		
 }
 
 void checkIfConditionTypeIsBoolean(node *cond) // michaell
@@ -2238,7 +2411,7 @@ void printST()
 	symbolTable * temp=current;
 	while(temp){
 		printf("name: %s\ttype: %s\tscope: %s\n",temp->name,temp->type,temp->scope);
-		temp=temp->prevST;
+		temp = temp->prevST;
 
 	}
 }
