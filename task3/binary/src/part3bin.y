@@ -946,6 +946,7 @@ void TAC_FillCode(node * tree)
 	
 	else if(strcmp(tree->token,"for")==0)//need to fix to put the label before the ifz and not before the variables.
 	{
+                TAC_FillCode(tree->left->left->left);
 		strcat(codebuffer,tree->trueLabel);
 		strcat(codebuffer,":\n");
 		TAC_FillCode(tree->left->right->left);
