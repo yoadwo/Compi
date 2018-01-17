@@ -193,9 +193,6 @@ $<IST.tree>$=mknode($<IST.string>2,"procedure",$<IST.tree>4,mknode("return","ret
 Parameters: SomeParameters IDENTIFIER  {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,NULL);}
 | SomeParameters IDENTIFIER SEPERATOR Parameters {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,$<IST.tree>4);}
 |{$<IST.tree>$=NULL;};
-//|IDENTIFIER StringParameter {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);};
-
-
 
 //SomeParameters: SEPERATOR IDENTIFIER SomeParameters {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>3,NULL);}
 //|COLON Types {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);};
