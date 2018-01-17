@@ -2583,7 +2583,7 @@ int numberOfBytes(char *type) //
 		printf("Error in numberOfBytes Function: type parameter is empty\n");
 		exit(1);
 	}
-	//ruben add the last || in the if
+	
 	if (typeOf(type) == INT_t || typeOf(type) == STRINGARRAY_t || typeOf(type) == INTPTR_t || typeOf(type) == CHARPTR_t || typeOf(type) == STRING_t)
 		return 4;
 	else if (typeOf(type) == BOOLEAN_t || typeOf(type) == CHAR_t)
