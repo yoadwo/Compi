@@ -196,9 +196,9 @@ Parameters: SomeParameters IDENTIFIER  {$<IST.tree>$=mknode($<IST.string>2,$<IST
 
 //SomeParameters: SEPERATOR IDENTIFIER SomeParameters {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>3,NULL);}
 //|COLON Types {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);};
-//| Types {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);};
+
 SomeParameters: SomeParameters IDENTIFIER SEPERATOR {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,NULL);}
-| Types COLON {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,NULL);};
+| Types {$<IST.tree>$=mknode("","colon",$<IST.tree>1,NULL);};
 
 Types: BOOLEAN {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);}
 |CHAR {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1 ,NULL,NULL);}
@@ -252,7 +252,6 @@ if($<IST.tree>$->right->constType != NULL)
 free($<IST.tree>$->right->constType);
 $<IST.tree>$->right->constType = strdup("procedure");
 }
-
 |ID ASSIGN Consts {$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);}
 |ID Array ASSIGN IndexedAssign  {$<IST.tree>$ = mknode("=","=", mknode("[]","[]", $<IST.tree>1, $<IST.tree>2), $<IST.tree>4);}
 |ID ASSIGN AddressID Array  {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, mknode("[]","[]", $<IST.tree>3, $<IST.tree>4));} /* ( x = &arr[2]; )*/
@@ -2260,7 +2259,8 @@ int countNumberOfParameters(node *tree)
 	while (tree != NULL)
 	{
 		saveNodeOfFirstParameter = tree;
-		while(strcmp(tree->token,":")!=0)
+		while(strcmp(tree->token,"")!=0)
+		//while(strcmp(tree->token,":")!=0)
 		{
 			if (strcmp(tree->token,",")!=0)
 				parameterCounter += 1;
@@ -2281,7 +2281,8 @@ char * buildVarOfProcedure(node * tree, char * procedureName)
 		buildVarOfProcedure(tree->right, procedureName);
 	
 	type=buildVarOfProcedure(tree->left, procedureName);
-	if(strcmp(tree->token,",")!=0 && strcmp(tree->token,":")!=0)
+	//if(strcmp(tree->token,",")!=0 && strcmp(tree->token,":")!=0)
+	if(strcmp(tree->token,",")!=0 && strcmp(tree->token,"")!=0)
 	{
 		symbolTable * temp=(symbolTable*)malloc(sizeof(symbolTable));
 		temp->scopeNumber = scopeCounter;
