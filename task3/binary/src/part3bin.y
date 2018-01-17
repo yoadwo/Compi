@@ -76,11 +76,11 @@ char * ReturnIDType(char * name);
 int checkIfProcedure(char * name);
 char* freshVar(char *type); //last
 int get_int_len();//last
-void CallProcedureParasTreat(char * proName,node * paras);//orel
-void checkFuncParam(char * proName,node * paras,node * nameAndParas);//orel
-symbolTable* reverseST(symbolTable * st);//orel
-symbolTable* dupST(char * proName,symbolTable * st);//orel
-void UpdateParameterType(node * tempTree);//orel &&michael
+void CallProcedureParasTreat(char * proName,node * paras);
+void checkFuncParam(char * proName,node * paras,node * nameAndParas);
+symbolTable* reverseST(symbolTable * st);
+symbolTable* dupST(char * proName,symbolTable * st);
+void UpdateParameterType(node * tempTree);
 void addProcedureParametersToST(char * proName,node * paras);
 static symbolTable * current;
 static symbolTable * procedureParas; 
@@ -259,7 +259,7 @@ $<IST.tree>$->right->constType = strdup("procedure");
 |ID ASSIGN ValueAddressID  {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);} /*( z = ^(x-5); )*/
 |ValueAddressID ASSIGN E  {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);}
 |ValueAddressID ASSIGN CHAR_CONST  {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, $<IST.tree>3);}
-//|ID ASSIGN Absolute SEMICOLON {$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);} //ohad
+//|ID ASSIGN Absolute SEMICOLON {$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);} //
 |ID ASSIGN NIL  {$<IST.tree>$ = mknode("=","=" ,$<IST.tree>1, mknode($<IST.string>3,$<IST.type>3 , NULL,NULL));}
 |ID ASSIGN LogicOp  {$<IST.tree>$ = mknode("=","=" ,$<IST.tree>1,$<IST.tree>3);};
 
@@ -351,7 +351,7 @@ Condition:E CompOp E {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree
 |ValueAddressID CompOp ID Array {$<IST.tree>$ = mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1, mknode("[]","[]", $<IST.tree>3, $<IST.tree>4));}
 |AddressID CompOp AddressID {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,$<IST.tree>3);}
 |AddressID CompOp ID {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,$<IST.tree>3);}
-//|IDENTIFIER CompOp AddressID {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,$<IST.tree>3);} //ohad not working???
+//|IDENTIFIER CompOp AddressID {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,$<IST.tree>3);} // not working???
 |ID Array CompOp ValueAddressID {$<IST.tree>$ = mknode($<IST.string>3,$<IST.type>3,mknode("[]","[]", $<IST.tree>1, $<IST.tree>2), $<IST.tree>4);}
 |ValueAddressID CompOp CHAR_CONST {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,$<IST.tree>1,mknode($<IST.string>3,$<IST.type>3, NULL, NULL));}
 |CHAR_CONST CompOp ValueAddressID {$<IST.tree>$=mknode($<IST.string>2,$<IST.type>2,mknode($<IST.string>1,$<IST.type>1, NULL, NULL),$<IST.tree>3);}
@@ -394,7 +394,7 @@ VoidReturn: RETURN SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,NU
 
 
 //ProcedureReturn:  Types {$<IST.tree>$=mknode("return","return",$<IST.tree>1,NULL);};
-//ID {$<IST.tree>$=mknode($<IST.tree>1,$<IST.tree>1,NULL,NULL);} // if(x) // ~michael //
+//ID {$<IST.tree>$=mknode($<IST.tree>1,$<IST.tree>1,NULL,NULL);} // if(x) // ~ //
 
 
 Loop:
@@ -1422,7 +1422,7 @@ void _3ACForAssignment(node * tree) //new
 			strcat(buffer,tree->left->token);
 		strcat(buffer," = ");
 	}
-	if (strcmp(tree->right->constType,"procedure")==0) // michael
+	if (strcmp(tree->right->constType,"procedure")==0) // 
 		strcat(buffer,_3ACForProcedureActivate(tree->right));
 	else
 		strcat(buffer,_3ACForOperations(tree->right));
@@ -1464,7 +1464,7 @@ char * _3ACForOperations(node * tree)
 			tree->code = strdup(buffer);
 			return newVar;
 		}
-		if(strcmp(tree->constType,"var")==0 && strcmp(tree->type,"boolean")==0) // if (ID) // michaell
+		if(strcmp(tree->constType,"var")==0 && strcmp(tree->type,"boolean")==0) // if (ID) // l
 		{
 			newVar=strdup(freshVar(tree->type));
 			strcat(buffer,newVar);
@@ -1483,7 +1483,7 @@ char * _3ACForOperations(node * tree)
 	{
 		strcat(bufferLeft,_3ACForOperations(tree->left));
 		strcat(bufferRight,_3ACForOperations(tree->right));
-		newVar=strdup(freshVar(tree->type)); // michaelll update last
+		newVar=strdup(freshVar(tree->type)); // ll update last
 		strcat(buffer,newVar);
 		strcat(buffer," = ");
 		strcat(buffer,bufferLeft);
@@ -1492,7 +1492,7 @@ char * _3ACForOperations(node * tree)
 
 		tree->code=strdup(buffer);
 	}
-	if(strcmp(tree->token,"!")==0) // michaell
+	if(strcmp(tree->token,"!")==0) // l
 	{
 		strcat(bufferRight,_3ACForOperations(tree->left));
 		newVar=strdup(freshVar(tree->left->type));
@@ -1502,7 +1502,7 @@ char * _3ACForOperations(node * tree)
 		strcat(buffer,bufferRight);
 		tree->code=strdup(buffer);
 	}
-	if(strcmp(tree->token,"|")==0)//ruben fix
+	if(strcmp(tree->token,"|")==0)
 	{
 		newVar = strdup(freshVar(tree->type));
 		strcat(buffer,newVar);
@@ -1559,7 +1559,7 @@ char * _3ACForOperations(node * tree)
 		tree->code = strdup(buffer);
 		return newVar;
 	}
-//ruben start
+
 	if(strcmp(tree->token,"^")==0)
 	{
 		if(strcmp(tree->left->token,"+")==0 || strcmp(tree->left->token,"*")==0 || strcmp(tree->left->token,"-")==0 || strcmp(tree->left->token,"/")==0)
@@ -1575,7 +1575,6 @@ char * _3ACForOperations(node * tree)
 		}
 		
 	}
-//ruben end
 /*
 	if(strcmp(tree->token,"&&")==0||strcmp(tree->token,"||")==0){
 		newVar=strdup(freshVar(tree->type));
@@ -1661,7 +1660,7 @@ char* _3ACForProcedureActivate(node * tree)
 	strcpy(buffer,freshVarToReturn); // get fresh var //
 	strcat(buffer," = LCall ");
 	strcat(buffer,tree->token); // copy the function name //
-	if (counter != 0) // michaelll last update
+	if (counter != 0) // ll last update
 	{
 		strcat(buffer,"\nPopParams ");
    		sprintf(byteNum,"%d",counter*4); // convert the counter from int to string //
@@ -1695,7 +1694,7 @@ void _3ACForProcedureDefine(node * tree)
 
 //end part4
 
-void CallProcedureParasTreat(char * proName,node * paras)// ariel && michael
+void CallProcedureParasTreat(char * proName,node * paras)//
 {
 	symbolTable * startOfProcedureParams=NULL; 
 	symbolTable * procedureRow=current;
@@ -1720,13 +1719,13 @@ void CallProcedureParasTreat(char * proName,node * paras)// ariel && michael
 	//startOfProcedureParams=procedureRow=foo row in ST
 	temp=startOfProcedureParams;
 
-	if (temp == NULL && paras->left) // if there are no parameters // michaell
+	if (temp == NULL && paras->left) // if there are no parameters // l
 	{
 		printf("Procedure %s has no paramaters!\n",proName);
 		exit(1);
 	}
 
-	if (temp == NULL && paras->left == NULL) // if there are no parameters // michaell
+	if (temp == NULL && paras->left == NULL) // if there are no parameters // l
 		return;
 
 	//printf("temp->scope: %s\ttempName: %s\n",temp->scope,temp->name);
@@ -1871,7 +1870,7 @@ void checkFuncParam(char * proName,node * paras,node * nameAndParas)
     }
 
 }
-int checkIfProcedure(char * name)//orel --check if need?
+int checkIfProcedure(char * name)// --check if need?
 {
 	symbolTable * temp=current;
 	while(temp!=NULL)
@@ -1970,7 +1969,7 @@ void buildST(node * tree)
 
             currentState = current; //save state before changing current //
 
-            // michael update - do NOT DELETE!!:
+            //  update - do NOT DELETE!!:
             // it saves in the SymbolTable the function + the parameters it should get.
             // the problem is that the names of the parameters are also saved. Therefore we can't use those names anymore (because they already exist)
             // Example:		procedure foo(a,b: integer) return integer {...}
@@ -2019,7 +2018,7 @@ void buildST(node * tree)
 		UpdateIDType(ifcond);
 		buildST(ifcond);
 
-		checkIfConditionTypeIsBoolean(ifcond); // michaell
+		checkIfConditionTypeIsBoolean(ifcond); // l
 
 		scopeCounter = scopeCounter + 1;
 		buildST(ifblock);//continue
@@ -2052,7 +2051,7 @@ void buildST(node * tree)
                 }
                 UpdateIDType(whilecond);
                 buildST(whilecond);
-                checkIfConditionTypeIsBoolean(whilecond); // michaell
+                checkIfConditionTypeIsBoolean(whilecond); // l
                 
 		if (tree->right){
                         if(strcmp(tree->right->token,"")==0)
@@ -2090,7 +2089,7 @@ void buildST(node * tree)
 		UpdateIDType(forStep);
 		buildST(forStep);
 
-		//checkIfConditionTypeIsBoolean(forCond); // michaell
+		//checkIfConditionTypeIsBoolean(forCond); // l
 
 		scopeCounter = scopeCounter + 1;  
 		buildST(forBlock);
@@ -2227,7 +2226,7 @@ void buildST(node * tree)
 		
 }
 
-void checkIfConditionTypeIsBoolean(node *cond) // michaell
+void checkIfConditionTypeIsBoolean(node *cond) // l
 {
 	// we will use this function ONLY when we have an ID in the condition (AND ONLY THAT ID).
 	// Example:	if (ID)		when (ID)... 
@@ -2273,7 +2272,7 @@ int countNumberOfParameters(node *tree)
 	return parameterCounter;
 }
 
-char * buildVarOfProcedure(node * tree, char * procedureName) // ariel && michael
+char * buildVarOfProcedure(node * tree, char * procedureName)
 {
 	char * type;
 	if (tree->left==NULL)
@@ -2290,7 +2289,7 @@ char * buildVarOfProcedure(node * tree, char * procedureName) // ariel && michae
 		current=temp;
 		current->name=strdup(tree->token);
 		current->type=strdup(type);
-		current->scope=strdup(procedureName); // ariel && michael
+		current->scope=strdup(procedureName); 
 		//current->scope=strdup("var");
 	}
 	return type;
@@ -2577,7 +2576,7 @@ char* equalReturnTypes(char* st1, char* st2) {
 	return "";
 }
 
-int numberOfBytes(char *type) // michael
+int numberOfBytes(char *type) // 
 {
 	if (!type)
 	{
@@ -2608,7 +2607,7 @@ char * freshVar(char *type)//last
 	strcat(newVarWithT,newVar);
 	return newVarWithT;	
 }
-char * freshLabel()//orel
+char * freshLabel()//
 {
 	char * newLabel;
 	int l=1;
