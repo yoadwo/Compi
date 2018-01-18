@@ -2,7 +2,7 @@ integer foo()
 {
     integer a;
     a = 23;
-    if (a == 23)
+    if (a == 23 && a != 100)
         a = 10;
     else
         a = 19;
@@ -30,11 +30,12 @@ void Main()
 {
     integer a;
     integer b;
+    integer c;
     a = 0;
     while(a < 10)
     {
         b = foo();
         a = a + b;
-        a = a + fee(a, b);
+        a = a + fee(a, b, c);
     }
 }
