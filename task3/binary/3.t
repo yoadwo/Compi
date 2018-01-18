@@ -20,7 +20,7 @@ integer fee(integer a, integer b)
     sum2 = 0;
     while (a < b)
     {
-        if (a / 2 == 0 || a*b < 100 && sum1 = sum2)
+        if (a / 2 == 0 || a*b < 100 && sum1 == sum2)
         {
             sum1 = sum1 + a;
         }
@@ -34,7 +34,7 @@ integer fee(integer a, integer b)
 }
 
 
-void main()
+void Main()
 {
     integer a;
     integer b;

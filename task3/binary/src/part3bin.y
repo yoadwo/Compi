@@ -233,7 +233,12 @@ F: BEGIN_PARAMETER_LIST E END_PARAMETER_LIST {$<IST.tree>$ = $<IST.tree>2;}
 |ID {$<IST.tree>$ = $<IST.tree>1;}
 |CONST_INT {$<IST.tree>$ = $<IST.tree>1;}
 |Absolute {$<IST.tree>$ = $<IST.tree>1;}
-|StringLenth {$<IST.tree>$ = $<IST.tree>1;};
+|StringLenth {$<IST.tree>$ = $<IST.tree>1;}
+|ID BEGIN_PARAMETER_LIST EmptyOrPara END_PARAMETER_LIST  {$<IST.tree>$=mknode($<IST.tree>1->token,$<IST.tree>1->type,$<IST.tree>3,NULL);
+//     if($<IST.tree>$->right->constType != NULL)
+//         free($<IST.tree>$->right->constType);
+   $<IST.tree>$->constType = strdup("procedure");
+};
 
 
 
@@ -247,11 +252,7 @@ ValueAddressID: VALUE_ADDRESS E {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type
 
 Assignment:ID ASSIGN E  {$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);}
 |ID ASSIGN AddressID  {$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);} 
-|ID ASSIGN ID BEGIN_PARAMETER_LIST EmptyOrPara END_PARAMETER_LIST  {$<IST.tree>$=mknode("=","=",$<IST.tree>1,mknode($<IST.tree>3->token,$<IST.tree>3->type, $<IST.tree>5,NULL));
-if($<IST.tree>$->right->constType != NULL)
-free($<IST.tree>$->right->constType);
-$<IST.tree>$->right->constType = strdup("procedure");
-}
+
 |ID ASSIGN Consts {$<IST.tree>$=mknode("=","=",$<IST.tree>1,$<IST.tree>3);}
 |ID Array ASSIGN IndexedAssign  {$<IST.tree>$ = mknode("=","=", mknode("[]","[]", $<IST.tree>1, $<IST.tree>2), $<IST.tree>4);}
 |ID ASSIGN AddressID Array  {$<IST.tree>$ = mknode("=","=",$<IST.tree>1, mknode("[]","[]", $<IST.tree>3, $<IST.tree>4));} /* ( x = &arr[2]; )*/
@@ -384,7 +385,7 @@ RETURN E SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2
 |RETURN CONST_BOOLEAN SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);}
 |RETURN AddressID SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>2,NULL);}
 |RETURN VALUE_ADDRESS E SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,$<IST.tree>3,NULL),NULL);}
-|RETURN IDENTIFIER BEGIN_PARAMETER_LIST EmptyOrPara END_PARAMETER_LIST SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,$<IST.tree>4,NULL),NULL);}
+/*|RETURN IDENTIFIER BEGIN_PARAMETER_LIST EmptyOrPara END_PARAMETER_LIST SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,$<IST.tree>4,NULL),NULL);}*/
 |RETURN NIL SEMICOLON {$<IST.tree>$ = mknode($<IST.string>1,$<IST.type>1,mknode($<IST.string>2,$<IST.type>2,NULL,NULL),NULL);};
 
 VoidReturn: RETURN SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,NULL,NULL);}
@@ -1446,7 +1447,12 @@ char * _3ACForOperations(node * tree)
 	char buffer[128]="";
 	char bufferLeft[128]="";
 	char bufferRight[128]="";
-	char bufferToken[2]=""; 
+	char bufferToken[2]="";
+	
+	if(strcmp(tree->constType,"procedure")==0)
+	{
+            return _3ACForProcedureActivate(tree);
+        }
 	if (tree && tree->left==NULL&&tree->right == NULL)//if leaves
 	{
 		//printf("treetoken = %s Origintype = %s Actualtype = %s\n",tree->token, tree->constType,tree->type);
@@ -1476,10 +1482,11 @@ char * _3ACForOperations(node * tree)
 		tree->code = strdup("");
 		return tree->token;
 	}
+	
 	if(strcmp(tree->token,"+")==0 || strcmp(tree->token,"*")==0 || strcmp(tree->token,"-")==0 || strcmp(tree->token,"/")==0 
 			|| strcmp(tree->token,"==")==0 || strcmp(tree->token,"<")==0 || strcmp(tree->token,">")==0 
 			|| strcmp(tree->token,"!=")==0 || strcmp(tree->token,"&&")==0 || strcmp(tree->token,"||")==0) 
-	{
+	{                    
 		strcat(bufferLeft,_3ACForOperations(tree->left));
 		strcat(bufferRight,_3ACForOperations(tree->right));
 		newVar=strdup(freshVar(tree->type)); // ll update last
