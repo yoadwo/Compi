@@ -3,13 +3,9 @@ integer foo()
     integer a;
     a = 23;
     if (a == 23)
-    {
         a = 10;
-    }
     else
-    {
         a = 19;
-    }
     return a;
 }
 
@@ -21,13 +17,9 @@ integer fee(integer a, integer b)
     while (a < b)
     {
         if (a / 2 == 0 || a*b < 100 && sum1 == sum2)
-        {
             sum1 = sum1 + a;
-        }
         else
-        {
             sum2 = sum2 + 1;
-        }
         a = a + 1;
     }
     return sum1 + sum2;

@@ -394,8 +394,20 @@ VoidReturn: RETURN SEMICOLON {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,NU
 
 
 //ProcedureReturn:  Types {$<IST.tree>$=mknode("return","return",$<IST.tree>1,NULL);};
-//ID {$<IST.tree>$=mknode($<IST.tree>1,$<IST.tree>1,NULL,NULL);} // if(x) // ~ //
+//ID {$<IST.tree>$=mknode($<IST.tree>1,$<IST.tree>1,NULL,NULL);} // if(/*x) // ~ //
+/*OneLine: Define
+|Assignment SEMICOLON
+|Procedure
+|Loop
+|For
+|If;*/
 
+OneLine:Define {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,NULL);}
+|Assignment SEMICOLON {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,NULL);}
+|Procedure {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,NULL);}
+|Loop {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,NULL);}
+|If {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,NULL);}
+|For {$<IST.tree>$=mknode("NewRow","NewRow",$<IST.tree>1,NULL);};
 
 Loop:
 WHILE BEGIN_PARAMETER_LIST ID END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE {$<IST.tree>$=mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>6);}
@@ -405,10 +417,28 @@ If:IF BEGIN_PARAMETER_LIST ID END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_B
 {
 $<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>6),mknode($<IST.string>8,$<IST.type>8,$<IST.tree>10,NULL));
 }
+
+|IF BEGIN_PARAMETER_LIST ID END_PARAMETER_LIST OneLine ELSE OneLine 
+{
+$<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>5),mknode($<IST.string>6,$<IST.type>6,$<IST.tree>7,NULL));
+}
+
+|IF BEGIN_PARAMETER_LIST LogicOp END_PARAMETER_LIST OneLine ELSE OneLine 
+{
+$<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>5),mknode($<IST.string>6,$<IST.type>6,$<IST.tree>7,NULL));
+}
+
 |IF BEGIN_PARAMETER_LIST LogicOp END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE ELSE START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE 
 {
 $<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>6),mknode($<IST.string>8,$<IST.type>8,$<IST.tree>10,NULL));
 }
+
+|IF BEGIN_PARAMETER_LIST ID END_PARAMETER_LIST OneLine 
+{
+$<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>5),NULL);
+}
+
+
 |IF BEGIN_PARAMETER_LIST ID END_PARAMETER_LIST START_BLOCK_OF_CODE Block END_BLOCK_OF_CODE
 {
 $<IST.tree>$=mknode("COND","COND",mknode($<IST.string>1,$<IST.type>1,$<IST.tree>3,$<IST.tree>6),NULL);
